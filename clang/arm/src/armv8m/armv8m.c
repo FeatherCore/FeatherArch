@@ -3,8 +3,8 @@
  *
  * ============================================================================
  * File: armv8m.c
- * Description: ARMv8-M Architecture (Cortex-M23/M33/M55/M85) Implementation
- * 描述: ARMv8-M 架构 (Cortex-M23/M33/M55/M85) 实现
+ * Description: ARMv8-M Architecture Implementation
+ * 描述: ARMv8-M 架构实现
  *
  * This file provides complete implementation of ARMv8-M architecture features
  * including core registers, NVIC, MPU, PMU, TrustZone/SAU, SysTick, ITM, and FPU.
@@ -12,46 +12,23 @@
  * TrustZone/SAU、SysTick、ITM 和 FPU。
  *
  * Reference Documents / 参考文档:
- *   1. ARMv8-M Architecture Reference Manual (ARM DDI 0553B)
- *      - Chapter B1: Processor Memory Model (B1.1-B1.5)
- *      - Chapter B2: Programmer's Model (B2.1-B2.9)
- *        - B2.2: Special Registers (CONTROL, MSP, PSP, PRIMASK, BASEPRI, FAULTMASK)
- *        - B2.3: Application Program Status Register (APSR, IPSR, xPSR)
- *        - B2.4: Wait for event and interrupt
- *      - Chapter B3: System Control Registers (B3.1-B3.5)
- *        - B3.1: System Control Block (SCB)
- *        - B3.2: System Control Register
- *        - B3.3: Nested Vectored Interrupt Controller (NVIC)
- *        - B3.4: System Timer (SysTick)
- *      - Chapter B4: Memory Protection Unit (B4.1-B4.5)
- *      - Chapter B5: Security Attribution Unit (B5.1-B5.5)
- *      - Chapter B6: Debug and Trace (B6.1-B6.5)
- *        - B6.2: Instrumentation Trace Macrocell (ITM)
- *        - B6.3: Performance Monitors (PMU)
- *
- *   2. ARM Cortex-M33 Devices Generic User Guide (DUI 0552A)
- *      - Chapter 4.2: System Control Block (SCB) registers
- *      - Chapter 4.3: Nested Vectored Interrupt Controller (NVIC)
- *      - Chapter 4.4: System Timer (SysTick)
- *      - Chapter 4.5: Memory Protection Unit (MPU)
- *      - Chapter 5: Floating-Point Unit (FPU)
- *      - Chapter 6: Security Attribution Unit (SAU)
- *      - Chapter 7: Instrumentation Trace Macrocell (ITM)
- *
- *   3. ARM Cortex-M33 Processor Technical Reference Manual (ARM DDI 0550A)
- *      - Chapter 4: Processor Registers
- *      - Chapter 11: Performance Monitor Unit (PMU)
- *
- *   4. ARM Cortex-M33 Processor Datasheet (V2)
- *      - Feature configuration
- *      - Memory map
+ *   1. Arm® v8-M Architecture Reference Manual
+ *      - Chapter B3: Programmers' Model
+ *      - Chapter B4: Floating-point Support
+ *      - Chapter B10: The Armv8-M Protected Memory System Architecture
+ *      - Chapter B11: The System Timer, SysTick
+ *      - Chapter B12: Nested Vectored Interrupt Controller
+ *      - Chapter B13: Debug
+ *      - Chapter B14: Debug and Trace Components
+ *      - Chapter B15: The Performance Monitors Extension
  *
  * Key Features:
- *   - TrustZone Security Extension (Mainline) - ARMv8-M ARM Section B5
- *   - MPU Memory Protection Unit - ARMv8-M ARM Section B4
- *   - Optional FPU (single/double precision) - ARMv8-M ARM Section B3.2
- *   - Helium SIMD Extension (M55, M85) - ARMv8.1-M
- *   - PMU Performance Monitor Unit (M55, M85) - ARMv8-M ARM Section B6.3
+ *   - TrustZone Security Extension (Mainline) - ARMv8-M ARM Chapter B10
+ *   - MPU Memory Protection Unit - ARMv8-M ARM Chapter B10
+ *   - Optional FPU (single/double precision) - ARMv8-M ARM Chapter B4
+ *   - Optional SIMD Extension
+ *   - Optional PMU Performance Monitor Unit - ARMv8-M ARM Chapter B15
+ *   - Enhanced Interrupt Controller - ARMv8-M ARM Chapter B12
  *
  * ============================================================================
  * SPDX-License-Identifier: Apache-2.0
@@ -89,6 +66,8 @@
 #define SCB_CCR                (*(volatile uint32_t *)(SCB_BASE_ADDR + 0x14))
 #define SCB_SHPR(n)            (*(volatile uint8_t *)(SCB_BASE_ADDR + 0x18 + (n)))
 #define SCB_SHCSR              (*(volatile uint32_t *)(SCB_BASE_ADDR + 0x24))
+#define SCB_SHCSR_MEMFAULTENA_Pos 16U
+#define SCB_SHCSR_MEMFAULTENA_Msk (1UL << SCB_SHCSR_MEMFAULTENA_Pos)
 #define SCB_CFSR               (*(volatile uint32_t *)(SCB_BASE_ADDR + 0x28))
 #define SCB_HFSR               (*(volatile uint32_t *)(SCB_BASE_ADDR + 0x2C))
 #define SCB_DFSR               (*(volatile uint32_t *)(SCB_BASE_ADDR + 0x30))
@@ -126,19 +105,23 @@
 #define MPU_MAIR1             (*(volatile uint32_t *)(MPU_BASE_ADDR + 0x18))
 
 #define PMU_BASE_ADDR          0xE0003000UL
-#define PMU_CTRL              (*(volatile uint32_t *)(PMU_BASE_ADDR + 0x00))
-#define PMU_CYCCNT            (*(volatile uint64_t *)(PMU_BASE_ADDR + 0x04))
-#define PMU_INTEN             (*(volatile uint32_t *)(PMU_BASE_ADDR + 0x08))
-#define PMU_INTENSET           (*(volatile uint32_t *)(PMU_BASE_ADDR + 0x08))
-#define PMU_INTENCLR           (*(volatile uint32_t *)(PMU_BASE_ADDR + 0x0C))
-#define PMU_EVCNTR_BASE       0xE0003010UL
-#define PMU_EVCNTR(n)         (*(volatile uint32_t *)(PMU_EVCNTR_BASE + (n) * 4))
-#define PMU_EVTYPER_BASE      0xE0003100UL
-#define PMU_EVTYPER(n)        (*(volatile uint32_t *)(PMU_EVTYPER_BASE + (n) * 4))
-#define PMU_CNTENSET          (*(volatile uint32_t *)(PMU_BASE_ADDR + 0xE0))
-#define PMU_CNTENCLR          (*(volatile uint32_t *)(PMU_BASE_ADDR + 0xE4))
-#define PMU_CCFGR             (*(volatile uint32_t *)(PMU_BASE_ADDR + 0xE8))
-#define PMU_CIDR              (*(volatile uint32_t *)(PMU_BASE_ADDR + 0xFC))
+#define PMU_CTRL              (*(volatile uint32_t *)(PMU_BASE_ADDR + 0xE04UL))
+#define PMU_CCNTR             (*(volatile uint32_t *)(PMU_BASE_ADDR + 0x07CUL))
+#define PMU_INTENSET          (*(volatile uint32_t *)(PMU_BASE_ADDR + 0xC40UL))
+#define PMU_INTENCLR          (*(volatile uint32_t *)(PMU_BASE_ADDR + 0xC60UL))
+#define PMU_OVSSET            (*(volatile uint32_t *)(PMU_BASE_ADDR + 0xCC0UL))
+#define PMU_OVSCLR            (*(volatile uint32_t *)(PMU_BASE_ADDR + 0xC80UL))
+#define PMU_EVCNTR(n)         (*(volatile uint32_t *)(PMU_BASE_ADDR + 0x000UL + (n) * 4))
+#define PMU_EVTYPER(n)        (*(volatile uint32_t *)(PMU_BASE_ADDR + 0x400UL + (n) * 4))
+#define PMU_CNTENSET          (*(volatile uint32_t *)(PMU_BASE_ADDR + 0xC00UL))
+#define PMU_CNTENCLR          (*(volatile uint32_t *)(PMU_BASE_ADDR + 0xC20UL))
+#define PMU_CCFILTR           (*(volatile uint32_t *)(PMU_BASE_ADDR + 0x47CUL))
+#define PMU_SWINC             (*(volatile uint32_t *)(PMU_BASE_ADDR + 0xCA0UL))
+#define PMU_TYPE              (*(volatile uint32_t *)(PMU_BASE_ADDR + 0xE00UL))
+#define PMU_CIDR0             (*(volatile uint32_t *)(PMU_BASE_ADDR + 0xFF0UL))
+#define PMU_CIDR1             (*(volatile uint32_t *)(PMU_BASE_ADDR + 0xFF4UL))
+#define PMU_CIDR2             (*(volatile uint32_t *)(PMU_BASE_ADDR + 0xFF8UL))
+#define PMU_CIDR3             (*(volatile uint32_t *)(PMU_BASE_ADDR + 0xFFCUL))
 
 #define SAU_BASE_ADDR          0xE000EDD0UL
 #define SAU_CTRL              (*(volatile uint32_t *)(SAU_BASE_ADDR + 0x00))
@@ -168,8 +151,8 @@
  * ============================================================================
  * ARMv8-M Core Register Access Implementation
  * ARMv8-M 核心寄存器访问实现
- * Reference: ARMv8-M ARM Section B2.1 (Special registers)
- * 参考: ARMv8-M ARM 第 B2.1 节 (特殊寄存器)
+ * Reference: Arm® v8-M ARM Chapter B3 (Programmers' Model)
+ * 参考: ARMv8-M ARM Chapter B3 (程序员模型)
  * ============================================================================
  */
 
@@ -184,8 +167,8 @@
  *   - BIT[2]: FPCA - FPU active state (1=FPU active, 0=no FPU)
  *   - BIT[4]: SFPA - Secure floating point active (TrustZone)
  *
- * Reference: ARMv8-M ARM B2.2.4 (CONTROL, Control Register)
- * 参考: ARMv8-M ARM B2.2.4 (CONTROL, 控制寄存器)
+ * Reference: Arm® v8-M ARM Chapter B3 (Programmers' Model)
+ * 参考: Arm® v8-M ARM Chapter B3 (程序员模型)
  *
  * @return Current CONTROL register value
  * @return CONTROL 寄存器当前值
@@ -200,14 +183,15 @@ uint32_t arch_armv8m_get_control(void) {
  * @brief Set CONTROL register value
  * @brief 设置 CONTROL 寄存器值
  *
- * Reference: ARMv8-M ARM B2.2.4 (CONTROL, Control Register)
- * 参考: ARMv8-M ARM B2.2.4 (CONTROL, 控制寄存器)
+ * Reference: Arm® v8-M ARM Chapter B3 (Programmers' Model)
+ * 参考: Arm® v8-M ARM Chapter B3 (程序员模型)
  *
  * @param control: New CONTROL register value
  * @param control: CONTROL 寄存器新值
  */
 void arch_armv8m_set_control(uint32_t control) {
     __asm__ volatile ("MSR control, %0" : : "r" (control) : "memory");
+    __asm__ volatile ("isb sy" : : : "memory");
 }
 
 /**
@@ -217,8 +201,8 @@ void arch_armv8m_set_control(uint32_t control) {
  * MSP is the default stack pointer used after reset and in handler mode.
  * MSP 是复位后和处理器模式下使用的默认栈指针。
  *
- * Reference: ARMv8-M ARM B2.2.2 (MSP, Main Stack Pointer)
- * 参考: ARMv8-M ARM B2.2.2 (MSP, 主栈指针)
+ * Reference: Arm® v8-M ARM Chapter B3 (Programmers' Model)
+ * 参考: Arm® v8-M ARM Chapter B3 (程序员模型)
  *
  * @return Current MSP value
  * @return 当前 MSP 值
@@ -233,8 +217,8 @@ uint32_t arch_armv8m_get_msp(void) {
  * @brief Set Main Stack Pointer (MSP)
  * @brief 设置主栈指针 (MSP)
  *
- * Reference: ARMv8-M ARM B2.2.2 (MSP, Main Stack Pointer)
- * 参考: ARMv8-M ARM B2.2.2 (MSP, 主栈指针)
+ * Reference: Arm® v8-M ARM Chapter B3 (Programmers' Model)
+ * 参考: Arm® v8-M ARM Chapter B3 (程序员模型)
  *
  * @param msp: New MSP value
  * @param msp: 新的 MSP 值
@@ -250,8 +234,8 @@ void arch_armv8m_set_msp(uint32_t msp) {
  * PSP is used in Thread mode when CONTROL.SPSEL is set to 1.
  * PSP 在线程模式下且 CONTROL.SPSEL 设为 1 时使用。
  *
- * Reference: ARMv8-M ARM B2.2.3 (PSP, Process Stack Pointer)
- * 参考: ARMv8-M ARM B2.2.3 (PSP, 进程栈指针)
+ * Reference: Arm® v8-M ARM Chapter B3 (Programmers' Model)
+ * 参考: Arm® v8-M ARM Chapter B3 (程序员模型)
  *
  * @return Current PSP value
  * @return 当前 PSP 值
@@ -266,8 +250,8 @@ uint32_t arch_armv8m_get_psp(void) {
  * @brief Set Process Stack Pointer (PSP)
  * @brief 设置进程栈指针 (PSP)
  *
- * Reference: ARMv8-M ARM B2.2.3 (PSP, Process Stack Pointer)
- * 参考: ARMv8-M ARM B2.2.3 (PSP, 进程栈指针)
+ * Reference: Arm® v8-M ARM Chapter B3 (Programmers' Model)
+ * 参考: Arm® v8-M ARM Chapter B3 (程序员模型)
  *
  * @param psp: New PSP value
  * @param psp: 新的 PSP 值
@@ -285,8 +269,8 @@ void arch_armv8m_set_psp(uint32_t psp) {
  *   - 0: Interrupts enabled
  *   - 1: Interrupts disabled
  *
- * Reference: ARMv8-M ARM B2.2.6 (PRIMASK, Priority Mask Register)
- * 参考: ARMv8-M ARM B2.2.6 (PRIMASK, 优先级屏蔽寄存器)
+ * Reference: Arm® v8-M ARM Chapter B3 (Programmers' Model)
+ * 参考: Arm® v8-M ARM Chapter B3 (程序员模型)
  *
  * @return Current PRIMASK value (0=interrupts enabled, 1=interrupts disabled)
  * @return 当前 PRIMASK 值 (0=中断使能, 1=中断禁用)
@@ -301,8 +285,8 @@ uint32_t arch_armv8m_get_primask(void) {
  * @brief Set PRIMASK register
  * @brief 设置 PRIMASK 寄存器
  *
- * Reference: ARMv8-M ARM B2.2.6 (PRIMASK, Priority Mask Register)
- * 参考: ARMv8-M ARM B2.2.6 (PRIMASK, 优先级屏蔽寄存器)
+ * Reference: Arm® v8-M ARM Chapter B3 (Programmers' Model)
+ * 参考: Arm® v8-M ARM Chapter B3 (程序员模型)
  *
  * @param primask: New PRIMASK value
  * @param primask: 新的 PRIMASK 值
@@ -320,8 +304,8 @@ void arch_armv8m_set_primask(uint32_t primask) {
  *   - 0: No effect
  *   - 1-255: Masks interrupts with priority >= BASEPRI
  *
- * Reference: ARMv8-M ARM B2.2.7 (BASEPRI, Base Priority Register)
- * 参考: ARMv8-M ARM B2.2.7 (BASEPRI, 基础优先级寄存器)
+ * Reference: Arm® v8-M ARM Chapter B3 (Programmers' Model)
+ * 参考: Arm® v8-M ARM Chapter B3 (程序员模型)
  *
  * @return Current BASEPRI value
  * @return 当前 BASEPRI 值
@@ -336,8 +320,8 @@ uint32_t arch_armv8m_get_basepri(void) {
  * @brief Set BASEPRI register
  * @brief 设置 BASEPRI 寄存器
  *
- * Reference: ARMv8-M ARM B2.2.7 (BASEPRI, Base Priority Register)
- * 参考: ARMv8-M ARM B2.2.7 (BASEPRI, 基础优先级寄存器)
+ * Reference: Arm® v8-M ARM Chapter B3 (Programmers' Model)
+ * 参考: Arm® v8-M ARM Chapter B3 (程序员模型)
  *
  * @param basepri: New BASEPRI value (0=disable, 1-255=mask priority <= basepri)
  * @param basepri: 新的 BASEPRI 值 (0=禁用, 1-255=屏蔽优先级 <= basepri)
@@ -355,8 +339,8 @@ void arch_armv8m_set_basepri(uint32_t basepri) {
  *   - 0: No effect
  *   - 1: Masks all exceptions except NMI
  *
- * Reference: ARMv8-M ARM B2.2.8 (FAULTMASK, Fault Mask Register)
- * 参考: ARMv8-M ARM B2.2.8 (FAULTMASK, 故障屏蔽寄存器)
+ * Reference: Arm® v8-M ARM Chapter B3 (Programmers' Model)
+ * 参考: Arm® v8-M ARM Chapter B3 (程序员模型)
  *
  * @return Current FAULTMASK value
  * @return 当前 FAULTMASK 值
@@ -371,8 +355,8 @@ uint32_t arch_armv8m_get_faultmask(void) {
  * @brief Set FAULTMASK register
  * @brief 设置 FAULTMASK 寄存器
  *
- * Reference: ARMv8-M ARM B2.2.8 (FAULTMASK, Fault Mask Register)
- * 参考: ARMv8-M ARM B2.2.8 (FAULTMASK, 故障屏蔽寄存器)
+ * Reference: Arm® v8-M ARM Chapter B3 (Programmers' Model)
+ * 参考: Arm® v8-M ARM Chapter B3 (程序员模型)
  *
  * @param faultmask: New FAULTMASK value
  * @param faultmask: 新的 FAULTMASK 值
@@ -388,8 +372,8 @@ void arch_armv8m_set_faultmask(uint32_t faultmask) {
  * MSPLIM defines the lower limit of MSP to detect stack overflow.
  * MSPLIM 定义 MSP 的下限以检测栈溢出。
  *
- * Reference: ARMv8-M ARM B2.2.2 (MSPLIM, Main Stack Pointer Limit)
- * 参考: ARMv8-M ARM B2.2.2 (MSPLIM, 主栈指针限制)
+ * Reference: Arm® v8-M ARM Chapter B3 (Programmers' Model)
+ * 参考: Arm® v8-M ARM Chapter B3 (程序员模型)
  *
  * @return Current MSPLIM value
  * @return 当前 MSPLIM 值
@@ -404,8 +388,8 @@ uint32_t arch_armv8m_get_msplim(void) {
  * @brief Set MSPLIM register
  * @brief 设置 MSPLIM 寄存器
  *
- * Reference: ARMv8-M ARM B2.2.2 (MSPLIM, Main Stack Pointer Limit)
- * 参考: ARMv8-M ARM B2.2.2 (MSPLIM, 主栈指针限制)
+ * Reference: Arm® v8-M ARM Chapter B3 (Programmers' Model)
+ * 参考: Arm® v8-M ARM Chapter B3 (程序员模型)
  *
  * @param msplim: New MSPLIM value (set bit[0] to 1 for non-secure access in TrustZone)
  * @param msplim: 新的 MSPLIM 值 (在 TrustZone 中设置 bit[0] 为 1 以进行非安全访问)
@@ -421,8 +405,8 @@ void arch_armv8m_set_msplim(uint32_t msplim) {
  * PSPLIM defines the lower limit of PSP to detect stack overflow.
  * PSPLIM 定义 PSP 的下限以检测栈溢出。
  *
- * Reference: ARMv8-M ARM B2.2.3 (PSPLIM, Process Stack Pointer Limit)
- * 参考: ARMv8-M ARM B2.2.3 (PSPLIM, 进程栈指针限制)
+ * Reference: Arm® v8-M ARM Chapter B3 (Programmers' Model)
+ * 参考: Arm® v8-M ARM Chapter B3 (程序员模型)
  *
  * @return Current PSPLIM value
  * @return 当前 PSPLIM 值
@@ -437,8 +421,8 @@ uint32_t arch_armv8m_get_psplim(void) {
  * @brief Set PSPLIM register
  * @brief 设置 PSPLIM 寄存器
  *
- * Reference: ARMv8-M ARM B2.2.3 (PSPLIM, Process Stack Pointer Limit)
- * 参考: ARMv8-M ARM B2.2.3 (PSPLIM, 进程栈指针限制)
+ * Reference: Arm® v8-M ARM Chapter B3 (Programmers' Model)
+ * 参考: Arm® v8-M ARM Chapter B3 (程序员模型)
  *
  * @param psplim: New PSPLIM value (set bit[0] to 1 for non-secure access in TrustZone)
  * @param psplim: 新的 PSPLIM 值 (在 TrustZone 中设置 bit[0] 为 1 以进行非安全访问)
@@ -451,8 +435,8 @@ void arch_armv8m_set_psplim(uint32_t psplim) {
  * ============================================================================
  * ARMv8-M Status Register Access Implementation
  * ARMv8-M 状态寄存器访问实现
- * Reference: ARMv8-M ARM Section B2.3 (Application Program Status Register)
- * 参考: ARMv8-M ARM 第 B2.3 节 (应用程序状态寄存器)
+ * Reference: Arm® v8-M ARM Chapter B3 (Programmers' Model)
+ * 参考: ARMv8-M ARM Chapter B3 (程序员模型)
  * ============================================================================
  */
 
@@ -466,8 +450,8 @@ void arch_armv8m_set_psplim(uint32_t psplim) {
  *   - 1-15: Reserved
  *   - 16-255: IRQ number + 16
  *
- * Reference: ARMv8-M ARM B2.3.3 (IPSR, Interrupt Program Status Register)
- * 参考: ARMv8-M ARM B2.3.3 (IPSR, 中断程序状态寄存器)
+ * Reference: Arm® v8-M ARM Chapter B3 (Programmers' Model)
+ * 参考: Arm® v8-M ARM Chapter B3 (程序员模型)
  *
  * @return Current IPSR value (exception number)
  * @return 当前 IPSR 值 (异常号)
@@ -490,8 +474,8 @@ uint32_t arch_armv8m_get_ipsr(void) {
  *   - V: Overflow flag
  *   - Q: Saturation flag (DSP)
  *
- * Reference: ARMv8-M ARM B2.3.2 (APSR, Application Program Status Register)
- * 参考: ARMv8-M ARM B2.3.2 (APSR, 应用程序状态寄存器)
+ * Reference: Arm® v8-M ARM Chapter B3 (Programmers' Model)
+ * 参考: Arm® v8-M ARM Chapter B3 (程序员模型)
  *
  * @return Current APSR value
  * @return 当前 APSR 值
@@ -511,8 +495,8 @@ uint32_t arch_armv8m_get_apsr(void) {
  * It combines IPSR, EPSR, and APSR.
  * 它结合了 IPSR、EPSR 和 APSR。
  *
- * Reference: ARMv8-M ARM B2.3.1 (xPSR, Combined Program Status Register)
- * 参考: ARMv8-M ARM B2.3.1 (xPSR, 组合程序状态寄存器)
+ * Reference: Arm® v8-M ARM Chapter B3 (Programmers' Model)
+ * 参考: Arm® v8-M ARM Chapter B3 (程序员模型)
  *
  * @return Current xPSR value
  * @return 当前 xPSR 值
@@ -527,8 +511,8 @@ uint32_t arch_armv8m_get_xpsr(void) {
  * ============================================================================
  * ARMv8-M Memory Barrier Implementation
  * ARMv8-M 内存屏障实现
- * Reference: ARMv8-M ARM Section D1.2.4 (Memory barriers)
- * 参考: ARMv8-M ARM 第 D1.2.4 节 (内存屏障)
+ * Reference: Arm® v8-M ARM Chapter B3 (Programmers' Model)
+ * 参考: Arm® v8-M ARM Chapter B3 (程序员模型)
  * ============================================================================
  */
 
@@ -540,8 +524,8 @@ uint32_t arch_armv8m_get_xpsr(void) {
  * This ensures that all memory transactions have completed before proceeding.
  * 确保所有显式内存访问在下一条指令之前完成。
  *
- * Reference: ARMv8-M ARM D1.2.4 (Data Synchronization Barrier)
- * 参考: ARMv8-M ARM D1.2.4 (数据同步屏障)
+ * Reference: Arm® v8-M ARM Chapter B3 (Programmers' Model)
+ * 参考: Arm® v8-M ARM Chapter B3 (程序员模型)
  */
 void arch_armv8m_dsb(void) {
     __asm__ volatile ("dsb sy" : : : "memory");
@@ -555,8 +539,8 @@ void arch_armv8m_dsb(void) {
  * This ensures that all instructions following the ISB are fetched from memory.
  * 刷新指令管道以确保获取指令序列。
  *
- * Reference: ARMv8-M ARM D1.2.4 (Instruction Synchronization Barrier)
- * 参考: ARMv8-M ARM D1.2.4 (指令同步屏障)
+ * Reference: Arm® v8-M ARM Chapter B3 (Programmers' Model)
+ * 参考: Arm® v8-M ARM Chapter B3 (程序员模型)
  */
 void arch_armv8m_isb(void) {
     __asm__ volatile ("isb sy" : : : "memory");
@@ -570,8 +554,8 @@ void arch_armv8m_isb(void) {
  * This ensures that memory transactions are completed in program order.
  * 确保显式内存访问按顺序观察。
  *
- * Reference: ARMv8-M ARM D1.2.4 (Data Memory Barrier)
- * 参考: ARMv8-M ARM D1.2.4 (数据内存屏障)
+ * Reference: Arm® v8-M ARM Chapter B3 (Programmers' Model)
+ * 参考: Arm® v8-M ARM Chapter B3 (程序员模型)
  */
 void arch_armv8m_dmb(void) {
     __asm__ volatile ("dmb sy" : : : "memory");
@@ -581,8 +565,8 @@ void arch_armv8m_dmb(void) {
  * ============================================================================
  * ARMv8-M Low Power Mode Implementation
  * ARMv8-M 低功耗模式实现
- * Reference: ARMv8-M ARM Section B2.4 (Wait for event and interrupt)
- * 参考: ARMv8-M ARM 第 B2.4 节 (等待事件和中断)
+ * Reference: Arm® v8-M ARM Chapter B3 (Programmers' Model)
+ * 参考: Arm® v8-M ARM Chapter B3 (程序员模型)
  * ============================================================================
  */
 
@@ -594,8 +578,8 @@ void arch_armv8m_dmb(void) {
  * The processor suspends execution until an interrupt occurs.
  * 进入睡眠模式，被中断唤醒。
  *
- * Reference: ARMv8-M ARM B2.4.1 (Wait for interrupt)
- * 参考: ARMv8-M ARM B2.4.1 (等待中断)
+ * Reference: Arm® v8-M ARM Chapter B3 (Programmers' Model)
+ * 参考: Arm® v8-M ARM Chapter B3 (程序员模型)
  */
 void arch_armv8m_wfi(void) {
     __asm__ volatile ("wfi" : : : "memory");
@@ -609,8 +593,8 @@ void arch_armv8m_wfi(void) {
  * The processor suspends execution until a event occurs.
  * 进入睡眠模式，被事件唤醒。
  *
- * Reference: ARMv8-M ARM B2.4.2 (Wait for event)
- * 参考: ARMv8-M ARM B2.4.2 (等待事件)
+ * Reference: Arm® v8-M ARM Chapter B3 (Programmers' Model)
+ * 参考: Arm® v8-M ARM Chapter B3 (程序员模型)
  */
 void arch_armv8m_wfe(void) {
     __asm__ volatile ("wfe" : : : "memory");
@@ -624,8 +608,8 @@ void arch_armv8m_wfe(void) {
  * This wakes up cores waiting for event.
  * 在多处理器系统中向所有核心发送事件。
  *
- * Reference: ARMv8-M ARM B2.4.3 (Send event)
- * 参考: ARMv8-M ARM B2.4.3 (发送事件)
+ * Reference: Arm® v8-M ARM Chapter B3 (Programmers' Model)
+ * 参考: Arm® v8-M ARM Chapter B3 (程序员模型)
  */
 void arch_armv8m_sev(void) {
     __asm__ volatile ("sev" : : : "memory");
@@ -635,8 +619,8 @@ void arch_armv8m_sev(void) {
  * ============================================================================
  * ARMv8-M NVIC Interrupt Management Implementation
  * ARMv8-M NVIC 中断管理实现
- * Reference: ARMv8-M ARM Section B3.3 (Nested Vectored Interrupt Controller)
- * 参考: ARMv8-M ARM 第 B3.3 节 (嵌套向量中断控制器)
+ * Reference: Arm® v8-M ARM Chapter B12 (Nested Vectored Interrupt Controller)
+ * 参考: Arm® v8-M ARM Chapter B12 (嵌套向量中断控制器)
  * ============================================================================
  */
 
@@ -644,8 +628,8 @@ void arch_armv8m_sev(void) {
  * @brief Enable specified interrupt
  * @brief 使能指定中断
  *
- * Reference: ARMv8-M ARM B3.3.9 (NVIC_ISER, Interrupt Set-Enable Register)
- * 参考: ARMv8-M ARM B3.3.9 (NVIC_ISER, 中断使能寄存器)
+ * Reference: Arm® v8-M ARM Chapter B12 (Nested Vectored Interrupt Controller)
+ * 参考: Arm® v8-M ARM Chapter B12 (嵌套向量中断控制器)
  *
  * @param irq: Interrupt number (0-239)
  * @param irq: 中断号 (0-239)
@@ -662,8 +646,8 @@ void arch_armv8m_enable_irq(uint8_t irq) {
  * @brief Disable specified interrupt
  * @brief 禁用指定中断
  *
- * Reference: ARMv8-M ARM B3.3.10 (NVIC_ICER, Interrupt Clear-Enable Register)
- * 参考: ARMv8-M ARM B3.3.10 (NVIC_ICER, 中断使能清除寄存器)
+ * Reference: Arm® v8-M ARM Chapter B12 (Nested Vectored Interrupt Controller)
+ * 参考: Arm® v8-M ARM Chapter B12 (嵌套向量中断控制器)
  *
  * @param irq: Interrupt number (0-239)
  * @param irq: 中断号 (0-239)
@@ -680,8 +664,8 @@ void arch_armv8m_disable_irq(uint8_t irq) {
  * @brief Set interrupt priority
  * @brief 设置中断优先级
  *
- * Reference: ARMv8-M ARM B3.3.22 (NVIC_IPR, Interrupt Priority Register)
- * 参考: ARMv8-M ARM B3.3.22 (NVIC_IPR, 中断优先级寄存器)
+ * Reference: Arm® v8-M ARM Chapter B12 (Nested Vectored Interrupt Controller)
+ * 参考: Arm® v8-M ARM Chapter B12 (嵌套向量中断控制器)
  *
  * @param irq: Interrupt number
  * @param irq: 中断号
@@ -698,8 +682,8 @@ void arch_armv8m_set_priority(uint8_t irq, uint8_t priority) {
  * @brief Get interrupt priority
  * @brief 获取中断优先级
  *
- * Reference: ARMv8-M ARM B3.3.22 (NVIC_IPR, Interrupt Priority Register)
- * 参考: ARMv8-M ARM B3.3.22 (NVIC_IPR, 中断优先级寄存器)
+ * Reference: Arm® v8-M ARM Chapter B12 (Nested Vectored Interrupt Controller)
+ * 参考: Arm® v8-M ARM Chapter B12 (嵌套向量中断控制器)
  *
  * @param irq: Interrupt number
  * @param irq: 中断号
@@ -717,8 +701,8 @@ uint8_t arch_armv8m_get_priority(uint8_t irq) {
  * @brief Set interrupt pending status
  * @brief 设置中断挂起状态
  *
- * Reference: ARMv8-M ARM B3.3.13 (NVIC_ISPR, Interrupt Set-Pending Register)
- * 参考: ARMv8-M ARM B3.3.13 (NVIC_ISPR, 中断挂起寄存器)
+ * Reference: Arm® v8-M ARM Chapter B12 (Nested Vectored Interrupt Controller)
+ * 参考: Arm® v8-M ARM Chapter B12 (嵌套向量中断控制器)
  *
  * @param irq: Interrupt number
  * @param irq: 中断号
@@ -735,8 +719,8 @@ void arch_armv8m_set_pending(uint8_t irq) {
  * @brief Clear interrupt pending status
  * @brief 清除中断挂起状态
  *
- * Reference: ARMv8-M ARM B3.3.14 (NVIC_ICPR, Interrupt Clear-Pending Register)
- * 参考: ARMv8-M ARM B3.3.14 (NVIC_ICPR, 中断挂起清除寄存器)
+ * Reference: Arm® v8-M ARM Chapter B12 (Nested Vectored Interrupt Controller)
+ * 参考: Arm® v8-M ARM Chapter B12 (嵌套向量中断控制器)
  *
  * @param irq: Interrupt number
  * @param irq: 中断号
@@ -753,8 +737,8 @@ void arch_armv8m_clear_pending(uint8_t irq) {
  * @brief Get enable status of specified interrupt
  * @brief 获取指定中断的使能状态
  *
- * Reference: ARMv8-M ARM B3.3.9 (NVIC_ISER) and B3.3.10 (NVIC_ICER)
- * 参考: ARMv8-M ARM B3.3.9 (NVIC_ISER) 和 B3.3.10 (NVIC_ICER)
+ * Reference: Arm® v8-M ARM Chapter B12 (Nested Vectored Interrupt Controller)
+ * 参考: Arm® v8-M ARM Chapter B12 (嵌套向量中断控制器)
  *
  * @param irq: Interrupt number
  * @param irq: 中断号
@@ -774,8 +758,8 @@ uint32_t arch_armv8m_get_enable_irq(uint8_t irq) {
  * @brief Get pending status of specified interrupt
  * @brief 获取指定中断的挂起状态
  *
- * Reference: ARMv8-M ARM B3.3.13 (NVIC_ISPR) and B3.3.14 (NVIC_ICPR)
- * 参考: ARMv8-M ARM B3.3.13 (NVIC_ISPR) 和 B3.3.14 (NVIC_ICPR)
+ * Reference: Arm® v8-M ARM Chapter B12 (Nested Vectored Interrupt Controller)
+ * 参考: Arm® v8-M ARM Chapter B12 (嵌套向量中断控制器)
  *
  * @param irq: Interrupt number
  * @param irq: 中断号
@@ -795,8 +779,8 @@ uint32_t arch_armv8m_get_pending_irq(uint8_t irq) {
  * @brief Get currently executing interrupt
  * @brief 获取当前正在执行的中断
  *
- * Reference: ARMv8-M ARM B3.3.3 (SCB_ICSR, Interrupt Control and State Register)
- * 参考: ARMv8-M ARM B3.3.3 (SCB_ICSR, 中断控制和状态寄存器)
+ * Reference: Arm® v8-M ARM Chapter B12 (Nested Vectored Interrupt Controller)
+ * 参考: Arm® v8-M ARM Chapter B12 (嵌套向量中断控制器)
  *
  * @return Active interrupt number (IRQ number, -16 for exceptions)
  * @return 活动中断号 (IRQ 号，异常返回 -16)
@@ -809,8 +793,8 @@ uint32_t arch_armv8m_get_active_irq(void) {
  * @brief Get priority grouping
  * @brief 获取优先级分组
  *
- * Reference: ARMv8-M ARM B3.3.1 (SCB_AIRCR, Application Interrupt and Reset Control Register)
- * 参考: ARMv8-M ARM B3.3.1 (SCB_AIRCR, 应用中断和复位控制寄存器)
+ * Reference: Arm® v8-M ARM Chapter B12 (Nested Vectored Interrupt Controller)
+ * 参考: Arm® v8-M ARM Chapter B12 (嵌套向量中断控制器)
  *
  * @return Priority grouping value
  * @return 优先级分组值
@@ -823,8 +807,8 @@ uint32_t arch_armv8m_get_priority_grouping(void) {
  * @brief Set priority grouping
  * @brief 设置优先级分组
  *
- * Reference: ARMv8-M ARM B3.3.1 (SCB_AIRCR)
- * 参考: ARMv8-M ARM B3.3.1 (SCB_AIRCR)
+ * Reference: Arm® v8-M ARM Chapter B12 (Nested Vectored Interrupt Controller)
+ * 参考: Arm® v8-M ARM Chapter B12 (嵌套向量中断控制器)
  *
  * @param priority_group: Priority grouping value
  * @param priority_group: 优先级分组值
@@ -913,8 +897,8 @@ uint32_t arch_armv8m_get_vector(uint8_t irq) {
  * ============================================================================
  * ARMv8-M MPU (Memory Protection Unit) Implementation
  * ARMv8-M MPU (内存保护单元) 实现
- * Reference: ARMv8-M ARM Section B4 (Memory Protection Unit)
- * 参考: ARMv8-M ARM 第 B4 节 (内存保护单元)
+ * Reference: Arm® v8-M ARM Chapter B10 (The Armv8-M Protected Memory System Architecture)
+ * 参考: Arm® v8-M ARM Chapter B10 (Armv8-M 受保护内存系统架构)
  * ============================================================================
  */
 
@@ -928,8 +912,8 @@ uint32_t arch_armv8m_get_vector(uint8_t irq) {
  *   - DREGION[15:8]: Number of data regions
  *   - SEPARATE[0]: Instruction/Data separation flag
  *
- * Reference: ARMv8-M ARM B4.3.1 (MPU_TYPE, MPU Type Register)
- * 参考: ARMv8-M ARM B4.3.1 (MPU_TYPE, MPU 类型寄存器)
+ * Reference: Arm® v8-M ARM Chapter B10 (The Armv8-M Protected Memory System Architecture)
+ * 参考: Arm® v8-M ARM Chapter B10 (Armv8-M 受保护内存系统架构)
  *
  * @return MPU type register value
  * @return MPU 类型寄存器值
@@ -942,8 +926,8 @@ uint32_t arch_armv8m_mpu_get_type(void) {
  * @brief Initialize MPU
  * @brief 初始化 MPU
  *
- * Reference: ARMv8-M ARM B4.3 (MPU registers summary)
- * 参考: ARMv8-M ARM B4.3 (MPU 寄存器摘要)
+ * Reference: Arm® v8-M ARM Chapter B10 (The Armv8-M Protected Memory System Architecture)
+ * 参考: Arm® v8-M ARM Chapter B10 (Armv8-M 受保护内存系统架构)
  */
 void arch_armv8m_mpu_init(void) {
     arch_armv8m_mpu_disable();
@@ -959,8 +943,8 @@ void arch_armv8m_mpu_init(void) {
  *   - HFNMIENA (bit 1): Enable during NMI and HardFault
  *   - PRIVDEFENA (bit 2): Privileged default memory map
  *
- * Reference: ARMv8-M ARM B4.3.2 (MPU_CTRL, MPU Control Register)
- * 参考: ARMv8-M ARM B4.3.2 (MPU_CTRL, MPU 控制寄存器)
+ * Reference: Arm® v8-M ARM Chapter B10 (The Armv8-M Protected Memory System Architecture)
+ * 参考: Arm® v8-M ARM Chapter B10 (Armv8-M 受保护内存系统架构)
  *
  * @param default_map: Use default memory map (true=enable, false=disable)
  * @param default_map: 使用默认内存映射 (true=启用, false=禁用)
@@ -972,6 +956,7 @@ void arch_armv8m_mpu_enable(bool default_map) {
         ctrl |= 0x4;
     }
     MPU_CTRL = ctrl;
+    SCB_SHCSR |= SCB_SHCSR_MEMFAULTENA_Msk;
     arch_armv8m_dsb();
     arch_armv8m_isb();
 }
@@ -980,11 +965,12 @@ void arch_armv8m_mpu_enable(bool default_map) {
  * @brief Disable MPU
  * @brief 禁用 MPU
  *
- * Reference: ARMv8-M ARM B4.3.2 (MPU_CTRL, MPU Control Register)
- * 参考: ARMv8-M ARM B4.3.2 (MPU_CTRL, MPU 控制寄存器)
+ * Reference: Arm® v8-M ARM Chapter B10 (The Armv8-M Protected Memory System Architecture)
+ * 参考: Arm® v8-M ARM Chapter B10 (Armv8-M 受保护内存系统架构)
  */
 void arch_armv8m_mpu_disable(void) {
     MPU_CTRL &= ~0x1;
+    SCB_SHCSR &= ~SCB_SHCSR_MEMFAULTENA_Msk;
     arch_armv8m_dsb();
     arch_armv8m_isb();
 }
@@ -1003,10 +989,8 @@ void arch_armv8m_mpu_disable(void) {
  *     - [1]: Read allocate
  *     - [0]: Write allocate
  *
- * Reference: ARMv8-M ARM B4.3.7 (MPU_MAIR0, MPU Memory Attribute Indirection Register 0)
- *            ARMv8-M ARM B4.3.8 (MPU_MAIR1, MPU Memory Attribute Indirection Register 1)
- * 参考: ARMv8-M ARM B4.3.7 (MPU_MAIR0, MPU 内存属性间接寄存器 0)
- *       ARMv8-M ARM B4.3.8 (MPU_MAIR1, MPU 内存属性间接寄存器 1)
+ * Reference: Arm® v8-M ARM Chapter B10 (The Armv8-M Protected Memory System Architecture)
+ * 参考: Arm® v8-M ARM Chapter B10 (Armv8-M 受保护内存系统架构)
  *
  * @param idx: Attribute index (0-7)
  * @param idx: 属性索引 (0-7)
@@ -1044,12 +1028,8 @@ void arch_armv8m_mpu_set_mem_attr(uint8_t idx, uint8_t attr) {
  *   - [2:1]: SH (Shareability)
  *   - [0]: ENABLE
  *
- * Reference: ARMv8-M ARM B4.3.3 (MPU_RNR, MPU Region Number Register)
- *            ARMv8-M ARM B4.3.4 (MPU_RBAR, MPU Region Base Address Register)
- *            ARMv8-M ARM B4.3.5 (MPU_RLAR, MPU Region Limit Register)
- * 参考: ARMv8-M ARM B4.3.3 (MPU_RNR, MPU 区域编号寄存器)
- *       ARMv8-M ARM B4.3.4 (MPU_RBAR, MPU 区域基地址寄存器)
- *       ARMv8-M ARM B4.3.5 (MPU_RLAR, MPU 区域限制寄存器)
+ * Reference: Arm® v8-M ARM Chapter B10 (The Armv8-M Protected Memory System Architecture)
+ * 参考: Arm® v8-M ARM Chapter B10 (Armv8-M 受保护内存系统架构)
  *
  * @param rnr: Region number (0-15)
  * @param rnr: 区域编号 (0-15)
@@ -1069,8 +1049,8 @@ void arch_armv8m_mpu_set_region(uint32_t rnr, uint32_t rbar, uint32_t rlar) {
  * @brief Clear MPU region
  * @brief 清除 MPU 区域
  *
- * Reference: ARMv8-M ARM B4.3.3 (MPU_RNR) and B4.3.5 (MPU_RLAR)
- * 参考: ARMv8-M ARM B4.3.3 (MPU_RNR) 和 B4.3.5 (MPU_RLAR)
+ * Reference: Arm® v8-M ARM Chapter B10 (The Armv8-M Protected Memory System Architecture)
+ * 参考: Arm® v8-M ARM Chapter B10 (Armv8-M 受保护内存系统架构)
  *
  * @param rnr: Region number
  * @param rnr: 区域编号
@@ -1085,8 +1065,8 @@ void arch_armv8m_mpu_clr_region(uint32_t rnr) {
  * @brief Get MPU region count
  * @brief 获取 MPU 区域数量
  *
- * Reference: ARMv8-M ARM B4.3.1 (MPU_TYPE)
- * 参考: ARMv8-M ARM B4.3.1 (MPU_TYPE)
+ * Reference: Arm® v8-M ARM Chapter B10 (The Armv8-M Protected Memory System Architecture)
+ * 参考: Arm® v8-M ARM Chapter B10 (Armv8-M 受保护内存系统架构)
  *
  * @return Number of data regions
  * @return 数据区域数量
@@ -1095,14 +1075,309 @@ uint32_t arch_armv8m_mpu_get_num_regions(void) {
     return (MPU_TYPE >> 8) & 0xFFUL;
 }
 
+/**
+ * @brief Ordered memcpy for MPU region loading
+ * @brief 用于 MPU 区域加载的有序内存复制
+ *
+ * Reference: Arm® v8-M ARM Chapter B10 (The Armv8-M Protected Memory System Architecture)
+ * 参考: Arm® v8-M ARM Chapter B10 (Armv8-M 受保护内存系统架构)
+ *
+ * @param dst: Destination pointer
+ * @param dst: 目标指针
+ * @param src: Source pointer
+ * @param src: 源指针
+ * @param len: Number of 32-bit words to copy
+ * @param len: 要复制的 32 位字数
+ */
+static void armv8m_mpu_ordered_memcpy(volatile uint32_t* dst, const uint32_t* src, uint32_t len) {
+    uint32_t i;
+    for (i = 0U; i < len; ++i) {
+        dst[i] = src[i];
+    }
+}
+
+/**
+ * @brief Load MPU regions from table (extended)
+ * @brief 从表加载 MPU 区域（扩展版）
+ *
+ * Reference: Arm® v8-M ARM Chapter B10 (The Armv8-M Protected Memory System Architecture)
+ * 参考: Arm® v8-M ARM Chapter B10 (Armv8-M 受保护内存系统架构)
+ *
+ * @param mpu: Pointer to MPU registers
+ * @param mpu: 指向 MPU 寄存器的指针
+ * @param rnr: First region number to configure
+ * @param rnr: 要配置的第一个区域编号
+ * @param table: Pointer to MPU configuration table
+ * @param table: 指向 MPU 配置表的指针
+ * @param cnt: Number of regions to configure
+ * @param cnt: 要配置的区域数量
+ */
+void arch_armv8m_mpu_load_ex(MPU_Type* mpu, uint32_t rnr, ARM_MPU_Region_t const* table, uint32_t cnt) {
+    const uint32_t rowWordSize = sizeof(ARM_MPU_Region_t) / 4U;
+    if (cnt == 1U) {
+        mpu->RNR = rnr;
+        armv8m_mpu_ordered_memcpy(&(mpu->RBAR), &(table->RBAR), rowWordSize);
+    } else {
+        uint32_t rnrBase = rnr & ~(MPU_TYPE_RALIASES - 1U);
+        uint32_t rnrOffset = rnr % MPU_TYPE_RALIASES;
+
+        mpu->RNR = rnrBase;
+        while ((rnrOffset + cnt) > MPU_TYPE_RALIASES) {
+            uint32_t c = MPU_TYPE_RALIASES - rnrOffset;
+            armv8m_mpu_ordered_memcpy(&(mpu->RBAR) + (rnrOffset * 2U), &(table->RBAR), c * rowWordSize);
+            table += c;
+            cnt -= c;
+            rnrOffset = 0U;
+            rnrBase += MPU_TYPE_RALIASES;
+            mpu->RNR = rnrBase;
+        }
+
+        armv8m_mpu_ordered_memcpy(&(mpu->RBAR) + (rnrOffset * 2U), &(table->RBAR), cnt * rowWordSize);
+    }
+    arch_armv8m_dsb();
+}
+
+/**
+ * @brief Load MPU regions from table
+ * @brief 从表加载 MPU 区域
+ *
+ * Reference: Arm® v8-M ARM Chapter B10 (The Armv8-M Protected Memory System Architecture)
+ * 参考: Arm® v8-M ARM Chapter B10 (Armv8-M 受保护内存系统架构)
+ *
+ * @param rnr: First region number to configure
+ * @param rnr: 要配置的第一个区域编号
+ * @param table: Pointer to MPU configuration table
+ * @param table: 指向 MPU 配置表的指针
+ * @param cnt: Number of regions to configure
+ * @param cnt: 要配置的区域数量
+ */
+void arch_armv8m_mpu_load(uint32_t rnr, ARM_MPU_Region_t const* table, uint32_t cnt) {
+    arch_armv8m_mpu_load_ex(MPU, rnr, table, cnt);
+}
+
+/**
+ * @brief Set memory attribute (extended)
+ * @brief 设置内存属性（扩展版）
+ *
+ * Reference: Arm® v8-M ARM Chapter B10 (The Armv8-M Protected Memory System Architecture)
+ * 参考: Arm® v8-M ARM Chapter B10 (Armv8-M 受保护内存系统架构)
+ *
+ * @param mpu: Pointer to MPU registers
+ * @param mpu: 指向 MPU 寄存器的指针
+ * @param idx: Attribute index (0-7)
+ * @param idx: 属性索引 (0-7)
+ * @param attr: Memory attribute
+ * @param attr: 内存属性
+ */
+void arch_armv8m_mpu_set_mem_attr_ex(MPU_Type* mpu, uint8_t idx, uint8_t attr) {
+    const uint32_t pos = ((idx % 4U) * 8U);
+    const uint32_t mask = 0xFFU << pos;
+
+    if (idx < 4) {
+        mpu->MAIR0 = ((mpu->MAIR0 & ~mask) | ((attr << pos) & mask));
+    } else if (idx < 8) {
+        mpu->MAIR1 = ((mpu->MAIR1 & ~mask) | ((attr << pos) & mask));
+    }
+    arch_armv8m_dsb();
+}
+
+/**
+ * @brief Set MPU region (extended)
+ * @brief 设置 MPU 区域（扩展版）
+ *
+ * Reference: Arm® v8-M ARM Chapter B10 (The Armv8-M Protected Memory System Architecture)
+ * 参考: Arm® v8-M ARM Chapter B10 (Armv8-M 受保护内存系统架构)
+ *
+ * @param mpu: Pointer to MPU registers
+ * @param mpu: 指向 MPU 寄存器的指针
+ * @param rnr: Region number (0-15)
+ * @param rnr: 区域编号 (0-15)
+ * @param rbar: Region Base Address Register
+ * @param rbar: 区域基地址寄存器
+ * @param rlar: Region Limit Register
+ * @param rlar: 区域限制寄存器
+ */
+void arch_armv8m_mpu_set_region_ex(MPU_Type* mpu, uint32_t rnr, uint32_t rbar, uint32_t rlar) {
+    mpu->RNR = rnr;
+    mpu->RBAR = rbar;
+    mpu->RLAR = rlar;
+    arch_armv8m_dsb();
+}
+
+/**
+ * @brief Clear MPU region (extended)
+ * @brief 清除 MPU 区域（扩展版）
+ *
+ * Reference: Arm® v8-M ARM Chapter B10 (The Armv8-M Protected Memory System Architecture)
+ * 参考: Arm® v8-M ARM Chapter B10 (Armv8-M 受保护内存系统架构)
+ *
+ * @param mpu: Pointer to MPU registers
+ * @param mpu: 指向 MPU 寄存器的指针
+ * @param rnr: Region number
+ * @param rnr: 区域编号
+ */
+void arch_armv8m_mpu_clr_region_ex(MPU_Type* mpu, uint32_t rnr) {
+    mpu->RNR = rnr;
+    mpu->RLAR = 0U;
+    arch_armv8m_dsb();
+}
+
+#ifdef __TZ_PRESENT
+#define MPU_NS_BASE_ADDR     0xE002ED90UL
+#define MPU_NS_TYPE          (*(volatile uint32_t *)(MPU_NS_BASE_ADDR + 0x00))
+#define MPU_NS_CTRL          (*(volatile uint32_t *)(MPU_NS_BASE_ADDR + 0x04))
+#define MPU_NS_RNR           (*(volatile uint32_t *)(MPU_NS_BASE_ADDR + 0x08))
+#define MPU_NS_RBAR          (*(volatile uint32_t *)(MPU_NS_BASE_ADDR + 0x0C))
+#define MPU_NS_RLAR          (*(volatile uint32_t *)(MPU_NS_BASE_ADDR + 0x10))
+#define MPU_NS_MAIR0         (*(volatile uint32_t *)(MPU_NS_BASE_ADDR + 0x14))
+#define MPU_NS_MAIR1         (*(volatile uint32_t *)(MPU_NS_BASE_ADDR + 0x18))
+
+#define SCB_NS_BASE_ADDR     0xE002ED00UL
+#define SCB_NS_SHCSR         (*(volatile uint32_t *)(SCB_NS_BASE_ADDR + 0x24))
+
+/**
+ * @brief Enable Non-secure MPU
+ * @brief 使能非安全 MPU
+ *
+ * Reference: Arm® v8-M ARM Chapter B10 (The Armv8-M Protected Memory System Architecture)
+ * 参考: Arm® v8-M ARM Chapter B10 (Armv8-M 受保护内存系统架构)
+ *
+ * @param mpu_control: Default access permissions for unconfigured regions
+ * @param mpu_control: 未配置区域的默认访问权限
+ */
+void arch_armv8m_mpu_enable_ns(uint32_t mpu_control) {
+    arch_armv8m_dsb();
+    MPU_NS_CTRL = mpu_control | MPU_CTRL_ENABLE_Msk;
+    SCB_NS_SHCSR |= SCB_SHCSR_MEMFAULTENA_Msk;
+    arch_armv8m_dsb();
+    arch_armv8m_isb();
+}
+
+/**
+ * @brief Disable Non-secure MPU
+ * @brief 禁用非安全 MPU
+ *
+ * Reference: Arm® v8-M ARM Chapter B10 (The Armv8-M Protected Memory System Architecture)
+ * 参考: Arm® v8-M ARM Chapter B10 (Armv8-M 受保护内存系统架构)
+ */
+void arch_armv8m_mpu_disable_ns(void) {
+    arch_armv8m_dsb();
+    SCB_NS_SHCSR &= ~SCB_SHCSR_MEMFAULTENA_Msk;
+    MPU_NS_CTRL &= ~MPU_CTRL_ENABLE_Msk;
+    arch_armv8m_dsb();
+    arch_armv8m_isb();
+}
+
+/**
+ * @brief Set Non-secure MPU memory attribute
+ * @brief 设置非安全 MPU 内存属性
+ *
+ * Reference: Arm® v8-M ARM Chapter B10 (The Armv8-M Protected Memory System Architecture)
+ * 参考: Arm® v8-M ARM Chapter B10 (Armv8-M 受保护内存系统架构)
+ *
+ * @param idx: Attribute index (0-7)
+ * @param idx: 属性索引 (0-7)
+ * @param attr: Memory attribute
+ * @param attr: 内存属性
+ */
+void arch_armv8m_mpu_set_mem_attr_ns(uint8_t idx, uint8_t attr) {
+    if (idx < 4) {
+        uint32_t val = MPU_NS_MAIR0;
+        val = (val & ~(0xFFUL << (idx * 8))) | ((uint32_t)attr << (idx * 8));
+        MPU_NS_MAIR0 = val;
+    } else {
+        uint32_t val = MPU_NS_MAIR1;
+        val = (val & ~(0xFFUL << ((idx - 4) * 8))) | ((uint32_t)attr << ((idx - 4) * 8));
+        MPU_NS_MAIR1 = val;
+    }
+    arch_armv8m_dsb();
+}
+
+/**
+ * @brief Set Non-secure MPU region
+ * @brief 设置非安全 MPU 区域
+ *
+ * Reference: Arm® v8-M ARM Chapter B10 (The Armv8-M Protected Memory System Architecture)
+ * 参考: Arm® v8-M ARM Chapter B10 (Armv8-M 受保护内存系统架构)
+ *
+ * @param rnr: Region number (0-15)
+ * @param rnr: 区域编号 (0-15)
+ * @param rbar: Region Base Address Register
+ * @param rbar: 区域基地址寄存器
+ * @param rlar: Region Limit Register
+ * @param rlar: 区域限制寄存器
+ */
+void arch_armv8m_mpu_set_region_ns(uint32_t rnr, uint32_t rbar, uint32_t rlar) {
+    MPU_NS_RNR = rnr;
+    MPU_NS_RBAR = rbar;
+    MPU_NS_RLAR = rlar;
+    arch_armv8m_dsb();
+}
+
+/**
+ * @brief Clear Non-secure MPU region
+ * @brief 清除非安全 MPU 区域
+ *
+ * Reference: Arm® v8-M ARM Chapter B10 (The Armv8-M Protected Memory System Architecture)
+ * 参考: Arm® v8-M ARM Chapter B10 (Armv8-M 受保护内存系统架构)
+ *
+ * @param rnr: Region number
+ * @param rnr: 区域编号
+ */
+void arch_armv8m_mpu_clr_region_ns(uint32_t rnr) {
+    MPU_NS_RNR = rnr;
+    MPU_NS_RLAR = 0;
+    arch_armv8m_dsb();
+}
+
+/**
+ * @brief Load Non-secure MPU regions from table
+ * @brief 从表加载非安全 MPU 区域
+ *
+ * Reference: Arm® v8-M ARM Chapter B10 (The Armv8-M Protected Memory System Architecture)
+ * 参考: Arm® v8-M ARM Chapter B10 (Armv8-M 受保护内存系统架构)
+ *
+ * @param rnr: First region number to configure
+ * @param rnr: 要配置的第一个区域编号
+ * @param table: Pointer to MPU configuration table
+ * @param table: 指向 MPU 配置表的指针
+ * @param cnt: Number of regions to configure
+ * @param cnt: 要配置的区域数量
+ */
+void arch_armv8m_mpu_load_ns(uint32_t rnr, ARM_MPU_Region_t const* table, uint32_t cnt) {
+    const uint32_t rowWordSize = sizeof(ARM_MPU_Region_t) / 4U;
+    if (cnt == 1U) {
+        MPU_NS_RNR = rnr;
+        armv8m_mpu_ordered_memcpy((volatile uint32_t*)&(MPU_NS_RBAR), &(table->RBAR), rowWordSize);
+    } else {
+        uint32_t rnrBase = rnr & ~(MPU_TYPE_RALIASES - 1U);
+        uint32_t rnrOffset = rnr % MPU_TYPE_RALIASES;
+
+        MPU_NS_RNR = rnrBase;
+        while ((rnrOffset + cnt) > MPU_TYPE_RALIASES) {
+            uint32_t c = MPU_TYPE_RALIASES - rnrOffset;
+            armv8m_mpu_ordered_memcpy((volatile uint32_t*)&(MPU_NS_RBAR) + (rnrOffset * 2U), &(table->RBAR), c * rowWordSize);
+            table += c;
+            cnt -= c;
+            rnrOffset = 0U;
+            rnrBase += MPU_TYPE_RALIASES;
+            MPU_NS_RNR = rnrBase;
+        }
+
+        armv8m_mpu_ordered_memcpy((volatile uint32_t*)&(MPU_NS_RBAR) + (rnrOffset * 2U), &(table->RBAR), cnt * rowWordSize);
+    }
+    arch_armv8m_dsb();
+}
+#endif
+
 /*
  * ============================================================================
  * ARMv8-M PMU (Performance Monitor Unit) Implementation
  * ARMv8-M PMU (性能监视单元) 实现
- * Reference: ARMv8-M ARM Section B6.3 (Performance Monitors)
- * 参考: ARMv8-M ARM 第 B6.3 节 (性能监视器)
- * Note: PMU is only supported on Cortex-M55, Cortex-M85
- * 注意: PMU 仅在 Cortex-M55、Cortex-M85 上支持
+ * Reference: Arm® v8-M ARM Chapter B15 (The Performance Monitors Extension)
+ * 参考: Arm® v8-M ARM Chapter B15 (性能监视器扩展)
+ * Note: PMU is optional feature
+ * 注意: PMU 是可选功能
  * ============================================================================
  */
 
@@ -1112,37 +1387,42 @@ uint32_t arch_armv8m_mpu_get_num_regions(void) {
  *
  * PMU_CTRL register:
  * PMU_CTRL 寄存器:
- *   - ENABLE (bit 0): PMU enable
- *   - EVTCOUNT (bit 1): Event counter enable
- *   - CYCCNT (bit 2): Cycle counter enable
+ *   - E (bit 0): Enable the event counters
+ *   - P (bit 1): Event counter reset (write-only)
+ *   - C (bit 2): Cycle counter reset (write-only)
+ *   - DP (bit 5): Disable cycle counter in Secure state
+ *   - FZO (bit 9): Freeze-on-overflow
+ *   - TRO (bit 11): Trace-on-overflow
  *
- * Reference: ARMv8-M ARM B6.3.1 (PMU_CTRL, Performance Monitor Control Register)
- * 参考: ARMv8-M ARM B6.3.1 (PMU_CTRL, 性能监视器控制寄存器)
+ * Reference: Arm® v8-M ARM Chapter B15 (The Performance Monitors Extension)
+ * 参考: Arm® v8-M ARM Chapter B15 (性能监视器扩展)
  */
 void arch_armv8m_pmu_enable(void) {
-    PMU_CTRL |= 0x1;
+    PMU_CTRL |= PMU_CTRL_E_Msk;
+    arch_armv8m_dsb();
 }
 
 /**
  * @brief Disable PMU
  * @brief 禁用 PMU
  *
- * Reference: ARMv8-M ARM B6.3.1 (PMU_CTRL)
- * 参考: ARMv8-M ARM B6.3.1 (PMU_CTRL)
+ * Reference: Arm® v8-M ARM Chapter B15 (The Performance Monitors Extension)
+ * 参考: Arm® v8-M ARM Chapter B15 (性能监视器扩展)
  */
 void arch_armv8m_pmu_disable(void) {
-    PMU_CTRL &= ~0x1;
+    PMU_CTRL &= ~PMU_CTRL_E_Msk;
+    arch_armv8m_dsb();
 }
 
 /**
  * @brief Reset cycle counter
  * @brief 复位 cycle 计数器
  *
- * Reference: ARMv8-M ARM B6.3.1 (PMU_CTRL)
- * 参考: ARMv8-M ARM B6.3.1 (PMU_CTRL)
+ * Reference: Arm® v8-M ARM Chapter B15 (The Performance Monitors Extension)
+ * 参考: Arm® v8-M ARM Chapter B15 (性能监视器扩展)
  */
 void arch_armv8m_pmu_cyccnt_reset(void) {
-    PMU_CTRL |= (1U << 3);
+    PMU_CTRL |= PMU_CTRL_C_Msk;
     arch_armv8m_dsb();
 }
 
@@ -1150,11 +1430,11 @@ void arch_armv8m_pmu_cyccnt_reset(void) {
  * @brief Reset all event counters
  * @brief 复位所有事件计数器
  *
- * Reference: ARMv8-M ARM B6.3.1 (PMU_CTRL)
- * 参考: ARMv8-M ARM B6.3.1 (PMU_CTRL)
+ * Reference: Arm® v8-M ARM Chapter B15 (The Performance Monitors Extension)
+ * 参考: Arm® v8-M ARM Chapter B15 (性能监视器扩展)
  */
 void arch_armv8m_pmu_evcntr_all_reset(void) {
-    PMU_CTRL |= (1U << 4);
+    PMU_CTRL |= PMU_CTRL_P_Msk;
     arch_armv8m_dsb();
 }
 
@@ -1162,11 +1442,11 @@ void arch_armv8m_pmu_evcntr_all_reset(void) {
  * @brief Enable counters
  * @brief 使能计数器
  *
- * Reference: ARMv8-M ARM B6.3.3 (PMU_CNTENSET, Count Enable Set Register)
- * 参考: ARMv8-M ARM B6.3.3 (PMU_CNTENSET, 计数器使能设置寄存器)
+ * Reference: Arm® v8-M ARM Chapter B15 (The Performance Monitors Extension)
+ * 参考: Arm® v8-M ARM Chapter B15 (性能监视器扩展)
  *
- * @param mask: Counter mask (bit0=Cycle, bit1-31=event counters)
- * @param mask: 计数器掩码 (bit0=Cycle, bit1-31=事件计数器)
+ * @param mask: Counter mask (bit31=Cycle, bit0-30=event counters)
+ * @param mask: 计数器掩码 (bit31=Cycle, bit0-30=事件计数器)
  */
 void arch_armv8m_pmu_cntr_enable(uint32_t mask) {
     PMU_CNTENSET = mask;
@@ -1177,11 +1457,11 @@ void arch_armv8m_pmu_cntr_enable(uint32_t mask) {
  * @brief Disable counters
  * @brief 禁用计数器
  *
- * Reference: ARMv8-M ARM B6.3.4 (PMU_CNTENCLR, Count Enable Clear Register)
- * 参考: ARMv8-M ARM B6.3.4 (PMU_CNTENCLR, 计数器使能清除寄存器)
+ * Reference: Arm® v8-M ARM Chapter B15 (The Performance Monitors Extension)
+ * 参考: Arm® v8-M ARM Chapter B15 (性能监视器扩展)
  *
- * @param mask: Counter mask
- * @param mask: 计数器掩码
+ * @param mask: Counter mask (bit31=Cycle, bit0-30=event counters)
+ * @param mask: 计数器掩码 (bit31=Cycle, bit0-30=事件计数器)
  */
 void arch_armv8m_pmu_cntr_disable(uint32_t mask) {
     PMU_CNTENCLR = mask;
@@ -1192,22 +1472,22 @@ void arch_armv8m_pmu_cntr_disable(uint32_t mask) {
  * @brief Get cycle counter value
  * @brief 获取 cycle 计数器值
  *
- * Reference: ARMv8-M ARM B6.3.2 (PMU_CYCCNT, Cycle Count Register)
- * 参考: ARMv8-M ARM B6.3.2 (PMU_CYCCNT, 周期计数寄存器)
+ * Reference: Arm® v8-M ARM Chapter B15 (The Performance Monitors Extension)
+ * 参考: Arm® v8-M ARM Chapter B15 (性能监视器扩展)
  *
  * @return Cycle count
  * @return Cycle 计数
  */
 uint32_t arch_armv8m_pmu_get_ccntr(void) {
-    return (uint32_t)PMU_CYCCNT;
+    return PMU_CCNTR;
 }
 
 /**
  * @brief Get event counter value
  * @brief 获取事件计数器值
  *
- * Reference: ARMv8-M ARM B6.3.5 (PMU_EVCNTRn, Event Counter Registers)
- * 参考: ARMv8-M ARM B6.3.5 (PMU_EVCNTRn, 事件计数器寄存器)
+ * Reference: Arm® v8-M ARM Chapter B15 (The Performance Monitors Extension)
+ * 参考: Arm® v8-M ARM Chapter B15 (性能监视器扩展)
  *
  * @param num: Counter number (0-30)
  * @param num: 计数器编号 (0-30)
@@ -1225,11 +1505,11 @@ uint32_t arch_armv8m_pmu_get_evcntr(uint32_t num) {
  * @brief Set event type
  * @brief 设置事件类型
  *
- * Reference: ARMv8-M ARM B6.3.6 (PMU_EVTYPERn, Event Type Select Registers)
- * 参考: ARMv8-M ARM B6.3.6 (PMU_EVTYPERn, 事件类型选择寄存器)
+ * Reference: Arm® v8-M ARM Chapter B15 (The Performance Monitors Extension)
+ * 参考: Arm® v8-M ARM Chapter B15 (性能监视器扩展)
  *
- * @param num: Counter number
- * @param num: 计数器编号
+ * @param num: Counter number (0-30)
+ * @param num: 计数器编号 (0-30)
  * @param type: Event type
  * @param type: 事件类型
  */
@@ -1244,28 +1524,28 @@ void arch_armv8m_pmu_set_evtyper(uint32_t num, uint32_t type) {
  * @brief Get overflow status
  * @brief 获取溢出状态
  *
- * Reference: ARMv8-M ARM B6.3.1 (PMU_CTRL)
- * 参考: ARMv8-M ARM B6.3.1 (PMU_CTRL)
+ * Reference: Arm® v8-M ARM Chapter B15 (The Performance Monitors Extension)
+ * 参考: Arm® v8-M ARM Chapter B15 (性能监视器扩展)
  *
- * @return Overflow status mask (bits 24-30)
- * @return 溢出状态掩码 (位 24-30)
+ * @return Overflow status mask (bit31=Cycle, bit0-30=event counters)
+ * @return 溢出状态掩码 (bit31=Cycle, bit0-30=事件计数器)
  */
 uint32_t arch_armv8m_pmu_get_cntr_ovs(void) {
-    return PMU_CTRL >> 24;
+    return PMU_OVSSET;
 }
 
 /**
  * @brief Set overflow interrupt enable
  * @brief 设置溢出中断使能
  *
- * Reference: ARMv8-M ARM B6.3.7 (PMU_INTENSET, Interrupt Enable Set Register)
- * 参考: ARMv8-M ARM B6.3.7 (PMU_INTENSET, 中断使能设置寄存器)
+ * Reference: Arm® v8-M ARM Chapter B15 (The Performance Monitors Extension)
+ * 参考: Arm® v8-M ARM Chapter B15 (性能监视器扩展)
  *
- * @param mask: Counter mask
- * @param mask: 计数器掩码
+ * @param mask: Counter mask (bit31=Cycle, bit0-30=event counters)
+ * @param mask: 计数器掩码 (bit31=Cycle, bit0-30=事件计数器)
  */
 void arch_armv8m_pmu_set_cntr_irq_enable(uint32_t mask) {
-    PMU_INTENSET = mask << 24;
+    PMU_INTENSET = mask;
     arch_armv8m_dsb();
 }
 
@@ -1273,14 +1553,44 @@ void arch_armv8m_pmu_set_cntr_irq_enable(uint32_t mask) {
  * @brief Clear overflow interrupt enable
  * @brief 清除溢出中断使能
  *
- * Reference: ARMv8-M ARM B6.3.8 (PMU_INTENCLR, Interrupt Enable Clear Register)
- * 参考: ARMv8-M ARM B6.3.8 (PMU_INTENCLR, 中断使能清除寄存器)
+ * Reference: Arm® v8-M ARM Chapter B15 (The Performance Monitors Extension)
+ * 参考: Arm® v8-M ARM Chapter B15 (性能监视器扩展)
  *
- * @param mask: Counter mask
- * @param mask: 计数器掩码
+ * @param mask: Counter mask (bit31=Cycle, bit0-30=event counters)
+ * @param mask: 计数器掩码 (bit31=Cycle, bit0-30=事件计数器)
  */
 void arch_armv8m_pmu_set_cntr_irq_disable(uint32_t mask) {
-    PMU_INTENCLR = mask << 24;
+    PMU_INTENCLR = mask;
+    arch_armv8m_dsb();
+}
+
+/**
+ * @brief Software increment event counter
+ * @brief 软件递增事件计数器
+ *
+ * Reference: Arm® v8-M ARM Chapter B15 (The Performance Monitors Extension)
+ * 参考: Arm® v8-M ARM Chapter B15 (性能监视器扩展)
+ *
+ * @param mask: Counters to increment (bit0-30=event counters)
+ * @param mask: 要递增的计数器 (bit0-30=事件计数器)
+ */
+void arch_armv8m_pmu_cntr_increment(uint32_t mask) {
+    PMU_SWINC = mask;
+    arch_armv8m_dsb();
+}
+
+/**
+ * @brief Clear counter overflow status
+ * @brief 清除计数器溢出状态
+ *
+ * Reference: Arm® v8-M ARM Chapter B15 (The Performance Monitors Extension)
+ * 参考: Arm® v8-M ARM 第 B15 章 (性能监视器扩展)
+ *
+ * @param mask: Overflow status bits to clear (bit31=Cycle, bit0-30=event counters)
+ * @param mask: 要清除的溢出状态位 (bit31=Cycle, bit0-30=事件计数器)
+ */
+void arch_armv8m_pmu_set_cntr_ovs(uint32_t mask) {
+    PMU_OVSCLR = mask;
     arch_armv8m_dsb();
 }
 
@@ -1288,8 +1598,8 @@ void arch_armv8m_pmu_set_cntr_irq_disable(uint32_t mask) {
  * ============================================================================
  * ARMv8-M TrustZone (TZ) SAU Implementation
  * ARMv8-M TrustZone (TZ) SAU 实现
- * Reference: ARMv8-M ARM Section B5 (Security Attribution Unit)
- * 参考: ARMv8-M ARM 第 B5 节 (安全属性单元)
+ * Reference: Arm® v8-M ARM Chapter B10 (The Armv8-M Protected Memory System Architecture)
+ * 参考: Arm® v8-M ARM Chapter B10 (Armv8-M 受保护内存系统架构)
  * Note: TrustZone is only supported on ARMv8-M Mainline
  * 注意: TrustZone 仅在 ARMv8-M Mainline 上支持
  * ============================================================================
@@ -1304,8 +1614,8 @@ void arch_armv8m_pmu_set_cntr_irq_disable(uint32_t mask) {
  *   - ENABLE (bit 0): SAU enable
  *   - ALLNS (bit 1): All non-secure access allowed
  *
- * Reference: ARMv8-M ARM B5.3.1 (SAU_CTRL, SAU Control Register)
- * 参考: ARMv8-M ARM B5.3.1 (SAU_CTRL, SAU 控制寄存器)
+ * Reference: Arm® v8-M ARM Chapter B10 (The Armv8-M Protected Memory System Architecture)
+ * 参考: Arm® v8-M ARM Chapter B10 (Armv8-M 受保护内存系统架构)
  */
 void arch_armv8m_tz_sau_enable(void) {
     SAU_CTRL |= 0x1;
@@ -1317,8 +1627,8 @@ void arch_armv8m_tz_sau_enable(void) {
  * @brief Disable SAU
  * @brief 禁用 SAU
  *
- * Reference: ARMv8-M ARM B5.3.1 (SAU_CTRL)
- * 参考: ARMv8-M ARM B5.3.1 (SAU_CTRL)
+ * Reference: Arm® v8-M ARM Chapter B10 (The Armv8-M Protected Memory System Architecture)
+ * 参考: Arm® v8-M ARM Chapter B10 (Armv8-M 受保护内存系统架构)
  */
 void arch_armv8m_tz_sau_disable(void) {
     SAU_CTRL &= ~0x1;
@@ -1330,8 +1640,8 @@ void arch_armv8m_tz_sau_disable(void) {
  * @brief Set SAU region count
  * @brief 设置 SAU 区域数量
  *
- * Reference: ARMv8-M ARM B5.3.2 (SAU_TYPE, SAU Type Register)
- * 参考: ARMv8-M ARM B5.3.2 (SAU_TYPE, SAU 类型寄存器)
+ * Reference: Arm® v8-M ARM Chapter B10 (The Armv8-M Protected Memory System Architecture)
+ * 参考: Arm® v8-M ARM Chapter B10 (Armv8-M 受保护内存系统架构)
  *
  * @param n: Region count (0-8)
  * @param n: 区域数量 (0-8)
@@ -1345,12 +1655,8 @@ void arch_armv8m_tz_sau_set_region_count(uint32_t n) {
  * @brief Set SAU region
  * @brief 设置 SAU 区域
  *
- * Reference: ARMv8-M ARM B5.3.3 (SAU_RNR, SAU Region Number Register)
- *            ARMv8-M ARM B5.3.4 (SAU_RBAR, SAU Region Base Address Register)
- *            ARMv8-M ARM B5.3.5 (SAU_RLAR, SAU Region Limit Register)
- * 参考: ARMv8-M ARM B5.3.3 (SAU_RNR, SAU 区域编号寄存器)
- *       ARMv8-M ARM B5.3.4 (SAU_RBAR, SAU 区域基地址寄存器)
- *       ARMv8-M ARM B5.3.5 (SAU_RLAR, SAU 区域限制寄存器)
+ * Reference: Arm® v8-M ARM Chapter B10 (The Armv8-M Protected Memory System Architecture)
+ * 参考: Arm® v8-M ARM Chapter B10 (Armv8-M 受保护内存系统架构)
  *
  * @param rnr: Region number
  * @param rnr: 区域编号
@@ -1370,8 +1676,8 @@ void arch_armv8m_tz_sau_set_region(uint32_t rnr, uint32_t rbar, uint32_t rlar) {
  * ============================================================================
  * ARMv8-M TrustZone (TZ) Non-Secure Functions Implementation
  * ARMv8-M TrustZone (TZ) 非安全区域函数实现
- * Reference: ARMv8-M ARM Section B5 (Security Attribution Unit)
- * 参考: ARMv8-M ARM 第 B5 节 (安全属性单元)
+ * Reference: Arm® v8-M ARM Chapter B10 (The Armv8-M Protected Memory System Architecture)
+ * 参考: Arm® v8-M ARM Chapter B10 (Armv8-M 受保护内存系统架构)
  * ============================================================================
  */
 
@@ -1379,8 +1685,8 @@ void arch_armv8m_tz_sau_set_region(uint32_t rnr, uint32_t rbar, uint32_t rlar) {
  * @brief Get CONTROL register (Non-Secure)
  * @brief 获取 CONTROL 寄存器 (非安全)
  *
- * Reference: ARMv8-M ARM B5.4 (Non-secure access to registers)
- * 参考: ARMv8-M ARM B5.4 (寄存器的非安全访问)
+ * Reference: Arm® v8-M ARM Chapter B10 (The Armv8-M Protected Memory System Architecture)
+ * 参考: Arm® v8-M ARM Chapter B10 (Armv8-M 受保护内存系统架构)
  *
  * @return Non-secure CONTROL register value
  * @return 非安全 CONTROL 寄存器值
@@ -1395,8 +1701,8 @@ uint32_t arch_armv8m_tz_get_control_ns(void) {
  * @brief Set CONTROL register (Non-Secure)
  * @brief 设置 CONTROL 寄存器 (非安全)
  *
- * Reference: ARMv8-M ARM B5.4 (Non-secure access to registers)
- * 参考: ARMv8-M ARM B5.4 (寄存器的非安全访问)
+ * Reference: Arm® v8-M ARM Chapter B10 (The Armv8-M Protected Memory System Architecture)
+ * 参考: Arm® v8-M ARM Chapter B10 (Armv8-M 受保护内存系统架构)
  *
  * @param control: Non-secure CONTROL value
  * @param control: 非安全 CONTROL 值
@@ -1409,8 +1715,8 @@ void arch_armv8m_tz_set_control_ns(uint32_t control) {
  * @brief Get PSP register (Non-Secure)
  * @brief 获取 PSP 寄存器 (非安全)
  *
- * Reference: ARMv8-M ARM B5.4 (Non-secure access to registers)
- * 参考: ARMv8-M ARM B5.4 (寄存器的非安全访问)
+ * Reference: Arm® v8-M ARM Chapter B10 (The Armv8-M Protected Memory System Architecture)
+ * 参考: Arm® v8-M ARM Chapter B10 (Armv8-M 受保护内存系统架构)
  *
  * @return Non-secure PSP value
  * @return 非安全 PSP 值
@@ -1425,8 +1731,8 @@ uint32_t arch_armv8m_tz_get_psp_ns(void) {
  * @brief Set PSP register (Non-Secure)
  * @brief 设置 PSP 寄存器 (非安全)
  *
- * Reference: ARMv8-M ARM B5.4 (Non-secure access to registers)
- * 参考: ARMv8-M ARM B5.4 (寄存器的非安全访问)
+ * Reference: Arm® v8-M ARM Chapter B10 (The Armv8-M Protected Memory System Architecture)
+ * 参考: Arm® v8-M ARM Chapter B10 (Armv8-M 受保护内存系统架构)
  *
  * @param psp: Non-secure PSP value
  * @param psp: 非安全 PSP 值
@@ -1439,8 +1745,8 @@ void arch_armv8m_tz_set_psp_ns(uint32_t psp) {
  * @brief Get MSP register (Non-Secure)
  * @brief 获取 MSP 寄存器 (非安全)
  *
- * Reference: ARMv8-M ARM B5.4 (Non-secure access to registers)
- * 参考: ARMv8-M ARM B5.4 (寄存器的非安全访问)
+ * Reference: Arm® v8-M ARM Chapter B10 (The Armv8-M Protected Memory System Architecture)
+ * 参考: Arm® v8-M ARM Chapter B10 (Armv8-M 受保护内存系统架构)
  *
  * @return Non-secure MSP value
  * @return 非安全 MSP 值
@@ -1455,8 +1761,8 @@ uint32_t arch_armv8m_tz_get_msp_ns(void) {
  * @brief Set MSP register (Non-Secure)
  * @brief 设置 MSP 寄存器 (非安全)
  *
- * Reference: ARMv8-M ARM B5.4 (Non-secure access to registers)
- * 参考: ARMv8-M ARM B5.4 (寄存器的非安全访问)
+ * Reference: Arm® v8-M ARM Chapter B10 (The Armv8-M Protected Memory System Architecture)
+ * 参考: Arm® v8-M ARM Chapter B10 (Armv8-M 受保护内存系统架构)
  *
  * @param msp: Non-secure MSP value
  * @param msp: 非安全 MSP 值
@@ -1469,8 +1775,8 @@ void arch_armv8m_tz_set_msp_ns(uint32_t msp) {
  * @brief Get PRIMASK register (Non-Secure)
  * @brief 获取 PRIMASK 寄存器 (非安全)
  *
- * Reference: ARMv8-M ARM B5.4 (Non-secure access to registers)
- * 参考: ARMv8-M ARM B5.4 (寄存器的非安全访问)
+ * Reference: Arm® v8-M ARM Chapter B10 (The Armv8-M Protected Memory System Architecture)
+ * 参考: Arm® v8-M ARM Chapter B10 (Armv8-M 受保护内存系统架构)
  *
  * @return Non-secure PRIMASK value
  * @return 非安全 PRIMASK 值
@@ -1485,8 +1791,8 @@ uint32_t arch_armv8m_tz_get_primask_ns(void) {
  * @brief Set PRIMASK register (Non-Secure)
  * @brief 设置 PRIMASK 寄存器 (非安全)
  *
- * Reference: ARMv8-M ARM B5.4 (Non-secure access to registers)
- * 参考: ARMv8-M ARM B5.4 (寄存器的非安全访问)
+ * Reference: Arm® v8-M ARM Chapter B10 (The Armv8-M Protected Memory System Architecture)
+ * 参考: Arm® v8-M ARM Chapter B10 (Armv8-M 受保护内存系统架构)
  *
  * @param primask: Non-secure PRIMASK value
  * @param primask: 非安全 PRIMASK 值
@@ -1499,8 +1805,8 @@ void arch_armv8m_tz_set_primask_ns(uint32_t primask) {
  * @brief Get BASEPRI register (Non-Secure)
  * @brief 获取 BASEPRI 寄存器 (非安全)
  *
- * Reference: ARMv8-M ARM B5.4 (Non-secure access to registers)
- * 参考: ARMv8-M ARM B5.4 (寄存器的非安全访问)
+ * Reference: Arm® v8-M ARM Chapter B10 (The Armv8-M Protected Memory System Architecture)
+ * 参考: Arm® v8-M ARM Chapter B10 (Armv8-M 受保护内存系统架构)
  *
  * @return Non-secure BASEPRI value
  * @return 非安全 BASEPRI 值
@@ -1515,8 +1821,8 @@ uint32_t arch_armv8m_tz_get_basepri_ns(void) {
  * @brief Set BASEPRI register (Non-Secure)
  * @brief 设置 BASEPRI 寄存器 (非安全)
  *
- * Reference: ARMv8-M ARM B5.4 (Non-secure access to registers)
- * 参考: ARMv8-M ARM B5.4 (寄存器的非安全访问)
+ * Reference: Arm® v8-M ARM Chapter B10 (The Armv8-M Protected Memory System Architecture)
+ * 参考: Arm® v8-M ARM Chapter B10 (Armv8-M 受保护内存系统架构)
  *
  * @param basepri: Non-secure BASEPRI value
  * @param basepri: 非安全 BASEPRI 值
@@ -1529,8 +1835,8 @@ void arch_armv8m_tz_set_basepri_ns(uint32_t basepri) {
  * @brief Get FAULTMASK register (Non-Secure)
  * @brief 获取 FAULTMASK 寄存器 (非安全)
  *
- * Reference: ARMv8-M ARM B5.4 (Non-secure access to registers)
- * 参考: ARMv8-M ARM B5.4 (寄存器的非安全访问)
+ * Reference: Arm® v8-M ARM Chapter B10 (The Armv8-M Protected Memory System Architecture)
+ * 参考: Arm® v8-M ARM Chapter B10 (Armv8-M 受保护内存系统架构)
  *
  * @return Non-secure FAULTMASK value
  * @return 非安全 FAULTMASK 值
@@ -1545,8 +1851,8 @@ uint32_t arch_armv8m_tz_get_faultmask_ns(void) {
  * @brief Set FAULTMASK register (Non-Secure)
  * @brief 设置 FAULTMASK 寄存器 (非安全)
  *
- * Reference: ARMv8-M ARM B5.4 (Non-secure access to registers)
- * 参考: ARMv8-M ARM B5.4 (寄存器的非安全访问)
+ * Reference: Arm® v8-M ARM Chapter B10 (The Armv8-M Protected Memory System Architecture)
+ * 参考: Arm® v8-M ARM Chapter B10 (Armv8-M 受保护内存系统架构)
  *
  * @param faultmask: Non-secure FAULTMASK value
  * @param faultmask: 非安全 FAULTMASK 值
@@ -1559,8 +1865,8 @@ void arch_armv8m_tz_set_faultmask_ns(uint32_t faultmask) {
  * @brief Get PSPLIM register (Non-Secure)
  * @brief 获取 PSPLIM 寄存器 (非安全)
  *
- * Reference: ARMv8-M ARM B5.4 (Non-secure access to registers)
- * 参考: ARMv8-M ARM B5.4 (寄存器的非安全访问)
+ * Reference: Arm® v8-M ARM Chapter B10 (The Armv8-M Protected Memory System Architecture)
+ * 参考: Arm® v8-M ARM Chapter B10 (Armv8-M 受保护内存系统架构)
  *
  * @return Non-secure PSPLIM value
  * @return 非安全 PSPLIM 值
@@ -1575,8 +1881,8 @@ uint32_t arch_armv8m_tz_get_psplim_ns(void) {
  * @brief Set PSPLIM register (Non-Secure)
  * @brief 设置 PSPLIM 寄存器 (非安全)
  *
- * Reference: ARMv8-M ARM B5.4 (Non-secure access to registers)
- * 参考: ARMv8-M ARM B5.4 (寄存器的非安全访问)
+ * Reference: Arm® v8-M ARM Chapter B10 (The Armv8-M Protected Memory System Architecture)
+ * 参考: Arm® v8-M ARM Chapter B10 (Armv8-M 受保护内存系统架构)
  *
  * @param psplim: Non-secure PSPLIM value
  * @param psplim: 非安全 PSPLIM 值
@@ -1589,8 +1895,8 @@ void arch_armv8m_tz_set_psplim_ns(uint32_t psplim) {
  * @brief Get MSPLIM register (Non-Secure)
  * @brief 获取 MSPLIM 寄存器 (非安全)
  *
- * Reference: ARMv8-M ARM B5.4 (Non-secure access to registers)
- * 参考: ARMv8-M ARM B5.4 (寄存器的非安全访问)
+ * Reference: Arm® v8-M ARM Chapter B10 (The Armv8-M Protected Memory System Architecture)
+ * 参考: Arm® v8-M ARM Chapter B10 (Armv8-M 受保护内存系统架构)
  *
  * @return Non-secure MSPLIM value
  * @return 非安全 MSPLIM 值
@@ -1605,8 +1911,8 @@ uint32_t arch_armv8m_tz_get_msplim_ns(void) {
  * @brief Set MSPLIM register (Non-Secure)
  * @brief 设置 MSPLIM 寄存器 (非安全)
  *
- * Reference: ARMv8-M ARM B5.4 (Non-secure access to registers)
- * 参考: ARMv8-M ARM B5.4 (寄存器的非安全访问)
+ * Reference: Arm® v8-M ARM Chapter B10 (The Armv8-M Protected Memory System Architecture)
+ * 参考: Arm® v8-M ARM Chapter B10 (Armv8-M 受保护内存系统架构)
  *
  * @param msplim: Non-secure MSPLIM value
  * @param msplim: 非安全 MSPLIM 值
@@ -1619,8 +1925,8 @@ void arch_armv8m_tz_set_msplim_ns(uint32_t msplim) {
  * @brief Get FPU type
  * @brief 获取 FPU 类型
  *
- * Reference: ARMv8-M ARM B3.2.14 (SCB_CPACR, Coprocessor Access Control Register)
- * 参考: ARMv8-M ARM B3.2.14 (SCB_CPACR, 协处理器访问控制寄存器)
+ * Reference: Arm® v8-M ARM Chapter B4 (Floating-point Support)
+ * 参考: Arm® v8-M ARM Chapter B4 (浮点支持)
  *
  * @return FPU type (0=none, 1=single precision, 2=double precision)
  * @return FPU 类型 (0=无, 1=单精度, 2=双精度)
@@ -1639,8 +1945,8 @@ uint32_t arch_armv8m_scb_get_fpu_type(void) {
  * ============================================================================
  * ARMv8-M FPU Implementation
  * ARMv8-M FPU 实现
- * Reference: ARMv8-M ARM Section B3.2 (Coprocessor Access Control Register)
- * 参考: ARMv8-M ARM 第 B3.2 节 (协处理器访问控制寄存器)
+ * Reference: Arm® v8-M ARM Chapter B4 (Floating-point Support)
+ * 参考: Arm® v8-M ARM Chapter B4 (浮点支持)
  * ============================================================================
  */
 
@@ -1648,8 +1954,8 @@ uint32_t arch_armv8m_scb_get_fpu_type(void) {
  * @brief Enable FPU
  * @brief 使能 FPU
  *
- * Reference: ARMv8-M ARM B3.2.14 (SCB_CPACR)
- * 参考: ARMv8-M ARM B3.2.14 (SCB_CPACR)
+ * Reference: Arm® v8-M ARM Chapter B4 (Floating-point Support)
+ * 参考: Arm® v8-M ARM Chapter B4 (浮点支持)
  */
 void arch_armv8m_enable_fpu(void) {
     uint32_t cpacr;
@@ -1664,8 +1970,8 @@ void arch_armv8m_enable_fpu(void) {
  * @brief Disable FPU
  * @brief 禁用 FPU
  *
- * Reference: ARMv8-M ARM B3.2.14 (SCB_CPACR)
- * 参考: ARMv8-M ARM B3.2.14 (SCB_CPACR)
+ * Reference: Arm® v8-M ARM Chapter B4 (Floating-point Support)
+ * 参考: Arm® v8-M ARM Chapter B4 (浮点支持)
  */
 void arch_armv8m_disable_fpu(void) {
     uint32_t cpacr;
@@ -1680,8 +1986,8 @@ void arch_armv8m_disable_fpu(void) {
  * ============================================================================
  * ARMv8-M System Control Implementation
  * ARMv8-M 系统控制实现
- * Reference: ARMv8-M ARM Section B3.1 (System Control Block)
- * 参考: ARMv8-M ARM 第 B3.1 节 (系统控制块)
+ * Reference: Arm® v8-M ARM Chapter B3 (Programmers' Model)
+ * 参考: Arm® v8-M ARM Chapter B3 (程序员模型)
  * ============================================================================
  */
 
@@ -1689,8 +1995,8 @@ void arch_armv8m_disable_fpu(void) {
  * @brief Trigger system reset
  * @brief 触发系统复位
  *
- * Reference: ARMv8-M ARM B3.3.1 (SCB_AIRCR, Application Interrupt and Reset Control Register)
- * 参考: ARMv8-M ARM B3.3.1 (SCB_AIRCR, 应用中断和复位控制寄存器)
+ * Reference: Arm® v8-M ARM Chapter B12 (Nested Vectored Interrupt Controller)
+ * 参考: Arm® v8-M ARM Chapter B12 (嵌套向量中断控制器)
  */
 void arch_armv8m_system_reset(void) {
     uint32_t val = SCB_AIRCR;
@@ -1704,8 +2010,8 @@ void arch_armv8m_system_reset(void) {
  * ============================================================================
  * ARMv8-M SysTick Implementation
  * ARMv8-M SysTick 实现
- * Reference: ARMv8-M ARM Section B3.4 (System Timer, SysTick)
- * 参考: ARMv8-M ARM 第 B3.4 节 (系统定时器 SysTick)
+ * Reference: Arm® v8-M ARM Chapter B11 (The System Timer, SysTick)
+ * 参考: Arm® v8-M ARM Chapter B11 (系统定时器, SysTick)
  * ============================================================================
  */
 
@@ -1713,8 +2019,8 @@ void arch_armv8m_system_reset(void) {
  * @brief SysTick configuration
  * @brief SysTick 配置
  *
- * Reference: ARMv8-M ARM B3.4.1 (SysTick Control and Status Register)
- * 参考: ARMv8-M ARM B3.4.1 (SysTick 控制和状态寄存器)
+ * Reference: Arm® v8-M ARM Chapter B11 (The System Timer, SysTick)
+ * 参考: Arm® v8-M ARM Chapter B11 (系统定时器, SysTick)
  *
  * @param ticks: Number of ticks between interrupts
  * @param ticks: 中断之间的tick数
@@ -1735,8 +2041,8 @@ uint32_t arch_armv8m_systick_config(uint32_t ticks) {
  * @brief Get SysTick current value
  * @brief 获取 SysTick 当前值
  *
- * Reference: ARMv8-M ARM B3.4.3 (SysTick Current Value Register)
- * 参考: ARMv8-M ARM B3.4.3 (SysTick 当前值寄存器)
+ * Reference: Arm® v8-M ARM Chapter B11 (The System Timer, SysTick)
+ * 参考: Arm® v8-M ARM Chapter B11 (系统定时器, SysTick)
  *
  * @return Current counter value
  * @return 当前计数器值
@@ -1749,8 +2055,8 @@ uint32_t arch_armv8m_systick_get_value(void) {
  * @brief Set SysTick reload value
  * @brief 设置 SysTick 加载值
  *
- * Reference: ARMv8-M ARM B3.4.2 (SysTick Reload Value Register)
- * 参考: ARMv8-M ARM B3.4.2 (SysTick 重新加载值寄存器)
+ * Reference: Arm® v8-M ARM Chapter B11 (The System Timer, SysTick)
+ * 参考: Arm® v8-M ARM Chapter B11 (系统定时器, SysTick)
  *
  * @param value: Reload value
  * @param value: 加载值
@@ -1763,8 +2069,8 @@ void arch_armv8m_systick_set_reload(uint32_t value) {
  * @brief Get SysTick reload value
  * @brief 获取 SysTick 加载值
  *
- * Reference: ARMv8-M ARM B3.4.2 (SysTick Reload Value Register)
- * 参考: ARMv8-M ARM B3.4.2 (SysTick 重新加载值寄存器)
+ * Reference: Arm® v8-M ARM Chapter B11 (The System Timer, SysTick)
+ * 参考: Arm® v8-M ARM Chapter B11 (系统定时器, SysTick)
  *
  * @return Reload value
  * @return 加载值
@@ -1777,8 +2083,8 @@ uint32_t arch_armv8m_systick_get_reload(void) {
  * @brief Enable SysTick interrupt
  * @brief 使能 SysTick 中断
  *
- * Reference: ARMv8-M ARM B3.4.1 (SysTick Control and Status Register)
- * 参考: ARMv8-M ARM B3.4.1 (SysTick 控制和状态寄存器)
+ * Reference: Arm® v8-M ARM Chapter B11 (The System Timer, SysTick)
+ * 参考: Arm® v8-M ARM Chapter B11 (系统定时器, SysTick)
  */
 void arch_armv8m_systick_enable_irq(void) {
     SYSTICK_CTRL |= 0x02;
@@ -1788,8 +2094,8 @@ void arch_armv8m_systick_enable_irq(void) {
  * @brief Disable SysTick interrupt
  * @brief 禁用 SysTick 中断
  *
- * Reference: ARMv8-M ARM B3.4.1 (SysTick Control and Status Register)
- * 参考: ARMv8-M ARM B3.4.1 (SysTick 控制和状态寄存器)
+ * Reference: Arm® v8-M ARM Chapter B11 (The System Timer, SysTick)
+ * 参考: Arm® v8-M ARM Chapter B11 (系统定时器, SysTick)
  */
 void arch_armv8m_systick_disable_irq(void) {
     SYSTICK_CTRL &= ~0x02;
@@ -1799,8 +2105,8 @@ void arch_armv8m_systick_disable_irq(void) {
  * @brief Enable SysTick timer
  * @brief 使能 SysTick 定时器
  *
- * Reference: ARMv8-M ARM B3.4.1 (SysTick Control and Status Register)
- * 参考: ARMv8-M ARM B3.4.1 (SysTick 控制和状态寄存器)
+ * Reference: Arm® v8-M ARM Chapter B11 (The System Timer, SysTick)
+ * 参考: Arm® v8-M ARM Chapter B11 (系统定时器, SysTick)
  */
 void arch_armv8m_systick_enable(void) {
     SYSTICK_CTRL |= 0x01;
@@ -1810,8 +2116,8 @@ void arch_armv8m_systick_enable(void) {
  * @brief Disable SysTick timer
  * @brief 禁用 SysTick 定时器
  *
- * Reference: ARMv8-M ARM B3.4.1 (SysTick Control and Status Register)
- * 参考: ARMv8-M ARM B3.4.1 (SysTick 控制和状态寄存器)
+ * Reference: Arm® v8-M ARM Chapter B11 (The System Timer, SysTick)
+ * 参考: Arm® v8-M ARM Chapter B11 (系统定时器, SysTick)
  */
 void arch_armv8m_systick_disable(void) {
     SYSTICK_CTRL &= ~0x01;
@@ -1821,8 +2127,8 @@ void arch_armv8m_systick_disable(void) {
  * @brief Get SysTick calibration value
  * @brief 获取 SysTick 校准值
  *
- * Reference: ARMv8-M ARM B3.4.4 (SysTick Calibration Register)
- * 参考: ARMv8-M ARM B3.4.4 (SysTick 校准寄存器)
+ * Reference: Arm® v8-M ARM Chapter B11 (The System Timer, SysTick)
+ * 参考: Arm® v8-M ARM Chapter B11 (系统定时器, SysTick)
  *
  * @return Calibration value
  * @return 校准值
@@ -1835,8 +2141,8 @@ uint32_t arch_armv8m_systick_get_calib(void) {
  * ============================================================================
  * ARMv8-M ITM (Instrumentation Trace Macrocell) Implementation
  * ARMv8-M ITM (仪表跟踪宏单元) 实现
- * Reference: ARMv8-M ARM Section B6.2 (Instrumentation Trace Macrocell)
- * 参考: ARMv8-M ARM 第 B6.2 节 (仪表跟踪宏单元)
+ * Reference: ARMv8-M ARM Chapter B14 (Debug and Trace Components)
+ * 参考: ARMv8-M ARM Chapter B14 (调试和跟踪组件)
  * ============================================================================
  */
 
@@ -1848,8 +2154,8 @@ static volatile int32_t ITM_RxBuffer = ITM_RXBUFFER_EMPTY;
  * @brief ITM send character
  * @brief ITM 发送字符
  *
- * Reference: ARMv8-M ARM B6.2.2 (ITM_STIM, Stimulus Port Register)
- * 参考: ARMv8-M ARM B6.2.2 (ITM_STIM, 刺激端口寄存器)
+ * Reference: Arm® v8-M ARM Chapter B14 (Debug and Trace Components)
+ * 参考: Arm® v8-M ARM Chapter B14 (调试和跟踪组件)
  *
  * @param ch: Character to send
  * @param ch: 要发送的字符
@@ -1870,8 +2176,8 @@ uint32_t arch_armv8m_itm_send_char(uint32_t ch) {
  * @brief ITM receive character
  * @brief ITM 接收字符
  *
- * Reference: ARMv8-M ARM B6.2.1 (ITM_RXR, Receive Register)
- * 参考: ARMv8-M ARM B6.2.1 (ITM_RXR, 接收寄存器)
+ * Reference: Arm® v8-M ARM Chapter B14 (Debug and Trace Components)
+ * 参考: Arm® v8-M ARM Chapter B14 (调试和跟踪组件)
  *
  * @return Received character or -1 if no data
  * @return 接收的字符或如果没有数据则返回 -1
@@ -1889,8 +2195,8 @@ int32_t arch_armv8m_itm_receive_char(void) {
  * @brief ITM check if character is waiting
  * @brief ITM 检查是否有字符等待读取
  *
- * Reference: ARMv8-M ARM B6.2.1 (ITM_RXR)
- * 参考: ARMv8-M ARM B6.2.1 (ITM_RXR)
+ * Reference: Arm® v8-M ARM Chapter B14 (Debug and Trace Components)
+ * 参考: Arm® v8-M ARM Chapter B14 (调试和跟踪组件)
  *
  * @return 1=data available, 0=no data
  * @return 1=有数据可用, 0=无数据
@@ -1906,8 +2212,8 @@ int32_t arch_armv8m_itm_check_char(void) {
  * @brief ITM enable/disable
  * @brief ITM 使能/禁用
  *
- * Reference: ARMv8-M ARM B6.2.3 (ITM_CTRL, Trace Control Register)
- * 参考: ARMv8-M ARM B6.2.3 (ITM_CTRL, 跟踪控制寄存器)
+ * Reference: Arm® v8-M ARM Chapter B14 (Debug and Trace Components)
+ * 参考: Arm® v8-M ARM Chapter B14 (调试和跟踪组件)
  *
  * @param enable: Enable (1) or disable (0)
  * @param enable: 使能 (1) 或禁用 (0)
@@ -1943,8 +2249,8 @@ void arch_armv8m_init(void) {
  * @brief ARMv8-M vector table setup
  * @brief ARMv8-M 向量表设置
  *
- * Reference: ARMv8-M ARM B3.2.5 (SCB_VTOR, Vector Table Offset Register)
- * 参考: ARMv8-M ARM B3.2.5 (SCB_VTOR, 向量表偏移寄存器)
+ * Reference: Arm® v8-M ARM Chapter B3 (Programmers' Model)
+ * 参考: Arm® v8-M ARM Chapter B3 (程序员模型)
  */
 void arch_armv8m_setup_vector_table(void) {
     extern uint32_t _vector_table_base;
@@ -2033,3 +2339,361 @@ void* arch_armv8m_jump_to_kernel(uint32_t vector_table_addr) {
     (void)vector_table_addr;
     __builtin_unreachable();
 }
+
+/*
+ * ============================================================================
+ * ARMv8-M Cache Maintenance Functions Implementation
+ * ARMv8-M Cache 维护函数实现
+ * Reference: Arm® v8-M ARM Chapter B3 (Programmers' Model)
+ * 参考: Arm® v8-M ARM 第 B3 章 (程序员模型)
+ * ============================================================================
+ */
+
+/**
+ * @brief Invalidate I-Cache to PoU
+ * @brief 使能 I-Cache 到 PoU 的失效
+ *
+ * Reference: Arm® v8-M ARM Chapter B3 (Programmers' Model)
+ * 参考: Arm® v8-M ARM 第 B3 章 (程序员模型)
+ */
+void arch_armv8m_icache_invalidate_all(void) {
+    __asm__ volatile ("dsb sy" : : : "memory");
+    __asm__ volatile ("ICIALLU" : : : "memory");
+    __asm__ volatile ("dsb sy" : : : "memory");
+    __asm__ volatile ("isb sy" : : : "memory");
+}
+
+/**
+ * @brief Invalidate I-Cache by MVA to PoU
+ * @brief 通过 MVA 使能 I-Cache 到 PoU 的失效
+ *
+ * Reference: Arm® v8-M ARM Chapter B3 (Programmers' Model)
+ * 参考: Arm® v8-M ARM 第 B3 章 (程序员模型)
+ *
+ * @param mva: Modified Virtual Address
+ * @param mva: 修改的虚拟地址
+ */
+void arch_armv8m_icache_invalidate_mva(uint32_t mva) {
+    __asm__ volatile ("dsb sy" : : : "memory");
+    __asm__ volatile ("ICIMVAU %0" : : "r" (mva) : "memory");
+    __asm__ volatile ("dsb sy" : : : "memory");
+    __asm__ volatile ("isb sy" : : : "memory");
+}
+
+/**
+ * @brief Invalidate D-Cache by MVA to PoC
+ * @brief 通过 MVA 使能 D-Cache 到 PoC 的失效
+ *
+ * Reference: Arm® v8-M ARM Chapter B3 (Programmers' Model)
+ * 参考: Arm® v8-M ARM 第 B3 章 (程序员模型)
+ *
+ * @param mva: Modified Virtual Address
+ * @param mva: 修改的虚拟地址
+ */
+void arch_armv8m_dcache_invalidate_mva(uint32_t mva) {
+    __asm__ volatile ("dsb sy" : : : "memory");
+    __asm__ volatile ("DCIMVAC %0" : : "r" (mva) : "memory");
+    __asm__ volatile ("dsb sy" : : : "memory");
+}
+
+/**
+ * @brief Invalidate D-Cache by Set/Way
+ * @brief 通过 Set/Way 使能 D-Cache 的失效
+ *
+ * Reference: Arm® v8-M ARM Chapter B3 (Programmers' Model)
+ * 参考: Arm® v8-M ARM 第 B3 章 (程序员模型)
+ *
+ * @param sw: Set/Way value
+ * @param sw: Set/Way 值
+ */
+void arch_armv8m_dcache_invalidate_sw(uint32_t sw) {
+    __asm__ volatile ("dsb sy" : : : "memory");
+    __asm__ volatile ("DCISW %0" : : "r" (sw) : "memory");
+    __asm__ volatile ("dsb sy" : : : "memory");
+}
+
+/**
+ * @brief Clean D-Cache by MVA to PoU
+ * @brief 通过 MVA 清理 D-Cache 到 PoU
+ *
+ * Reference: Arm® v8-M ARM Chapter B3 (Programmers' Model)
+ * 参考: Arm® v8-M ARM 第 B3 章 (程序员模型)
+ *
+ * @param mva: Modified Virtual Address
+ * @param mva: 修改的虚拟地址
+ */
+void arch_armv8m_dcache_clean_mva(uint32_t mva) {
+    __asm__ volatile ("dsb sy" : : : "memory");
+    __asm__ volatile ("DCCMVAU %0" : : "r" (mva) : "memory");
+    __asm__ volatile ("dsb sy" : : : "memory");
+}
+
+/**
+ * @brief Clean D-Cache by MVA to PoC
+ * @brief 通过 MVA 清理 D-Cache 到 PoC
+ *
+ * Reference: Arm® v8-M ARM Chapter B3 (Programmers' Model)
+ * 参考: Arm® v8-M ARM 第 B3 章 (程序员模型)
+ *
+ * @param mva: Modified Virtual Address
+ * @param mva: 修改的虚拟地址
+ */
+void arch_armv8m_dcache_clean_mva_poc(uint32_t mva) {
+    __asm__ volatile ("dsb sy" : : : "memory");
+    __asm__ volatile ("DCCMVAC %0" : : "r" (mva) : "memory");
+    __asm__ volatile ("dsb sy" : : : "memory");
+}
+
+/**
+ * @brief Clean D-Cache by Set/Way
+ * @brief 通过 Set/Way 清理 D-Cache
+ *
+ * Reference: Arm® v8-M ARM Chapter B3 (Programmers' Model)
+ * 参考: Arm® v8-M ARM 第 B3 章 (程序员模型)
+ *
+ * @param sw: Set/Way value
+ * @param sw: Set/Way 值
+ */
+void arch_armv8m_dcache_clean_sw(uint32_t sw) {
+    __asm__ volatile ("dsb sy" : : : "memory");
+    __asm__ volatile ("DCCSW %0" : : "r" (sw) : "memory");
+    __asm__ volatile ("dsb sy" : : : "memory");
+}
+
+/**
+ * @brief Clean and Invalidate D-Cache by MVA to PoC
+ * @brief 通过 MVA 清理并使能 D-Cache 到 PoC 的失效
+ *
+ * Reference: Arm® v8-M ARM Chapter B3 (Programmers' Model)
+ * 参考: Arm® v8-M ARM 第 B3 章 (程序员模型)
+ *
+ * @param mva: Modified Virtual Address
+ * @param mva: 修改的虚拟地址
+ */
+void arch_armv8m_dcache_clean_invalidate_mva(uint32_t mva) {
+    __asm__ volatile ("dsb sy" : : : "memory");
+    __asm__ volatile ("DCCIMVAC %0" : : "r" (mva) : "memory");
+    __asm__ volatile ("dsb sy" : : : "memory");
+}
+
+/**
+ * @brief Clean and Invalidate D-Cache by Set/Way
+ * @brief 通过 Set/Way 清理并使能 D-Cache 的失效
+ *
+ * Reference: Arm® v8-M ARM Chapter B3 (Programmers' Model)
+ * 参考: Arm® v8-M ARM 第 B3 章 (程序员模型)
+ *
+ * @param sw: Set/Way value
+ * @param sw: Set/Way 值
+ */
+void arch_armv8m_dcache_clean_invalidate_sw(uint32_t sw) {
+    __asm__ volatile ("dsb sy" : : : "memory");
+    __asm__ volatile ("DCCISW %0" : : "r" (sw) : "memory");
+    __asm__ volatile ("dsb sy" : : : "memory");
+}
+
+/*
+ * ============================================================================
+ * ARMv8-M TrustZone NVIC Non-Secure Functions Implementation
+ * ARMv8-M TrustZone NVIC 非安全函数实现
+ * Reference: Arm® v8-M ARM Chapter B12 (Nested Vectored Interrupt Controller)
+ * 参考: Arm® v8-M ARM 第 B12 章 (嵌套向量中断控制器)
+ * ============================================================================
+ */
+
+#define NVIC_NS_BASE_ADDR     0xE002E100UL
+#define NVIC_NS_ISER(n)       (*(volatile uint32_t *)(NVIC_NS_BASE_ADDR + (n) * 4))
+#define NVIC_NS_ICER(n)       (*(volatile uint32_t *)(NVIC_NS_BASE_ADDR + 0x80 + (n) * 4))
+#define NVIC_NS_ISPR(n)       (*(volatile uint32_t *)(NVIC_NS_BASE_ADDR + 0x100 + (n) * 4))
+#define NVIC_NS_ICPR(n)       (*(volatile uint32_t *)(NVIC_NS_BASE_ADDR + 0x180 + (n) * 4))
+#define NVIC_NS_IABR(n)       (*(volatile uint32_t *)(NVIC_NS_BASE_ADDR + 0x200 + (n) * 4))
+#define NVIC_NS_IPR_BASE      0xE002E400UL
+#define NVIC_NS_IPR(n)        (*(volatile uint8_t *)(NVIC_NS_IPR_BASE + (n)))
+#define SCB_NS_AIRCR           (*(volatile uint32_t *)(0xE002ED0C))
+
+/**
+ * @brief Set Priority Grouping (Non-Secure)
+ * @brief 设置优先级分组 (非安全)
+ *
+ * Reference: Arm® v8-M ARM Chapter B12 (Nested Vectored Interrupt Controller)
+ * 参考: Arm® v8-M ARM 第 B12 章 (嵌套向量中断控制器)
+ *
+ * @param priority_group: Priority grouping value
+ * @param priority_group: 优先级分组值
+ */
+void arch_armv8m_tz_nvic_set_priority_grouping_ns(uint32_t priority_group) {
+    uint32_t val = SCB_NS_AIRCR;
+    val = (val & ~(0x7UL << 8)) | (0x5FAUL << 16) | ((priority_group & 0x7UL) << 8);
+    SCB_NS_AIRCR = val;
+}
+
+/**
+ * @brief Get Priority Grouping (Non-Secure)
+ * @brief 获取优先级分组 (非安全)
+ *
+ * Reference: Arm® v8-M ARM Chapter B12 (Nested Vectored Interrupt Controller)
+ * 参考: Arm® v8-M ARM 第 B12 章 (嵌套向量中断控制器)
+ *
+ * @return Priority grouping value
+ * @return 优先级分组值
+ */
+uint32_t arch_armv8m_tz_nvic_get_priority_grouping_ns(void) {
+    return (SCB_NS_AIRCR >> 8) & 0x7U;
+}
+
+/**
+ * @brief Enable Interrupt (Non-Secure)
+ * @brief 使能中断 (非安全)
+ *
+ * Reference: Arm® v8-M ARM Chapter B12 (Nested Vectored Interrupt Controller)
+ * 参考: Arm® v8-M ARM 第 B12 章 (嵌套向量中断控制器)
+ *
+ * @param irq: Interrupt number
+ * @param irq: 中断号
+ */
+void arch_armv8m_tz_nvic_enable_irq_ns(uint8_t irq) {
+    if (irq < 240) {
+        uint32_t idx = irq / 32;
+        uint32_t bit = irq % 32;
+        NVIC_NS_ISER(idx) = (1U << bit);
+    }
+}
+
+/**
+ * @brief Disable Interrupt (Non-Secure)
+ * @brief 禁用中断 (非安全)
+ *
+ * Reference: Arm® v8-M ARM Chapter B12 (Nested Vectored Interrupt Controller)
+ * 参考: Arm® v8-M ARM 第 B12 章 (嵌套向量中断控制器)
+ *
+ * @param irq: Interrupt number
+ * @param irq: 中断号
+ */
+void arch_armv8m_tz_nvic_disable_irq_ns(uint8_t irq) {
+    if (irq < 240) {
+        uint32_t idx = irq / 32;
+        uint32_t bit = irq % 32;
+        NVIC_NS_ICER(idx) = (1U << bit);
+    }
+}
+
+/**
+ * @brief Set Pending Interrupt (Non-Secure)
+ * @brief 设置中断挂起 (非安全)
+ *
+ * Reference: Arm® v8-M ARM Chapter B12 (Nested Vectored Interrupt Controller)
+ * 参考: Arm® v8-M ARM 第 B12 章 (嵌套向量中断控制器)
+ *
+ * @param irq: Interrupt number
+ * @param irq: 中断号
+ */
+void arch_armv8m_tz_nvic_set_pending_ns(uint8_t irq) {
+    if (irq < 240) {
+        uint32_t idx = irq / 32;
+        uint32_t bit = irq % 32;
+        NVIC_NS_ISPR(idx) = (1U << bit);
+    }
+}
+
+/**
+ * @brief Clear Pending Interrupt (Non-Secure)
+ * @brief 清除中断挂起 (非安全)
+ *
+ * Reference: Arm® v8-M ARM Chapter B12 (Nested Vectored Interrupt Controller)
+ * 参考: Arm® v8-M ARM 第 B12 章 (嵌套向量中断控制器)
+ *
+ * @param irq: Interrupt number
+ * @param irq: 中断号
+ */
+void arch_armv8m_tz_nvic_clear_pending_ns(uint8_t irq) {
+    if (irq < 240) {
+        uint32_t idx = irq / 32;
+        uint32_t bit = irq % 32;
+        NVIC_NS_ICPR(idx) = (1U << bit);
+    }
+}
+
+/**
+ * @brief Get Pending Interrupt (Non-Secure)
+ * @brief 获取中断挂起 (非安全)
+ *
+ * Reference: Arm® v8-M ARM Chapter B12 (Nested Vectored Interrupt Controller)
+ * 参考: Arm® v8-M ARM 第 B12 章 (嵌套向量中断控制器)
+ *
+ * @param irq: Interrupt number
+ * @param irq: 中断号
+ * @return Pending status (0 = not pending, 1 = pending)
+ * @return 挂起状态 (0 = 未挂起, 1 = 挂起)
+ */
+uint32_t arch_armv8m_tz_nvic_get_pending_ns(uint8_t irq) {
+    if (irq < 240) {
+        uint32_t idx = irq / 32;
+        uint32_t bit = irq % 32;
+        return (NVIC_NS_ISPR(idx) >> bit) & 0x1U;
+    }
+    return 0;
+}
+
+/**
+ * @brief Get Active Interrupt (Non-Secure)
+ * @brief 获取活动中断 (非安全)
+ *
+ * Reference: Arm® v8-M ARM Chapter B12 (Nested Vectored Interrupt Controller)
+ * 参考: Arm® v8-M ARM 第 B12 章 (嵌套向量中断控制器)
+ *
+ * @return Active status
+ * @return 活动状态
+ */
+uint32_t arch_armv8m_tz_nvic_get_active_ns(void) {
+    uint32_t active = 0;
+    for (uint32_t idx = 0; idx < 8; idx++) {
+        uint32_t reg = NVIC_NS_IABR(idx);
+        if (reg != 0) {
+            for (uint32_t bit = 0; bit < 32; bit++) {
+                if (reg & (1U << bit)) {
+                    active = idx * 32 + bit;
+                    return active;
+                }
+            }
+        }
+    }
+    return 0xFFFFFFFFUL;
+}
+
+/**
+ * @brief Set Interrupt Priority (Non-Secure)
+ * @brief 设置中断优先级 (非安全)
+ *
+ * Reference: Arm® v8-M ARM Chapter B12 (Nested Vectored Interrupt Controller)
+ * 参考: Arm® v8-M ARM 第 B12 章 (嵌套向量中断控制器)
+ *
+ * @param irq: Interrupt number
+ * @param irq: 中断号
+ * @param priority: Priority to set
+ * @param priority: 要设置的优先级
+ */
+void arch_armv8m_tz_nvic_set_priority_ns(uint8_t irq, uint8_t priority) {
+    if (irq < 240) {
+        NVIC_NS_IPR(irq) = priority;
+    }
+}
+
+/**
+ * @brief Get Interrupt Priority (Non-Secure)
+ * @brief 获取中断优先级 (非安全)
+ *
+ * Reference: Arm® v8-M ARM Chapter B12 (Nested Vectored Interrupt Controller)
+ * 参考: Arm® v8-M ARM 第 B12 章 (嵌套向量中断控制器)
+ *
+ * @param irq: Interrupt number
+ * @param irq: 中断号
+ * @return Current priority value
+ * @return 当前优先级值
+ */
+uint32_t arch_armv8m_tz_nvic_get_priority_ns(uint8_t irq) {
+    if (irq < 240) {
+        return NVIC_NS_IPR(irq);
+    }
+    return 0;
+}
+
