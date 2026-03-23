@@ -51,6 +51,13 @@ extern "C" {
 #include "armv7-m_core.h"
 
 /**
+ * CPUID - CPU Identification Registers
+ * CPUID - CPU 识别寄存器
+ * Reference: Chapter B4 - The CPUID Scheme
+ */
+#include "armv7-m_cpuid.h"
+
+/**
  * NVIC - Nested Vectored Interrupt Controller
  * NVIC - 嵌套向量中断控制器
  * Reference: Chapter B3.4 - Nested Vectored Interrupt Controller, NVIC
