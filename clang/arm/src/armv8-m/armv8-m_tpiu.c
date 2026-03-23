@@ -12,7 +12,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-#include "armv8-m_tpiu.h"
+#include "armv8-m/armv8-m_tpiu.h"
 
 void tpiu_enable(void)
 {

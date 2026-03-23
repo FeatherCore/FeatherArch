@@ -12,7 +12,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-#include "armv8m_fpu.h"
+#include "armv8-m/armv8-m_fpu.h"
 
 /*
  * ============================================================================

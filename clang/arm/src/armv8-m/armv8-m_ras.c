@@ -13,7 +13,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-#include "armv8-m_ras.h"
+#include "armv8-m/armv8-m_ras.h"
 
 void ras_enable(void)
 {

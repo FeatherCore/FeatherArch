@@ -14,8 +14,8 @@
  * Copyright (c) 2024 ARM Architecture Team. All rights reserved.
  */
 
-#include "armv8m/armv8-m_nvic.h"
-#include "armv8m/armv8-m_core.h"
+#include "armv8-m/armv8-m_nvic.h"
+#include "armv8-m/armv8-m_core.h"
 
 /*
  * ============================================================================

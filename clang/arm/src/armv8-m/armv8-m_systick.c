@@ -12,7 +12,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-#include "armv8m_systick.h"
+#include "armv8-m/armv8-m_systick.h"
 
 uint32_t systick_config(uint32_t ticks, uint8_t use_processor_clock, uint8_t enable_interrupt)
 {

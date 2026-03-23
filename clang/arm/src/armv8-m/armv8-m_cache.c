@@ -12,8 +12,8 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-#include "armv8m_cache.h"
-#include "armv8m_nvic.h"
+#include "armv8-m/armv8-m_cache.h"
+#include "armv8-m/armv8-m_nvic.h"
 
 /*
  * ============================================================================
