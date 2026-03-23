@@ -6,7 +6,8 @@
  * Description: ARMv7-M FPU register definitions and function declarations
  * 描述: ARMv7-M FPU 寄存器定义和函数声明
  *
- * Reference: Arm(R) v7-M Architecture Reference Manual
+ * Reference: Arm(R) v7-M Architecture Reference Manual (DDI 0403E.e)
+ *   - Table B3-5 Summary of additional SCB registers for the FP extension (page B3-597)
  *   - Chapter B4: Floating-point Support
  * ============================================================================
  * SPDX-License-Identifier: Apache-2.0
@@ -25,55 +26,52 @@ extern "C" {
 
 /*
  * ============================================================================
- * FPU Base Address
- * FPU 基地址
- * ============================================================================
- */
-
-#define FPU_BASE_ADDR             0xE000EF30UL
-
-/*
- * ============================================================================
  * FPU Register Definitions
  * FPU 寄存器定义
+ * Reference: Table B3-5 Summary of additional SCB registers for the FP extension
  * ============================================================================
  */
 
 /**
  * Floating-Point Context Control Register (FPCCR)
- * 浮点上下文控制寄存器
- * Reference: Arm(R) v7-M Architecture Reference Manual, B4.1.6
+ * Address: 0xE000EF34
+ * Reference: Arm(R) v7-M Architecture Reference Manual, B3-615
  */
 #define FPU_FPCCR                 (*(volatile uint32_t *)(0xE000EF34UL))
 
 /**
  * Floating-Point Context Address Register (FPCAR)
- * 浮点上下文地址寄存器
- * Reference: Arm(R) v7-M Architecture Reference Manual, B4.1.7
+ * Address: 0xE000EF38
+ * Reference: Arm(R) v7-M Architecture Reference Manual, B3-617
  */
 #define FPU_FPCAR                 (*(volatile uint32_t *)(0xE000EF38UL))
 
 /**
- * Floating-Point Default Status Control Register (FPSCR)
- * 浮点默认状态控制寄存器
- * Reference: Arm(R) v7-M Architecture Reference Manual, B4.1.8
+ * Floating-Point Default Status Control Register (FPDSCR)
+ * Address: 0xE000EF3C
+ * Reference: Arm(R) v7-M Architecture Reference Manual, B3-617
  */
-#define FPU_FPSCR                 (*(volatile uint32_t *)(0xE000EF3CUL))
+#define FPU_FPDSCR                (*(volatile uint32_t *)(0xE000EF3CUL))
 
 /**
- * Coprocessor Access Control Register (CPACR)
- * 协处理器访问控制寄存器
- * Reference: Arm(R) v7-M Architecture Reference Manual, B4.1.9
- */
-#define FPU_CPACR                 (*(volatile uint32_t *)(0xE000ED88UL))
-
-/**
- * Floating-Point Feature Registers (MVFR0-MVFR2)
- * 浮点特性寄存器
- * Reference: Arm(R) v7-M Architecture Reference Manual, B4.1.10
+ * Media and FP Feature Register 0 (MVFR0)
+ * Address: 0xE000EF40
+ * Reference: Arm(R) v7-M Architecture Reference Manual, B4-662
  */
 #define FPU_MVFR0                 (*(volatile uint32_t *)(0xE000EF40UL))
+
+/**
+ * Media and FP Feature Register 1 (MVFR1)
+ * Address: 0xE000EF44
+ * Reference: Arm(R) v7-M Architecture Reference Manual, B4-663
+ */
 #define FPU_MVFR1                 (*(volatile uint32_t *)(0xE000EF44UL))
+
+/**
+ * Media and FP Feature Register 2 (MVFR2)
+ * Address: 0xE000EF48
+ * Reference: Arm(R) v7-M Architecture Reference Manual, B4-664
+ */
 #define FPU_MVFR2                 (*(volatile uint32_t *)(0xE000EF48UL))
 
 /*
@@ -85,16 +83,14 @@ extern "C" {
 
 /**
  * FPCCR Register Bits
- * FPCCR 寄存器位
+ * Reference: Arm(R) v7-M Architecture Reference Manual, B3-615
  */
 #define FPU_FPCCR_ASPEN_Pos       31U
 #define FPU_FPCCR_ASPEN_Msk       (1UL << FPU_FPCCR_ASPEN_Pos)
 #define FPU_FPCCR_LSPEN_Pos       30U
 #define FPU_FPCCR_LSPEN_Msk       (1UL << FPU_FPCCR_LSPEN_Pos)
-#define FPU_FPCCR_CLRONRET_Pos    28U
-#define FPU_FPCCR_CLRONRET_Msk    (1UL << FPU_FPCCR_CLRONRET_Pos)
-#define FPU_FPCCR_CLRONRETS_Pos   27U
-#define FPU_FPCCR_CLRONRETS_Msk   (1UL << FPU_FPCCR_CLRONRETS_Pos)
+#define FPU_FPCCR_MONRDY_Pos      8U
+#define FPU_FPCCR_MONRDY_Msk      (1UL << FPU_FPCCR_MONRDY_Pos)
 #define FPU_FPCCR_SFRDY_Pos       7U
 #define FPU_FPCCR_SFRDY_Msk       (1UL << FPU_FPCCR_SFRDY_Pos)
 #define FPU_FPCCR_BFRDY_Pos       6U
@@ -113,46 +109,33 @@ extern "C" {
 #define FPU_FPCCR_LSPACT_Msk      (1UL << FPU_FPCCR_LSPACT_Pos)
 
 /**
- * FPSCR Register Bits
- * FPSCR 寄存器位
+ * FPDSCR Register Bits
+ * Reference: Arm(R) v7-M Architecture Reference Manual, B3-617
  */
-#define FPU_FPSCR_N_Pos           31U
-#define FPU_FPSCR_N_Msk           (1UL << FPU_FPSCR_N_Pos)
-#define FPU_FPSCR_Z_Pos           30U
-#define FPU_FPSCR_Z_Msk           (1UL << FPU_FPSCR_Z_Pos)
-#define FPU_FPSCR_C_Pos           29U
-#define FPU_FPSCR_C_Msk           (1UL << FPU_FPSCR_C_Pos)
-#define FPU_FPSCR_V_Pos           28U
-#define FPU_FPSCR_V_Msk           (1UL << FPU_FPSCR_V_Pos)
-#define FPU_FPSCR_AHP_Pos         26U
-#define FPU_FPSCR_AHP_Msk         (1UL << FPU_FPSCR_AHP_Pos)
-#define FPU_FPSCR_DN_Pos          25U
-#define FPU_FPSCR_DN_Msk          (1UL << FPU_FPSCR_DN_Pos)
-#define FPU_FPSCR_FZ_Pos          24U
-#define FPU_FPSCR_FZ_Msk          (1UL << FPU_FPSCR_FZ_Pos)
-#define FPU_FPSCR_RMode_Pos       22U
-#define FPU_FPSCR_RMode_Msk       (3UL << FPU_FPSCR_RMode_Pos)
-#define FPU_FPSCR_IDC_Pos         7U
-#define FPU_FPSCR_IDC_Msk         (1UL << FPU_FPSCR_IDC_Pos)
-#define FPU_FPSCR_IXC_Pos         4U
-#define FPU_FPSCR_IXC_Msk         (1UL << FPU_FPSCR_IXC_Pos)
-#define FPU_FPSCR_UFC_Pos         3U
-#define FPU_FPSCR_UFC_Msk         (1UL << FPU_FPSCR_UFC_Pos)
-#define FPU_FPSCR_OFC_Pos         2U
-#define FPU_FPSCR_OFC_Msk         (1UL << FPU_FPSCR_OFC_Pos)
-#define FPU_FPSCR_DZC_Pos         1U
-#define FPU_FPSCR_DZC_Msk         (1UL << FPU_FPSCR_DZC_Pos)
-#define FPU_FPSCR_IOC_Pos         0U
-#define FPU_FPSCR_IOC_Msk         (1UL << FPU_FPSCR_IOC_Pos)
+#define FPU_FPDSCR_AHP_Pos        26U
+#define FPU_FPDSCR_AHP_Msk        (1UL << FPU_FPDSCR_AHP_Pos)
+#define FPU_FPDSCR_DN_Pos         25U
+#define FPU_FPDSCR_DN_Msk         (1UL << FPU_FPDSCR_DN_Pos)
+#define FPU_FPDSCR_FZ_Pos         24U
+#define FPU_FPDSCR_FZ_Msk         (1UL << FPU_FPDSCR_FZ_Pos)
+#define FPU_FPDSCR_RMode_Pos      22U
+#define FPU_FPDSCR_RMode_Msk      (3UL << FPU_FPDSCR_RMode_Pos)
+
+/*
+ * ============================================================================
+ * Coprocessor Access Control Register (CPACR)
+ * Located in SCB at 0xE000ED88
+ * Reference: Arm(R) v7-M Architecture Reference Manual, B3-614
+ * ============================================================================
+ */
 
 /**
  * CPACR Register Bits
- * CPACR 寄存器位
  */
-#define FPU_CPACR_CP11_Pos        22U
-#define FPU_CPACR_CP11_Msk        (3UL << FPU_CPACR_CP11_Pos)
-#define FPU_CPACR_CP10_Pos        20U
-#define FPU_CPACR_CP10_Msk        (3UL << FPU_CPACR_CP10_Pos)
+#define CPACR_CP11_Pos            22U
+#define CPACR_CP11_Msk            (3UL << CPACR_CP11_Pos)
+#define CPACR_CP10_Pos            20U
+#define CPACR_CP10_Msk            (3UL << CPACR_CP10_Pos)
 
 /* CP10/CP11 Access Values */
 #define CPACR_CP_DISABLE          0x0U  /* Access denied */
@@ -209,16 +192,16 @@ void fpu_enable_lazy_preservation(void);
 void fpu_disable_lazy_preservation(void);
 
 /**
- * @brief Get FPSCR value
- * @return FPSCR value
+ * @brief Get FPDSCR value
+ * @return FPDSCR value
  */
-uint32_t fpu_get_fpscr(void);
+uint32_t fpu_get_fpdscr(void);
 
 /**
- * @brief Set FPSCR value
- * @param fpscr New FPSCR value
+ * @brief Set FPDSCR value
+ * @param fpdscr New FPDSCR value
  */
-void fpu_set_fpscr(uint32_t fpscr);
+void fpu_set_fpdscr(uint32_t fpdscr);
 
 /**
  * @brief Set rounding mode
@@ -245,17 +228,6 @@ void fpu_enable_default_nan(void);
  * @brief Disable default NaN mode
  */
 void fpu_disable_default_nan(void);
-
-/**
- * @brief Clear all exception flags
- */
-void fpu_clear_exceptions(void);
-
-/**
- * @brief Get exception flags
- * @return Exception flags
- */
-uint32_t fpu_get_exceptions(void);
 
 #ifdef __cplusplus
 }

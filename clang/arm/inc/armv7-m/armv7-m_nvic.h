@@ -14,6 +14,8 @@
  *
  * Reference: Arm(R) v7-M Architecture Reference Manual (DDI 0403E.e)
  *   - Chapter B3.4 - Nested Vectored Interrupt Controller, NVIC
+ *   - Table B3-4 Summary of SCB registers (page B3-596)
+ *   - Table B3-6 Summary of system control and ID registers not in the SCB (page B3-597)
  * ============================================================================
  * SPDX-License-Identifier: Apache-2.0
  */
@@ -21,8 +23,8 @@
 #ifndef __ARCH_ARM_V7M_NVIC_H__
 #define __ARCH_ARM_V7M_NVIC_H__
 
-#include &lt;stdint.h&gt;
-#include &lt;stdbool.h&gt;
+#include <stdint.h>
+#include <stdbool.h>
 #include "armv7-m_config.h"
 
 #ifdef __cplusplus
@@ -33,63 +35,98 @@ extern "C" {
  * ============================================================================
  * NVIC Base Addresses
  * NVIC 基地址
+ * Reference: Table B3-3 SCS address space regions (page B3-595)
  * ============================================================================
  */
 
+#define SCS_BASE_ADDR             0xE000E000UL
 #define NVIC_BASE_ADDR            0xE000E100UL
 #define SCB_BASE_ADDR             0xE000ED00UL
 
 /*
  * ============================================================================
- * NVIC Register Definitions
- * NVIC 寄存器定义
+ * System Control and ID Registers (not in SCB)
+ * 系统控制和ID寄存器 (不在SCB中)
+ * Reference: Table B3-6 Summary of system control and ID registers not in the SCB
  * ============================================================================
  */
 
 /**
- * Interrupt Set Enable Registers (ISER[0-7])
- * 中断使能设置寄存器
+ * Interrupt Controller Type Register (ICTR)
+ * Reference: Arm(R) v7-M Architecture Reference Manual, B3-618
+ */
+#define SCS_ICTR                  (*(volatile uint32_t *)(SCS_BASE_ADDR + 0x004))
+
+/**
+ * Auxiliary Control Register (ACTLR)
+ * Reference: Arm(R) v7-M Architecture Reference Manual, B3-618
+ */
+#define SCS_ACTLR                 (*(volatile uint32_t *)(SCS_BASE_ADDR + 0x008))
+
+/**
+ * Software Triggered Interrupt Register (STIR)
+ * Reference: Arm(R) v7-M Architecture Reference Manual, B3-619
+ */
+#define SCS_STIR                  (*(volatile uint32_t *)(0xE000EF00UL))
+
+/*
+ * ============================================================================
+ * NVIC Register Definitions
+ * NVIC 寄存器定义
  * Reference: Chapter B3.4 - Nested Vectored Interrupt Controller, NVIC
+ * ============================================================================
+ */
+
+/**
+ * Interrupt Set Enable Registers (NVIC_ISER0-NVIC_ISER15)
+ * 中断使能设置寄存器
+ * Address: 0xE000E100-0xE000E13C
+ * Reference: Arm(R) v7-M Architecture Reference Manual, B3-628
  */
 #define NVIC_ISER_BASE            (NVIC_BASE_ADDR + 0x000)
 #define NVIC_ISER(n)              (*(volatile uint32_t *)(NVIC_ISER_BASE + ((n) * 4)))
 
 /**
- * Interrupt Clear Enable Registers (ICER[0-7])
+ * Interrupt Clear Enable Registers (NVIC_ICER0-NVIC_ICER15)
  * 中断使能清除寄存器
- * Reference: Chapter B3.4 - Nested Vectored Interrupt Controller, NVIC
+ * Address: 0xE000E180-0xE000E1BC
+ * Reference: Arm(R) v7-M Architecture Reference Manual, B3-629
  */
 #define NVIC_ICER_BASE            (NVIC_BASE_ADDR + 0x080)
 #define NVIC_ICER(n)              (*(volatile uint32_t *)(NVIC_ICER_BASE + ((n) * 4)))
 
 /**
- * Interrupt Set Pending Registers (ISPR[0-7])
+ * Interrupt Set Pending Registers (NVIC_ISPR0-NVIC_ISPR15)
  * 中断挂起设置寄存器
- * Reference: Chapter B3.4 - Nested Vectored Interrupt Controller, NVIC
+ * Address: 0xE000E200-0xE000E23C
+ * Reference: Arm(R) v7-M Architecture Reference Manual, B3-629
  */
 #define NVIC_ISPR_BASE            (NVIC_BASE_ADDR + 0x100)
 #define NVIC_ISPR(n)              (*(volatile uint32_t *)(NVIC_ISPR_BASE + ((n) * 4)))
 
 /**
- * Interrupt Clear Pending Registers (ICPR[0-7])
+ * Interrupt Clear Pending Registers (NVIC_ICPR0-NVIC_ICPR15)
  * 中断挂起清除寄存器
- * Reference: Chapter B3.4 - Nested Vectored Interrupt Controller, NVIC
+ * Address: 0xE000E280-0xE000E2BC
+ * Reference: Arm(R) v7-M Architecture Reference Manual, B3-630
  */
 #define NVIC_ICPR_BASE            (NVIC_BASE_ADDR + 0x180)
 #define NVIC_ICPR(n)              (*(volatile uint32_t *)(NVIC_ICPR_BASE + ((n) * 4)))
 
 /**
- * Interrupt Active Bit Registers (IABR[0-7])
+ * Interrupt Active Bit Registers (NVIC_IABR0-NVIC_IABR15)
  * 中断活动位寄存器
- * Reference: Chapter B3.4 - Nested Vectored Interrupt Controller, NVIC
+ * Address: 0xE000E300-0xE000E33C
+ * Reference: Arm(R) v7-M Architecture Reference Manual, B3-630
  */
 #define NVIC_IABR_BASE            (NVIC_BASE_ADDR + 0x200)
 #define NVIC_IABR(n)              (*(volatile uint32_t *)(NVIC_IABR_BASE + ((n) * 4)))
 
 /**
- * Interrupt Priority Registers (IPR[0-239])
+ * Interrupt Priority Registers (NVIC_IPR0-NVIC_IPR59)
  * 中断优先级寄存器
- * Reference: Chapter B3.4 - Nested Vectored Interrupt Controller, NVIC
+ * Address: 0xE000E400-0xE000E4EC
+ * Reference: Arm(R) v7-M Architecture Reference Manual, B3-631
  */
 #define NVIC_IPR_BASE             (NVIC_BASE_ADDR + 0x300)
 #define NVIC_IPR(n)               (*(volatile uint8_t *)(NVIC_IPR_BASE + (n)))
@@ -98,239 +135,245 @@ extern "C" {
  * ============================================================================
  * SCB (System Control Block) Register Definitions
  * 系统控制块寄存器定义
+ * Reference: Table B3-4 Summary of SCB registers (page B3-596)
  * ============================================================================
  */
 
 /**
  * CPUID Base Register
- * CPUID 基址寄存器
- * Reference: Chapter B4.1 - About the CPUID scheme
+ * Address: 0xE000ED00
+ * Reference: Arm(R) v7-M Architecture Reference Manual, B3-598
  */
 #define SCB_CPUID                 (*(volatile uint32_t *)(SCB_BASE_ADDR + 0x00))
 
 /**
  * Interrupt Control and State Register (ICSR)
- * 中断控制和状态寄存器
- * Reference: Chapter B3 - System Address Map
+ * Address: 0xE000ED04
+ * Reference: Arm(R) v7-M Architecture Reference Manual, B3-599
  */
 #define SCB_ICSR                  (*(volatile uint32_t *)(SCB_BASE_ADDR + 0x04))
 
 /**
  * Vector Table Offset Register (VTOR)
- * 向量表偏移寄存器
- * Reference: Chapter B3 - System Address Map
+ * Address: 0xE000ED08
+ * Reference: Arm(R) v7-M Architecture Reference Manual, B3-601
  */
 #define SCB_VTOR                  (*(volatile uint32_t *)(SCB_BASE_ADDR + 0x08))
 
 /**
  * Application Interrupt and Reset Control Register (AIRCR)
- * 应用中断和复位控制寄存器
- * Reference: Chapter B3 - System Address Map
+ * Address: 0xE000ED0C
+ * Reference: Arm(R) v7-M Architecture Reference Manual, B3-601
  */
 #define SCB_AIRCR                 (*(volatile uint32_t *)(SCB_BASE_ADDR + 0x0C))
 
 /**
  * System Control Register (SCR)
- * 系统控制寄存器
- * Reference: Chapter B3 - System Address Map
+ * Address: 0xE000ED10
+ * Reference: Arm(R) v7-M Architecture Reference Manual, B3-603
  */
 #define SCB_SCR                   (*(volatile uint32_t *)(SCB_BASE_ADDR + 0x10))
 
 /**
  * Configuration and Control Register (CCR)
- * 配置和控制寄存器
- * Reference: Chapter B3 - System Address Map
+ * Address: 0xE000ED14
+ * Reference: Arm(R) v7-M Architecture Reference Manual, B3-604
  */
 #define SCB_CCR                   (*(volatile uint32_t *)(SCB_BASE_ADDR + 0x14))
 
 /**
- * System Handler Priority Registers (SHPR[0-2])
- * 系统处理程序优先级寄存器
- * Reference: Chapter B3 - System Address Map
+ * System Handler Priority Register 1 (SHPR1)
+ * Address: 0xE000ED18
+ * Reference: Arm(R) v7-M Architecture Reference Manual, B3-606
  */
 #define SCB_SHPR1                 (*(volatile uint32_t *)(SCB_BASE_ADDR + 0x18))
+
+/**
+ * System Handler Priority Register 2 (SHPR2)
+ * Address: 0xE000ED1C
+ * Reference: Arm(R) v7-M Architecture Reference Manual, B3-606
+ */
 #define SCB_SHPR2                 (*(volatile uint32_t *)(SCB_BASE_ADDR + 0x1C))
+
+/**
+ * System Handler Priority Register 3 (SHPR3)
+ * Address: 0xE000ED20
+ * Reference: Arm(R) v7-M Architecture Reference Manual, B3-607
+ */
 #define SCB_SHPR3                 (*(volatile uint32_t *)(SCB_BASE_ADDR + 0x20))
 
 /**
  * System Handler Control and State Register (SHCSR)
- * 系统处理程序控制和状态寄存器
- * Reference: Chapter B3 - System Address Map
+ * Address: 0xE000ED24
+ * Reference: Arm(R) v7-M Architecture Reference Manual, B3-607
  */
 #define SCB_SHCSR                 (*(volatile uint32_t *)(SCB_BASE_ADDR + 0x24))
 
 /**
  * Configurable Fault Status Register (CFSR)
- * 可配置故障状态寄存器
- * Reference: Chapter B3 - System Address Map
+ * Address: 0xE000ED28
+ * Reference: Arm(R) v7-M Architecture Reference Manual, B3-609
  */
 #define SCB_CFSR                  (*(volatile uint32_t *)(SCB_BASE_ADDR + 0x28))
 
 /**
  * HardFault Status Register (HFSR)
- * HardFault 状态寄存器
- * Reference: Chapter B3 - System Address Map
+ * Address: 0xE000ED2C
+ * Reference: Arm(R) v7-M Architecture Reference Manual, B3-612
  */
 #define SCB_HFSR                  (*(volatile uint32_t *)(SCB_BASE_ADDR + 0x2C))
 
 /**
  * Debug Fault Status Register (DFSR)
- * 调试故障状态寄存器
- * Reference: Chapter B3 - System Address Map
+ * Address: 0xE000ED30
+ * Reference: Arm(R) v7-M Architecture Reference Manual, C1-699
  */
 #define SCB_DFSR                  (*(volatile uint32_t *)(SCB_BASE_ADDR + 0x30))
 
 /**
  * MemManage Fault Address Register (MMFAR)
- * 内存管理故障地址寄存器
- * Reference: Chapter B3 - System Address Map
+ * Address: 0xE000ED34
+ * Reference: Arm(R) v7-M Architecture Reference Manual, B3-613
  */
 #define SCB_MMFAR                 (*(volatile uint32_t *)(SCB_BASE_ADDR + 0x34))
 
 /**
  * BusFault Address Register (BFAR)
- * 总线故障地址寄存器
- * Reference: Chapter B3 - System Address Map
+ * Address: 0xE000ED38
+ * Reference: Arm(R) v7-M Architecture Reference Manual, B3-614
  */
 #define SCB_BFAR                  (*(volatile uint32_t *)(SCB_BASE_ADDR + 0x38))
 
 /**
  * Auxiliary Fault Status Register (AFSR)
- * 辅助故障状态寄存器
- * Reference: Chapter B3 - System Address Map
+ * Address: 0xE000ED3C
+ * Reference: Arm(R) v7-M Architecture Reference Manual, B3-614
  */
 #define SCB_AFSR                  (*(volatile uint32_t *)(SCB_BASE_ADDR + 0x3C))
 
 /**
  * Processor Feature Register 0 (ID_PFR0)
- * 处理器特性寄存器0
- * Reference: Chapter B4 - The CPUID Scheme
+ * Address: 0xE000ED40
+ * Reference: Arm(R) v7-M Architecture Reference Manual, B4-646
  */
 #define SCB_ID_PFR0               (*(volatile uint32_t *)(SCB_BASE_ADDR + 0x40))
 
 /**
  * Processor Feature Register 1 (ID_PFR1)
- * 处理器特性寄存器1
- * Reference: Chapter B4 - The CPUID Scheme
+ * Address: 0xE000ED44
+ * Reference: Arm(R) v7-M Architecture Reference Manual, B4-646
  */
 #define SCB_ID_PFR1               (*(volatile uint32_t *)(SCB_BASE_ADDR + 0x44))
 
 /**
  * Debug Feature Register 0 (ID_DFR0)
- * 调试特性寄存器0
- * Reference: Chapter B4 - The CPUID Scheme
+ * Address: 0xE000ED48
+ * Reference: Arm(R) v7-M Architecture Reference Manual, B4-648
  */
 #define SCB_ID_DFR0               (*(volatile uint32_t *)(SCB_BASE_ADDR + 0x48))
 
 /**
  * Auxiliary Feature Register 0 (ID_AFR0)
- * 辅助特性寄存器0
- * Reference: Chapter B4 - The CPUID Scheme
+ * Address: 0xE000ED4C
+ * Reference: Arm(R) v7-M Architecture Reference Manual, B4-649
  */
 #define SCB_ID_AFR0               (*(volatile uint32_t *)(SCB_BASE_ADDR + 0x4C))
 
 /**
  * Memory Model Feature Register 0 (ID_MMFR0)
- * 内存模型特性寄存器0
- * Reference: Chapter B4 - The CPUID Scheme
+ * Address: 0xE000ED50
+ * Reference: Arm(R) v7-M Architecture Reference Manual, B4-650
  */
 #define SCB_ID_MMFR0              (*(volatile uint32_t *)(SCB_BASE_ADDR + 0x50))
 
 /**
  * Memory Model Feature Register 1 (ID_MMFR1)
- * 内存模型特性寄存器1
- * Reference: Chapter B4 - The CPUID Scheme
+ * Address: 0xE000ED54
+ * Reference: Arm(R) v7-M Architecture Reference Manual, B4-650
  */
 #define SCB_ID_MMFR1              (*(volatile uint32_t *)(SCB_BASE_ADDR + 0x54))
 
 /**
  * Memory Model Feature Register 2 (ID_MMFR2)
- * 内存模型特性寄存器2
- * Reference: Chapter B4 - The CPUID Scheme
+ * Address: 0xE000ED58
+ * Reference: Arm(R) v7-M Architecture Reference Manual, B4-650
  */
 #define SCB_ID_MMFR2              (*(volatile uint32_t *)(SCB_BASE_ADDR + 0x58))
 
 /**
  * Memory Model Feature Register 3 (ID_MMFR3)
- * 内存模型特性寄存器3
- * Reference: Chapter B4 - The CPUID Scheme
+ * Address: 0xE000ED5C
+ * Reference: Arm(R) v7-M Architecture Reference Manual, B4-650
  */
 #define SCB_ID_MMFR3              (*(volatile uint32_t *)(SCB_BASE_ADDR + 0x5C))
 
 /**
  * Instruction Set Attribute Register 0 (ID_ISAR0)
- * 指令集属性寄存器0
- * Reference: Chapter B4 - The CPUID Scheme
+ * Address: 0xE000ED60
+ * Reference: Arm(R) v7-M Architecture Reference Manual, B4-653
  */
 #define SCB_ID_ISAR0              (*(volatile uint32_t *)(SCB_BASE_ADDR + 0x60))
 
 /**
  * Instruction Set Attribute Register 1 (ID_ISAR1)
- * 指令集属性寄存器1
- * Reference: Chapter B4 - The CPUID Scheme
+ * Address: 0xE000ED64
+ * Reference: Arm(R) v7-M Architecture Reference Manual, B4-653
  */
 #define SCB_ID_ISAR1              (*(volatile uint32_t *)(SCB_BASE_ADDR + 0x64))
 
 /**
  * Instruction Set Attribute Register 2 (ID_ISAR2)
- * 指令集属性寄存器2
- * Reference: Chapter B4 - The CPUID Scheme
+ * Address: 0xE000ED68
+ * Reference: Arm(R) v7-M Architecture Reference Manual, B4-653
  */
 #define SCB_ID_ISAR2              (*(volatile uint32_t *)(SCB_BASE_ADDR + 0x68))
 
 /**
  * Instruction Set Attribute Register 3 (ID_ISAR3)
- * 指令集属性寄存器3
- * Reference: Chapter B4 - The CPUID Scheme
+ * Address: 0xE000ED6C
+ * Reference: Arm(R) v7-M Architecture Reference Manual, B4-653
  */
 #define SCB_ID_ISAR3              (*(volatile uint32_t *)(SCB_BASE_ADDR + 0x6C))
 
 /**
  * Instruction Set Attribute Register 4 (ID_ISAR4)
- * 指令集属性寄存器4
- * Reference: Chapter B4 - The CPUID Scheme
+ * Address: 0xE000ED70
+ * Reference: Arm(R) v7-M Architecture Reference Manual, B4-653
  */
 #define SCB_ID_ISAR4              (*(volatile uint32_t *)(SCB_BASE_ADDR + 0x70))
 
 /**
- * Instruction Set Attribute Register 5 (ID_ISAR5)
- * 指令集属性寄存器5
- * Reference: Chapter B4 - The CPUID Scheme
- */
-#define SCB_ID_ISAR5              (*(volatile uint32_t *)(SCB_BASE_ADDR + 0x74))
-
-/**
  * Cache Level ID Register (CLIDR)
- * 缓存级别ID寄存器
- * Reference: Chapter B4 - The CPUID Scheme
+ * Address: 0xE000ED78
+ * Reference: Arm(R) v7-M Architecture Reference Manual, B4-665
  */
 #define SCB_CLIDR                 (*(volatile uint32_t *)(SCB_BASE_ADDR + 0x78))
 
 /**
  * Cache Type Register (CTR)
- * 缓存类型寄存器
- * Reference: Chapter B4 - The CPUID Scheme
+ * Address: 0xE000ED7C
+ * Reference: Arm(R) v7-M Architecture Reference Manual, B4-665
  */
 #define SCB_CTR                   (*(volatile uint32_t *)(SCB_BASE_ADDR + 0x7C))
 
 /**
  * Cache Size ID Register (CCSIDR)
- * 缓存大小ID寄存器
- * Reference: Chapter B4 - The CPUID Scheme
+ * Address: 0xE000ED80
+ * Reference: Arm(R) v7-M Architecture Reference Manual, B4-665
  */
 #define SCB_CCSIDR                (*(volatile uint32_t *)(SCB_BASE_ADDR + 0x80))
 
 /**
  * Cache Size Selection Register (CSSELR)
- * 缓存大小选择寄存器
- * Reference: Chapter B4 - The CPUID Scheme
+ * Address: 0xE000ED84
+ * Reference: Arm(R) v7-M Architecture Reference Manual, B4-665
  */
 #define SCB_CSSELR                (*(volatile uint32_t *)(SCB_BASE_ADDR + 0x84))
 
 /**
  * Coprocessor Access Control Register (CPACR)
- * 协处理器访问控制寄存器
- * Reference: Chapter B4 - The CPUID Scheme
+ * Address: 0xE000ED88
+ * Reference: Arm(R) v7-M Architecture Reference Manual, B3-614
  */
 #define SCB_CPACR                 (*(volatile uint32_t *)(SCB_BASE_ADDR + 0x88))
 
@@ -343,64 +386,66 @@ extern "C" {
 
 /**
  * ICSR (Interrupt Control and State Register) bit definitions
+ * Reference: Arm(R) v7-M Architecture Reference Manual, B3-599
  */
 #define SCB_ICSR_VECTACTIVE_Pos   0U
-#define SCB_ICSR_VECTACTIVE_Msk  (0x1FFUL &lt;&lt; SCB_ICSR_VECTACTIVE_Pos)
+#define SCB_ICSR_VECTACTIVE_Msk  (0x1FFUL << SCB_ICSR_VECTACTIVE_Pos)
 #define SCB_ICSR_VECTACTIVE       SCB_ICSR_VECTACTIVE_Msk
 
 #define SCB_ICSR_RETTOBASE_Pos    11U
-#define SCB_ICSR_RETTOBASE_Msk   (1UL &lt;&lt; SCB_ICSR_RETTOBASE_Pos)
+#define SCB_ICSR_RETTOBASE_Msk   (1UL << SCB_ICSR_RETTOBASE_Pos)
 #define SCB_ICSR_RETTOBASE        SCB_ICSR_RETTOBASE_Msk
 
 #define SCB_ICSR_VECTPENDING_Pos  12U
-#define SCB_ICSR_VECTPENDING_Msk (0x1FFUL &lt;&lt; SCB_ICSR_VECTPENDING_Pos)
+#define SCB_ICSR_VECTPENDING_Msk (0x1FFUL << SCB_ICSR_VECTPENDING_Pos)
 #define SCB_ICSR_VECTPENDING      SCB_ICSR_VECTPENDING_Msk
 
 #define SCB_ICSR_ISRPENDING_Pos   22U
-#define SCB_ICSR_ISRPENDING_Msk  (1UL &lt;&lt; SCB_ICSR_ISRPENDING_Pos)
+#define SCB_ICSR_ISRPENDING_Msk  (1UL << SCB_ICSR_ISRPENDING_Pos)
 #define SCB_ICSR_ISRPENDING       SCB_ICSR_ISRPENDING_Msk
 
 #define SCB_ICSR_PENDSTCLR_Pos    25U
-#define SCB_ICSR_PENDSTCLR_Msk   (1UL &lt;&lt; SCB_ICSR_PENDSTCLR_Pos)
+#define SCB_ICSR_PENDSTCLR_Msk   (1UL << SCB_ICSR_PENDSTCLR_Pos)
 #define SCB_ICSR_PENDSTCLR        SCB_ICSR_PENDSTCLR_Msk
 
 #define SCB_ICSR_PENDSTSET_Pos    26U
-#define SCB_ICSR_PENDSTSET_Msk   (1UL &lt;&lt; SCB_ICSR_PENDSTSET_Pos)
+#define SCB_ICSR_PENDSTSET_Msk   (1UL << SCB_ICSR_PENDSTSET_Pos)
 #define SCB_ICSR_PENDSTSET        SCB_ICSR_PENDSTSET_Msk
 
 #define SCB_ICSR_PENDSVCLR_Pos    27U
-#define SCB_ICSR_PENDSVCLR_Msk   (1UL &lt;&lt; SCB_ICSR_PENDSVCLR_Pos)
+#define SCB_ICSR_PENDSVCLR_Msk   (1UL << SCB_ICSR_PENDSVCLR_Pos)
 #define SCB_ICSR_PENDSVCLR        SCB_ICSR_PENDSVCLR_Msk
 
 #define SCB_ICSR_PENDSVSET_Pos    28U
-#define SCB_ICSR_PENDSVSET_Msk   (1UL &lt;&lt; SCB_ICSR_PENDSVSET_Pos)
+#define SCB_ICSR_PENDSVSET_Msk   (1UL << SCB_ICSR_PENDSVSET_Pos)
 #define SCB_ICSR_PENDSVSET        SCB_ICSR_PENDSVSET_Msk
 
 #define SCB_ICSR_NMIPENDSET_Pos  31U
-#define SCB_ICSR_NMIPENDSET_Msk  (1UL &lt;&lt; SCB_ICSR_NMIPENDSET_Pos)
+#define SCB_ICSR_NMIPENDSET_Msk  (1UL << SCB_ICSR_NMIPENDSET_Pos)
 #define SCB_ICSR_NMIPENDSET       SCB_ICSR_NMIPENDSET_Msk
 
 /**
  * AIRCR (Application Interrupt and Reset Control Register) bit definitions
+ * Reference: Arm(R) v7-M Architecture Reference Manual, B3-601
  */
 #define SCB_AIRCR_VECTRESET_Pos   0U
-#define SCB_AIRCR_VECTRESET_Msk  (1UL &lt;&lt; SCB_AIRCR_VECTRESET_Pos)
+#define SCB_AIRCR_VECTRESET_Msk  (1UL << SCB_AIRCR_VECTRESET_Pos)
 #define SCB_AIRCR_VECTRESET       SCB_AIRCR_VECTRESET_Msk
 
 #define SCB_AIRCR_VECTCLRACTIVE_Pos  1U
-#define SCB_AIRCR_VECTCLRACTIVE_Msk (1UL &lt;&lt; SCB_AIRCR_VECTCLRACTIVE_Pos)
+#define SCB_AIRCR_VECTCLRACTIVE_Msk (1UL << SCB_AIRCR_VECTCLRACTIVE_Pos)
 #define SCB_AIRCR_VECTCLRACTIVE  SCB_AIRCR_VECTCLRACTIVE_Msk
 
 #define SCB_AIRCR_SYSRESETREQ_Pos  2U
-#define SCB_AIRCR_SYSRESETREQ_Msk (1UL &lt;&lt; SCB_AIRCR_SYSRESETREQ_Pos)
+#define SCB_AIRCR_SYSRESETREQ_Msk (1UL << SCB_AIRCR_SYSRESETREQ_Pos)
 #define SCB_AIRCR_SYSRESETREQ    SCB_AIRCR_SYSRESETREQ_Msk
 
 #define SCB_AIRCR_PRIGROUP_Pos   8U
-#define SCB_AIRCR_PRIGROUP_Msk  (0x7UL &lt;&lt; SCB_AIRCR_PRIGROUP_Pos)
+#define SCB_AIRCR_PRIGROUP_Msk  (0x7UL << SCB_AIRCR_PRIGROUP_Pos)
 #define SCB_AIRCR_PRIGROUP       SCB_AIRCR_PRIGROUP_Msk
 
 #define SCB_AIRCR_ENDIANESS_Pos  15U
-#define SCB_AIRCR_ENDIANESS_Msk (1UL &lt;&lt; SCB_AIRCR_ENDIANESS_Pos)
+#define SCB_AIRCR_ENDIANESS_Msk (1UL << SCB_AIRCR_ENDIANESS_Pos)
 #define SCB_AIRCR_ENDIANESS      SCB_AIRCR_ENDIANESS_Msk
 
 #define SCB_AIRCR_VECTKEY_Pos    16U
@@ -411,57 +456,59 @@ extern "C" {
 
 /**
  * SCR (System Control Register) bit definitions
+ * Reference: Arm(R) v7-M Architecture Reference Manual, B3-603
  */
 #define SCB_SCR_SLEEPONEXIT_Pos   1U
-#define SCB_SCR_SLEEPONEXIT_Msk  (1UL &lt;&lt; SCB_SCR_SLEEPONEXIT_Pos)
+#define SCB_SCR_SLEEPONEXIT_Msk  (1UL << SCB_SCR_SLEEPONEXIT_Pos)
 #define SCB_SCR_SLEEPONEXIT       SCB_SCR_SLEEPONEXIT_Msk
 
 #define SCB_SCR_SLEEPDEEP_Pos    2U
-#define SCB_SCR_SLEEPDEEP_Msk   (1UL &lt;&lt; SCB_SCR_SLEEPDEEP_Pos)
+#define SCB_SCR_SLEEPDEEP_Msk   (1UL << SCB_SCR_SLEEPDEEP_Pos)
 #define SCB_SCR_SLEEPDEEP        SCB_SCR_SLEEPDEEP_Msk
 
 #define SCB_SCR_SEVONPEND_Pos    4U
-#define SCB_SCR_SEVONPEND_Msk   (1UL &lt;&lt; SCB_SCR_SEVONPEND_Pos)
+#define SCB_SCR_SEVONPEND_Msk   (1UL << SCB_SCR_SEVONPEND_Pos)
 #define SCB_SCR_SEVONPEND        SCB_SCR_SEVONPEND_Msk
 
 /**
  * CCR (Configuration and Control Register) bit definitions
+ * Reference: Arm(R) v7-M Architecture Reference Manual, B3-604
  */
 #define SCB_CCR_NONBASETHRDENA_Pos  0U
-#define SCB_CCR_NONBASETHRDENA_Msk (1UL &lt;&lt; SCB_CCR_NONBASETHRDENA_Pos)
+#define SCB_CCR_NONBASETHRDENA_Msk (1UL << SCB_CCR_NONBASETHRDENA_Pos)
 #define SCB_CCR_NONBASETHRDENA  SCB_CCR_NONBASETHRDENA_Msk
 
 #define SCB_CCR_USERSETMPEND_Pos  1U
-#define SCB_CCR_USERSETMPEND_Msk (1UL &lt;&lt; SCB_CCR_USERSETMPEND_Pos)
+#define SCB_CCR_USERSETMPEND_Msk (1UL << SCB_CCR_USERSETMPEND_Pos)
 #define SCB_CCR_USERSETMPEND     SCB_CCR_USERSETMPEND_Msk
 
 #define SCB_CCR_UNALIGN_TRP_Pos  3U
-#define SCB_CCR_UNALIGN_TRP_Msk (1UL &lt;&lt; SCB_CCR_UNALIGN_TRP_Pos)
+#define SCB_CCR_UNALIGN_TRP_Msk (1UL << SCB_CCR_UNALIGN_TRP_Pos)
 #define SCB_CCR_UNALIGN_TRP      SCB_CCR_UNALIGN_TRP_Msk
 
 #define SCB_CCR_DIV_0_TRP_Pos    4U
-#define SCB_CCR_DIV_0_TRP_Msk   (1UL &lt;&lt; SCB_CCR_DIV_0_TRP_Pos)
+#define SCB_CCR_DIV_0_TRP_Msk   (1UL << SCB_CCR_DIV_0_TRP_Pos)
 #define SCB_CCR_DIV_0_TRP        SCB_CCR_DIV_0_TRP_Msk
 
 #define SCB_CCR_BFHFNMIGN_Pos    8U
-#define SCB_CCR_BFHFNMIGN_Msk   (1UL &lt;&lt; SCB_CCR_BFHFNMIGN_Pos)
+#define SCB_CCR_BFHFNMIGN_Msk   (1UL << SCB_CCR_BFHFNMIGN_Pos)
 #define SCB_CCR_BFHFNMIGN        SCB_CCR_BFHFNMIGN_Msk
 
 #define SCB_CCR_STKALIGN_Pos     9U
 #define SCB_CCR_STKALIGN_Msk    (1UL << SCB_CCR_STKALIGN_Pos)
 #define SCB_CCR_STKALIGN         SCB_CCR_STKALIGN_Msk
 
-#define SCB_CCR_BP_Pos          17U
-#define SCB_CCR_BP_Msk          (1UL << SCB_CCR_BP_Pos)
-#define SCB_CCR_BP              SCB_CCR_BP_Msk
+#define SCB_CCR_DC_Pos          16U
+#define SCB_CCR_DC_Msk          (1UL << SCB_CCR_DC_Pos)
+#define SCB_CCR_DC              SCB_CCR_DC_Msk
 
 #define SCB_CCR_IC_Pos          17U
 #define SCB_CCR_IC_Msk          (1UL << SCB_CCR_IC_Pos)
 #define SCB_CCR_IC              SCB_CCR_IC_Msk
 
-#define SCB_CCR_DC_Pos          16U
-#define SCB_CCR_DC_Msk          (1UL << SCB_CCR_DC_Pos)
-#define SCB_CCR_DC              SCB_CCR_DC_Msk
+#define SCB_CCR_BP_Pos          18U
+#define SCB_CCR_BP_Msk          (1UL << SCB_CCR_BP_Pos)
+#define SCB_CCR_BP              SCB_CCR_BP_Msk
 
 /*
  * ============================================================================
