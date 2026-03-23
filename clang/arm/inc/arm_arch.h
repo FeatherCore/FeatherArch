@@ -298,19 +298,13 @@ static inline int arm_is_r_profile(void)
 
 /*
  * ============================================================================
- * Compiler Abstraction
- * 编译器抽象
+ * Compiler Check
+ * 编译器检查
  * ============================================================================
  */
 
-#if defined(__GNUC__) || defined(__clang__)
-    #define ARM_COMPILER_GCC      1
-#elif defined(__ICCARM__) || defined(__ICCRX__)
-    #define ARM_COMPILER_IAR      1
-#elif defined(__CC_ARM) || defined(__ARMCC_VERSION)
-    #define ARM_COMPILER_KEIL     1
-#else
-    #define ARM_COMPILER_UNKNOWN  1
+#if !defined(__clang__)
+    #error "This header only supports Clang/LLVM compiler"
 #endif
 
 /**
@@ -319,15 +313,7 @@ static inline int arm_is_r_profile(void)
  */
 static inline const char* arm_get_compiler_string(void)
 {
-    #if defined(ARM_COMPILER_GCC)
-        return "GCC/Clang";
-    #elif defined(ARM_COMPILER_IAR)
-        return "IAR";
-    #elif defined(ARM_COMPILER_KEIL)
-        return "ARM Compiler";
-    #else
-        return "Unknown";
-    #endif
+    return "Clang/LLVM";
 }
 
 #ifdef __cplusplus
