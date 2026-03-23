@@ -17,7 +17,7 @@
 
 #include <stdint.h>
 #include <stdbool.h>
-#include "armv8m_config.h"
+#include "armv8-m_config.h"
 
 #ifdef __cplusplus
 extern "C" {

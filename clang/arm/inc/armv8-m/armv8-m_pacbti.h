@@ -16,7 +16,7 @@
 #define __ARCH_ARM_V8M_PACBTI_H__
 
 #include <stdint.h>
-#include "armv8m_config.h"
+#include "armv8-m_config.h"
 
 #ifdef __cplusplus
 extern "C" {
