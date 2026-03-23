@@ -6,8 +6,9 @@
  * Description: ARMv7-M SysTick timer definitions and function declarations
  * 描述: ARMv7-M SysTick 定时器定义和函数声明
  *
- * Reference: Arm(R) v7-M Architecture Reference Manual
- *   - Chapter B8: The System Timer, SysTick
+ * Reference: Arm(R) v7-M Architecture Reference Manual (DDI 0403E.e)
+ *   - Chapter B3.3 - The system timer, SysTick
+ *   - Table B3-7 SysTick register summary (page B3-621)
  * ============================================================================
  * SPDX-License-Identifier: Apache-2.0
  */
@@ -27,6 +28,7 @@ extern "C" {
  * ============================================================================
  * SysTick Base Address
  * SysTick 基地址
+ * Reference: Table B3-3 SCS address space regions (page B3-595)
  * ============================================================================
  */
 
@@ -36,34 +38,35 @@ extern "C" {
  * ============================================================================
  * SysTick Register Definitions
  * SysTick 寄存器定义
+ * Reference: Table B3-7 SysTick register summary (page B3-621)
  * ============================================================================
  */
 
 /**
  * SysTick Control and Status Register (SYST_CSR)
- * SysTick 控制和状态寄存器
- * Reference: Arm(R) v7-M Architecture Reference Manual, B8.2.1
+ * Address: 0xE000E010
+ * Reference: Arm(R) v7-M Architecture Reference Manual, B3-621
  */
 #define SYST_CSR                  (*(volatile uint32_t *)(SYSTICK_BASE_ADDR + 0x00))
 
 /**
  * SysTick Reload Value Register (SYST_RVR)
- * SysTick 重载值寄存器
- * Reference: Arm(R) v7-M Architecture Reference Manual, B8.2.2
+ * Address: 0xE000E014
+ * Reference: Arm(R) v7-M Architecture Reference Manual, B3-622
  */
 #define SYST_RVR                  (*(volatile uint32_t *)(SYSTICK_BASE_ADDR + 0x04))
 
 /**
  * SysTick Current Value Register (SYST_CVR)
- * SysTick 当前值寄存器
- * Reference: Arm(R) v7-M Architecture Reference Manual, B8.2.3
+ * Address: 0xE000E018
+ * Reference: Arm(R) v7-M Architecture Reference Manual, B3-622
  */
 #define SYST_CVR                  (*(volatile uint32_t *)(SYSTICK_BASE_ADDR + 0x08))
 
 /**
  * SysTick Calibration Value Register (SYST_CALIB)
- * SysTick 校准值寄存器
- * Reference: Arm(R) v7-M Architecture Reference Manual, B8.2.4
+ * Address: 0xE000E01C
+ * Reference: Arm(R) v7-M Architecture Reference Manual, B3-623
  */
 #define SYST_CALIB                (*(volatile uint32_t *)(SYSTICK_BASE_ADDR + 0x0C))
 
@@ -71,12 +74,13 @@ extern "C" {
  * ============================================================================
  * SysTick Register Bit Definitions
  * SysTick 寄存器位定义
+ * Reference: Arm(R) v7-M Architecture Reference Manual, B3-621
  * ============================================================================
  */
 
 /**
  * SYST_CSR Register Bits
- * SYST_CSR 寄存器位
+ * Reference: Arm(R) v7-M Architecture Reference Manual, B3-621
  */
 #define SYST_CSR_COUNTFLAG_Pos    16U
 #define SYST_CSR_COUNTFLAG_Msk    (1UL << SYST_CSR_COUNTFLAG_Pos)
@@ -89,21 +93,21 @@ extern "C" {
 
 /**
  * SYST_RVR Register Bits
- * SYST_RVR 寄存器位
+ * Reference: Arm(R) v7-M Architecture Reference Manual, B3-622
  */
 #define SYST_RVR_RELOAD_Pos       0U
 #define SYST_RVR_RELOAD_Msk       (0xFFFFFFUL << SYST_RVR_RELOAD_Pos)
 
 /**
  * SYST_CVR Register Bits
- * SYST_CVR 寄存器位
+ * Reference: Arm(R) v7-M Architecture Reference Manual, B3-622
  */
 #define SYST_CVR_CURRENT_Pos      0U
 #define SYST_CVR_CURRENT_Msk      (0xFFFFFFUL << SYST_CVR_CURRENT_Pos)
 
 /**
  * SYST_CALIB Register Bits
- * SYST_CALIB 寄存器位
+ * Reference: Arm(R) v7-M Architecture Reference Manual, B3-623
  */
 #define SYST_CALIB_NOREF_Pos      31U
 #define SYST_CALIB_NOREF_Msk      (1UL << SYST_CALIB_NOREF_Pos)
@@ -114,7 +118,7 @@ extern "C" {
 
 /**
  * Clock Source Selection
- * 时钟源选择
+ * Reference: Arm(R) v7-M Architecture Reference Manual, B3-621
  */
 #define SYST_CLKSOURCE_EXTERNAL   0U  /* External reference clock */
 #define SYST_CLKSOURCE_PROCESSOR  1U  /* Processor clock */
@@ -132,12 +136,14 @@ extern "C" {
  * @param use_processor_clock 1 = use processor clock, 0 = use external clock
  * @param enable_interrupt 1 = enable interrupt, 0 = disable interrupt
  * @return 0 on success, 1 if ticks is invalid
+ * Reference: Arm(R) v7-M Architecture Reference Manual, B3-621
  */
 uint32_t systick_config(uint32_t ticks, uint8_t use_processor_clock, uint8_t enable_interrupt);
 
 /**
  * @brief Get SysTick current value
  * @return Current counter value
+ * Reference: Arm(R) v7-M Architecture Reference Manual, B3-622
  */
 static inline uint32_t systick_get_value(void) {
     return SYST_CVR;
@@ -146,6 +152,7 @@ static inline uint32_t systick_get_value(void) {
 /**
  * @brief Set SysTick reload value
  * @param value Reload value (1-0xFFFFFF)
+ * Reference: Arm(R) v7-M Architecture Reference Manual, B3-622
  */
 static inline void systick_set_reload(uint32_t value) {
     SYST_RVR = (value & SYST_RVR_RELOAD_Msk);
@@ -154,6 +161,7 @@ static inline void systick_set_reload(uint32_t value) {
 /**
  * @brief Get SysTick reload value
  * @return Reload value
+ * Reference: Arm(R) v7-M Architecture Reference Manual, B3-622
  */
 static inline uint32_t systick_get_reload(void) {
     return SYST_RVR;
@@ -161,6 +169,7 @@ static inline uint32_t systick_get_reload(void) {
 
 /**
  * @brief Enable SysTick counter
+ * Reference: Arm(R) v7-M Architecture Reference Manual, B3-621
  */
 static inline void systick_enable(void) {
     SYST_CSR |= SYST_CSR_ENABLE_Msk;
@@ -168,6 +177,7 @@ static inline void systick_enable(void) {
 
 /**
  * @brief Disable SysTick counter
+ * Reference: Arm(R) v7-M Architecture Reference Manual, B3-621
  */
 static inline void systick_disable(void) {
     SYST_CSR &= ~SYST_CSR_ENABLE_Msk;
@@ -175,6 +185,7 @@ static inline void systick_disable(void) {
 
 /**
  * @brief Enable SysTick interrupt
+ * Reference: Arm(R) v7-M Architecture Reference Manual, B3-621
  */
 static inline void systick_enable_interrupt(void) {
     SYST_CSR |= SYST_CSR_TICKINT_Msk;
@@ -182,6 +193,7 @@ static inline void systick_enable_interrupt(void) {
 
 /**
  * @brief Disable SysTick interrupt
+ * Reference: Arm(R) v7-M Architecture Reference Manual, B3-621
  */
 static inline void systick_disable_interrupt(void) {
     SYST_CSR &= ~SYST_CSR_TICKINT_Msk;
@@ -190,6 +202,7 @@ static inline void systick_disable_interrupt(void) {
 /**
  * @brief Set SysTick clock source
  * @param source SYST_CLKSOURCE_EXTERNAL or SYST_CLKSOURCE_PROCESSOR
+ * Reference: Arm(R) v7-M Architecture Reference Manual, B3-621
  */
 static inline void systick_set_clock_source(uint8_t source) {
     if (source == SYST_CLKSOURCE_PROCESSOR) {
@@ -202,6 +215,7 @@ static inline void systick_set_clock_source(uint8_t source) {
 /**
  * @brief Get SysTick count flag
  * @return 1 if counter reached zero since last read, 0 otherwise
+ * Reference: Arm(R) v7-M Architecture Reference Manual, B3-621
  */
 static inline uint32_t systick_get_count_flag(void) {
     return (SYST_CSR & SYST_CSR_COUNTFLAG_Msk) ? 1U : 0U;
@@ -210,6 +224,7 @@ static inline uint32_t systick_get_count_flag(void) {
 /**
  * @brief Get SysTick calibration value
  * @return Calibration value
+ * Reference: Arm(R) v7-M Architecture Reference Manual, B3-623
  */
 static inline uint32_t systick_get_calib(void) {
     return SYST_CALIB;
@@ -218,6 +233,7 @@ static inline uint32_t systick_get_calib(void) {
 /**
  * @brief Check if external reference clock is available
  * @return 1 if available, 0 if not
+ * Reference: Arm(R) v7-M Architecture Reference Manual, B3-623
  */
 static inline uint32_t systick_has_external_clock(void) {
     return (SYST_CALIB & SYST_CALIB_NOREF_Msk) ? 0U : 1U;
@@ -225,6 +241,7 @@ static inline uint32_t systick_has_external_clock(void) {
 
 /**
  * @brief Reset SysTick counter
+ * Reference: Arm(R) v7-M Architecture Reference Manual, B3-622
  */
 static inline void systick_reset(void) {
     SYST_CVR = 0U;

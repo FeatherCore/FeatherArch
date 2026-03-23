@@ -6,8 +6,9 @@
  * Description: ARMv7-M TPIU function implementations
  * 描述: ARMv7-M TPIU 函数实现
  *
- * Reference: Arm(R) v7-M Architecture Reference Manual
- *   - Chapter B12: Trace Port Interface Unit
+ * Reference: Arm(R) v7-M Architecture Reference Manual (DDI 0403E.e)
+ *   - Chapter C1.10 - Trace Port Interface Unit
+ *   - Table C1-23 TPIU registers (page C1-750)
  * ============================================================================
  * SPDX-License-Identifier: Apache-2.0
  */
@@ -18,6 +19,7 @@
  * ============================================================================
  * TPIU Functions
  * TPIU 函数
+ * Reference: Chapter C1.10 - Trace Port Interface Unit
  * ============================================================================
  */
 
@@ -48,7 +50,7 @@ void tpiu_flush(void)
 {
     /* Trigger a flush by setting the formatter enable then clearing */
     TPIU_FFCR |= TPIU_FFCR_EnFC_Msk;
-    __asm__ volatile("dsb");
-    __asm__ volatile("isb");
+    __asm__ volatile("dsb" ::: "memory");
+    __asm__ volatile("isb" ::: "memory");
     TPIU_FFCR &= ~TPIU_FFCR_EnFC_Msk;
 }
