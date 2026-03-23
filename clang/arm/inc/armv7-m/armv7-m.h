@@ -109,6 +109,15 @@ extern "C" {
 #include "armv7-m_tpiu.h"
 #endif
 
+/**
+ * Cache - Cache Maintenance Operations
+ * 缓存 - 缓存维护操作
+ * Reference: Chapter B3.2 - Cache maintenance operations
+ */
+#if (__ICACHE_PRESENT == 1) || (__DCACHE_PRESENT == 1)
+#include "armv7-m_cache.h"
+#endif
+
 /*
  * ============================================================================
  * Version Information

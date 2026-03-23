@@ -394,6 +394,220 @@ static inline void __BKPT(uint8_t val) {
     __asm__ volatile ("bkpt %0" : : "I" (val));
 }
 
+/**
+ * @brief Enable interrupts
+ */
+static inline void __enable_interrupts(void) {
+    __asm__ volatile ("cpsie i" ::: "memory");
+}
+
+/**
+ * @brief Disable interrupts
+ */
+static inline void __disable_interrupts(void) {
+    __asm__ volatile ("cpsid i" ::: "memory");
+}
+
+/**
+ * @brief Enable interrupts and faults
+ */
+static inline void __enable_fault_irq(void) {
+    __asm__ volatile ("cpsie f" ::: "memory");
+}
+
+/**
+ * @brief Disable interrupts and faults
+ */
+static inline void __disable_fault_irq(void) {
+    __asm__ volatile ("cpsid f" ::: "memory");
+}
+
+/*
+ * ============================================================================
+ * Exclusive Access Instructions
+ * 独占访问指令
+ * ============================================================================
+ */
+
+/**
+ * @brief Load Exclusive word
+ * Reference: Arm(R) v7-M Architecture Reference Manual (DDI 0403E.e)
+ *   - Chapter A3.4 - Synchronization and semaphores
+ */
+static inline uint32_t __LDREXW(volatile uint32_t *addr) {
+    uint32_t result;
+    __asm__ volatile ("ldrex %0, [%1]" : "=r" (result) : "r" (addr) : "memory");
+    return result;
+}
+
+/**
+ * @brief Store Exclusive word
+ * Reference: Arm(R) v7-M Architecture Reference Manual (DDI 0403E.e)
+ *   - Chapter A3.4 - Synchronization and semaphores
+ */
+static inline uint32_t __STREXW(uint32_t value, volatile uint32_t *addr) {
+    uint32_t result;
+    __asm__ volatile ("strex %0, %2, [%1]" : "=&r" (result) : "r" (addr), "r" (value) : "memory");
+    return result;
+}
+
+/**
+ * @brief Load Exclusive halfword
+ * Reference: Arm(R) v7-M Architecture Reference Manual (DDI 0403E.e)
+ *   - Chapter A3.4 - Synchronization and semaphores
+ */
+static inline uint16_t __LDREXH(volatile uint16_t *addr) {
+    uint16_t result;
+    __asm__ volatile ("ldrexh %0, [%1]" : "=r" (result) : "r" (addr) : "memory");
+    return result;
+}
+
+/**
+ * @brief Store Exclusive halfword
+ * Reference: Arm(R) v7-M Architecture Reference Manual (DDI 0403E.e)
+ *   - Chapter A3.4 - Synchronization and semaphores
+ */
+static inline uint32_t __STREXH(uint16_t value, volatile uint16_t *addr) {
+    uint32_t result;
+    __asm__ volatile ("strexh %0, %2, [%1]" : "=&r" (result) : "r" (addr), "r" (value) : "memory");
+    return result;
+}
+
+/**
+ * @brief Load Exclusive byte
+ * Reference: Arm(R) v7-M Architecture Reference Manual (DDI 0403E.e)
+ *   - Chapter A3.4 - Synchronization and semaphores
+ */
+static inline uint8_t __LDREXB(volatile uint8_t *addr) {
+    uint8_t result;
+    __asm__ volatile ("ldrexb %0, [%1]" : "=r" (result) : "r" (addr) : "memory");
+    return result;
+}
+
+/**
+ * @brief Store Exclusive byte
+ * Reference: Arm(R) v7-M Architecture Reference Manual (DDI 0403E.e)
+ *   - Chapter A3.4 - Synchronization and semaphores
+ */
+static inline uint32_t __STREXB(uint8_t value, volatile uint8_t *addr) {
+    uint32_t result;
+    __asm__ volatile ("strexb %0, %2, [%1]" : "=&r" (result) : "r" (addr), "r" (value) : "memory");
+    return result;
+}
+
+/**
+ * @brief Clear Exclusive
+ * Reference: Arm(R) v7-M Architecture Reference Manual (DDI 0403E.e)
+ *   - Chapter A3.4 - Synchronization and semaphores
+ */
+static inline void __CLREX(void) {
+    __asm__ volatile ("clrex" ::: "memory");
+}
+
+/*
+ * ============================================================================
+ * Core Helper Function Declarations
+ * 核心辅助函数声明
+ * ============================================================================
+ */
+
+/**
+ * @brief Set nPRIV bit (enter non-privileged mode)
+ */
+void armv7m_enter_non_privileged(void);
+
+/**
+ * @brief Clear nPRIV bit (enter privileged mode)
+ */
+void armv7m_enter_privileged(void);
+
+/**
+ * @brief Select PSP as current stack pointer
+ */
+void armv7m_select_psp(void);
+
+/**
+ * @brief Select MSP as current stack pointer
+ */
+void armv7m_select_msp(void);
+
+#if (__FPU_PRESENT == 1)
+/**
+ * @brief Set FPCA bit (mark floating-point context active)
+ */
+void armv7m_set_fp_context_active(void);
+
+/**
+ * @brief Clear FPCA bit (mark floating-point context inactive)
+ */
+void armv7m_clear_fp_context_active(void);
+#endif
+
+/**
+ * @brief Get N flag (Negative)
+ */
+uint32_t armv7m_get_flag_n(void);
+
+/**
+ * @brief Get Z flag (Zero)
+ */
+uint32_t armv7m_get_flag_z(void);
+
+/**
+ * @brief Get C flag (Carry)
+ */
+uint32_t armv7m_get_flag_c(void);
+
+/**
+ * @brief Get V flag (Overflow)
+ */
+uint32_t armv7m_get_flag_v(void);
+
+/**
+ * @brief Get Q flag (Saturation)
+ */
+uint32_t armv7m_get_flag_q(void);
+
+/**
+ * @brief Clear Q flag
+ */
+void armv7m_clear_flag_q(void);
+
+/**
+ * @brief Enable interrupts (clear PRIMASK)
+ */
+void armv7m_enable_interrupts(void);
+
+/**
+ * @brief Disable interrupts (set PRIMASK)
+ */
+void armv7m_disable_interrupts(void);
+
+/**
+ * @brief Enable interrupts with priority masking
+ */
+void armv7m_set_basepri(uint8_t priority);
+
+/**
+ * @brief Clear BASEPRI (enable all interrupts)
+ */
+void armv7m_clear_basepri(void);
+
+/**
+ * @brief Enable FAULTMASK (disable all interrupts including NMI)
+ */
+void armv7m_set_faultmask(void);
+
+/**
+ * @brief Clear FAULTMASK
+ */
+void armv7m_clear_faultmask(void);
+
+/**
+ * @brief Get current exception number
+ */
+uint32_t armv7m_get_exception_number(void);
+
 #ifdef __cplusplus
 }
 #endif

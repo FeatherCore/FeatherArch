@@ -283,6 +283,31 @@ extern "C" {
 
 /*
  * ============================================================================
+ * Performance Monitor Unit (PMU) Configuration
+ * 性能监视器单元 (PMU) 配置
+ * ============================================================================
+ */
+
+/**
+ * PMU Present: 0 = No PMU, 1 = Performance Monitor Unit is present
+ * PMU 存在: 0 = 无 PMU, 1 = 性能监视器单元存在
+ * Reference: Chapter B3.6 - Performance Monitors Extension
+ */
+#ifndef __PMU_PRESENT
+#define __PMU_PRESENT                0U
+#endif
+
+/**
+ * Number of PMU Event Counters (0-4)
+ * PMU 事件计数器数量 (0-4)
+ * Reference: Chapter B3.6 - Performance Monitors Extension
+ */
+#ifndef __PMU_NUM_COUNTERS
+#define __PMU_NUM_COUNTERS           4U
+#endif
+
+/*
+ * ============================================================================
  * Architecture Feature Checks
  * 架构功能检查
  * ============================================================================

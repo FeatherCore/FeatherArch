@@ -93,9 +93,9 @@ extern "C" {
  * MPU 区域属性和大小寄存器别名 1-3
  * Reference: Chapter B3.5 - Protected Memory System Architecture, PMSAv7
  */
-#define MPU_RASR_A1               (*(volatile uint32_t *)(MPU_BASE_ADDR + 0x14))
-#define MPU_RASR_A2               (*(volatile uint32_t *)(MPU_BASE_ADDR + 0x18))
-#define MPU_RASR_A3               (*(volatile uint32_t *)(MPU_BASE_ADDR + 0x1C))
+#define MPU_RASR_A1               (*(volatile uint32_t *)(MPU_BASE_ADDR + 0x18))
+#define MPU_RASR_A2               (*(volatile uint32_t *)(MPU_BASE_ADDR + 0x20))
+#define MPU_RASR_A3               (*(volatile uint32_t *)(MPU_BASE_ADDR + 0x28))
 
 /*
  * ============================================================================

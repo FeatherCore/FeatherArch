@@ -404,9 +404,10 @@ extern "C" {
 #define SCB_AIRCR_ENDIANESS      SCB_AIRCR_ENDIANESS_Msk
 
 #define SCB_AIRCR_VECTKEY_Pos    16U
-#define SCB_AIRCR_VECTKEY_Msk   (0xFFFFUL &lt;&lt; SCB_AIRCR_VECTKEY_Pos)
+#define SCB_AIRCR_VECTKEY_Msk   (0xFFFFUL << SCB_AIRCR_VECTKEY_Pos)
 #define SCB_AIRCR_VECTKEY        SCB_AIRCR_VECTKEY_Msk
-#define SCB_AIRCR_VECTKEYSTAT    (0x5FAUL &lt;&lt; SCB_AIRCR_VECTKEY_Pos)
+#define SCB_AIRCR_VECTKEYSTAT    (0x5FAUL << SCB_AIRCR_VECTKEY_Pos)
+#define SCB_AIRCR_VECTKEY_VALUE  (0x5FAUL << SCB_AIRCR_VECTKEY_Pos)
 
 /**
  * SCR (System Control Register) bit definitions
@@ -447,8 +448,20 @@ extern "C" {
 #define SCB_CCR_BFHFNMIGN        SCB_CCR_BFHFNMIGN_Msk
 
 #define SCB_CCR_STKALIGN_Pos     9U
-#define SCB_CCR_STKALIGN_Msk    (1UL &lt;&lt; SCB_CCR_STKALIGN_Pos)
+#define SCB_CCR_STKALIGN_Msk    (1UL << SCB_CCR_STKALIGN_Pos)
 #define SCB_CCR_STKALIGN         SCB_CCR_STKALIGN_Msk
+
+#define SCB_CCR_BP_Pos          17U
+#define SCB_CCR_BP_Msk          (1UL << SCB_CCR_BP_Pos)
+#define SCB_CCR_BP              SCB_CCR_BP_Msk
+
+#define SCB_CCR_IC_Pos          17U
+#define SCB_CCR_IC_Msk          (1UL << SCB_CCR_IC_Pos)
+#define SCB_CCR_IC              SCB_CCR_IC_Msk
+
+#define SCB_CCR_DC_Pos          16U
+#define SCB_CCR_DC_Msk          (1UL << SCB_CCR_DC_Pos)
+#define SCB_CCR_DC              SCB_CCR_DC_Msk
 
 /*
  * ============================================================================
@@ -458,61 +471,126 @@ extern "C" {
  */
 
 /**
- * @brief Enable Interrupt
- * @param IRQn External interrupt number
+ * @brief Enable specified interrupt
+ * @param irq Interrupt number (0 to __ARM_NUM_INTERRUPTS-1)
+ * Reference: Arm(R) v7-M ARM Chapter B3.4 (Nested Vectored Interrupt Controller) - ISER register
  */
-void NVIC_EnableIRQ(uint32_t IRQn);
+void nvic_enable_irq(uint8_t irq);
 
 /**
- * @brief Disable Interrupt
- * @param IRQn External interrupt number
+ * @brief Disable specified interrupt
+ * @param irq Interrupt number
+ * Reference: Arm(R) v7-M ARM Chapter B3.4 (Nested Vectored Interrupt Controller) - ICER register
  */
-void NVIC_DisableIRQ(uint32_t IRQn);
+void nvic_disable_irq(uint8_t irq);
 
 /**
- * @brief Get Pending Interrupt
- * @param IRQn External interrupt number
- * @return 1 if interrupt pending
+ * @brief Get interrupt enable status
+ * @param irq Interrupt number
+ * @return 1 if enabled, 0 if disabled
+ * Reference: Arm(R) v7-M ARM Chapter B3.4 (Nested Vectored Interrupt Controller) - ISER register
  */
-uint32_t NVIC_GetPendingIRQ(uint32_t IRQn);
+uint32_t nvic_get_enable_irq(uint8_t irq);
 
 /**
- * @brief Set Pending Interrupt
- * @param IRQn External interrupt number
+ * @brief Set interrupt pending status
+ * @param irq Interrupt number
+ * Reference: Arm(R) v7-M ARM Chapter B3.4 (Nested Vectored Interrupt Controller) - ISPR register
  */
-void NVIC_SetPendingIRQ(uint32_t IRQn);
+void nvic_set_pending(uint8_t irq);
 
 /**
- * @brief Clear Pending Interrupt
- * @param IRQn External interrupt number
+ * @brief Clear interrupt pending status
+ * @param irq Interrupt number
+ * Reference: Arm(R) v7-M ARM Chapter B3.4 (Nested Vectored Interrupt Controller) - ICPR register
  */
-void NVIC_ClearPendingIRQ(uint32_t IRQn);
+void nvic_clear_pending(uint8_t irq);
 
 /**
- * @brief Get Active Interrupt
- * @param IRQn External interrupt number
- * @return 1 if interrupt active
+ * @brief Get interrupt pending status
+ * @param irq Interrupt number
+ * @return 1 if pending, 0 if not pending
+ * Reference: Arm(R) v7-M ARM Chapter B3.4 (Nested Vectored Interrupt Controller) - ISPR register
  */
-uint32_t NVIC_GetActive(uint32_t IRQn);
+uint32_t nvic_get_pending(uint8_t irq);
 
 /**
- * @brief Set Interrupt Priority
- * @param IRQn External interrupt number
- * @param priority Priority to set
+ * @brief Get active interrupt status
+ * @param irq Interrupt number
+ * @return 1 if active, 0 if not active
+ * Reference: Arm(R) v7-M ARM Chapter B3.4 (Nested Vectored Interrupt Controller) - IABR register
  */
-void NVIC_SetPriority(uint32_t IRQn, uint32_t priority);
+uint32_t nvic_get_active(uint8_t irq);
 
 /**
- * @brief Get Interrupt Priority
- * @param IRQn External interrupt number
- * @return Interrupt priority
+ * @brief Set interrupt priority
+ * @param irq Interrupt number
+ * @param priority Priority value (0=highest, 255=lowest)
+ * Reference: Arm(R) v7-M ARM Chapter B3.4 (Nested Vectored Interrupt Controller) - IPR register
  */
-uint32_t NVIC_GetPriority(uint32_t IRQn);
+void nvic_set_priority(uint8_t irq, uint8_t priority);
 
 /**
- * @brief System Reset
+ * @brief Get interrupt priority
+ * @param irq Interrupt number
+ * @return Priority value
+ * Reference: Arm(R) v7-M ARM Chapter B3.4 (Nested Vectored Interrupt Controller) - IPR register
  */
-void NVIC_SystemReset(void);
+uint8_t nvic_get_priority(uint8_t irq);
+
+/**
+ * @brief Set priority grouping
+ * @param priority_group Priority grouping value (0-7)
+ * Reference: Arm(R) v7-M ARM Chapter B3.4 (Nested Vectored Interrupt Controller) - AIRCR register
+ */
+void nvic_set_priority_grouping(uint32_t priority_group);
+
+/**
+ * @brief Get priority grouping
+ * @return Priority grouping value
+ * Reference: Arm(R) v7-M ARM Chapter B3.4 (Nested Vectored Interrupt Controller) - AIRCR register
+ */
+uint32_t nvic_get_priority_grouping(void);
+
+/**
+ * @brief Encode priority
+ * @param priority_group Priority grouping
+ * @param preempt_priority Preemption priority
+ * @param sub_priority Sub-priority
+ * @return Encoded priority value
+ * Reference: Arm(R) v7-M ARM Chapter B3.4 (Nested Vectored Interrupt Controller)
+ */
+uint32_t nvic_encode_priority(uint32_t priority_group, uint32_t preempt_priority, uint32_t sub_priority);
+
+/**
+ * @brief Decode priority
+ * @param priority Encoded priority
+ * @param priority_group Priority grouping
+ * @param preempt_priority Output preemption priority
+ * @param sub_priority Output sub-priority
+ * Reference: Arm(R) v7-M ARM Chapter B3.4 (Nested Vectored Interrupt Controller)
+ */
+void nvic_decode_priority(uint32_t priority, uint32_t priority_group, uint32_t *preempt_priority, uint32_t *sub_priority);
+
+/**
+ * @brief System reset
+ * Reference: Arm(R) v7-M ARM Chapter B1.5 (Resets) - AIRCR register
+ */
+void nvic_system_reset(void);
+
+/**
+ * @brief Set vector table offset
+ * @param offset Vector table offset address
+ * Reference: Arm(R) v7-M ARM Chapter B3.4 (Nested Vectored Interrupt Controller) - VTOR register
+ */
+void scb_set_vtor(uint32_t offset);
+
+/**
+ * @brief Get vector table offset
+ * @return Vector table offset address
+ * Reference: Arm(R) v7-M ARM Chapter B3.4 (Nested Vectored Interrupt Controller) - VTOR register
+ */
+uint32_t scb_get_vtor(void);
 
 #ifdef __cplusplus
 }
