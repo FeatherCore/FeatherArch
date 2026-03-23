@@ -6,9 +6,11 @@
  * Description: ARMv7-M debug and trace function implementations
  * 描述: ARMv7-M 调试和跟踪函数实现
  *
- * Reference: Arm(R) v7-M Architecture Reference Manual
- *   - Chapter B10: Debug
- *   - Chapter B11: Debug and Trace Components
+ * Reference: Arm(R) v7-M Architecture Reference Manual (DDI 0403E.e)
+ *   - Chapter C1: Debug
+ *   - Table C1-21 DWT register summary (page C1-736)
+ *   - Table C1-11 ITM register summary (page C1-713)
+ *   - Table C1-22 FPB register summary (page C1-756)
  * ============================================================================
  * SPDX-License-Identifier: Apache-2.0
  */
@@ -19,17 +21,18 @@
  * ============================================================================
  * DWT (Data Watchpoint and Trace) Functions
  * DWT 函数
+ * Reference: Chapter C1.8 - The Data Watchpoint and Trace unit
  * ============================================================================
  */
 
 void dwt_enable(void)
 {
-    DWT_CTRL |= (DWT_CTRL_CYCCNTENA_Msk);
+    DWT_CTRL |= DWT_CTRL_CYCCNTENA_Msk;
 }
 
 void dwt_disable(void)
 {
-    DWT_CTRL &= ~(DWT_CTRL_CYCCNTENA_Msk);
+    DWT_CTRL &= ~DWT_CTRL_CYCCNTENA_Msk;
 }
 
 void dwt_enable_cycle_counter(void)
@@ -44,24 +47,34 @@ void dwt_disable_cycle_counter(void)
 
 void dwt_configure_comparator(uint32_t comp, uint32_t addr, uint32_t action)
 {
-    DWT_COMP(comp) = addr;
-    DWT_FUNCTION(comp) = action & DWT_FUNCTION_ACTION_Msk;
+    if (comp < dwt_get_num_comparators()) {
+        DWT_COMP(comp) = addr;
+        DWT_FUNCTION(comp) = action & DWT_FUNCTION_FUNCTION_Msk;
+    }
 }
 
 void dwt_enable_comparator(uint32_t comp)
 {
-    DWT_FUNCTION(comp) |= DWT_FUNCTION_ACTION_WATCHPOINT;
+    if (comp < dwt_get_num_comparators()) {
+        uint32_t function = DWT_FUNCTION(comp);
+        function &= ~DWT_FUNCTION_FUNCTION_Msk;
+        function |= DWT_FUNCTION_FUNCTION_INSTR_ADDR;
+        DWT_FUNCTION(comp) = function;
+    }
 }
 
 void dwt_disable_comparator(uint32_t comp)
 {
-    DWT_FUNCTION(comp) &= ~DWT_FUNCTION_ACTION_Msk;
+    if (comp < dwt_get_num_comparators()) {
+        DWT_FUNCTION(comp) = DWT_FUNCTION_FUNCTION_DISABLED;
+    }
 }
 
 /*
  * ============================================================================
  * ITM (Instrumentation Trace Macrocell) Functions
  * ITM 函数
+ * Reference: Chapter C1.7 - The Instrumentation Trace Macrocell
  * ============================================================================
  */
 
@@ -79,8 +92,9 @@ int32_t itm_send_char(int32_t ch)
 {
     if (ITM_STIM(0) & 0x1U) {
         ITM_STIM(0) = (uint8_t)ch;
+        return ch;
     }
-    return ch;
+    return -1;
 }
 
 int32_t itm_receive_char(void)
@@ -106,6 +120,7 @@ void itm_disable_stimulus_port(uint32_t port)
  * ============================================================================
  * FPB (Flash Patch and Breakpoint) Functions
  * FPB 函数
+ * Reference: Chapter C1.11 - Flash Patch and Breakpoint unit
  * ============================================================================
  */
 

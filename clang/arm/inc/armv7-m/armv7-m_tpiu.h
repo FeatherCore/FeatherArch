@@ -6,8 +6,9 @@
  * Description: ARMv7-M TPIU definitions
  * 描述: ARMv7-M 跟踪端口接口单元定义
  *
- * Reference: Arm(R) v7-M Architecture Reference Manual
- *   - Chapter B12: Trace Port Interface Unit
+ * Reference: Arm(R) v7-M Architecture Reference Manual (DDI 0403E.e)
+ *   - Chapter C1.10: Trace Port Interface Unit
+ *   - Table C1-23 TPIU registers (page C1-750)
  * ============================================================================
  * SPDX-License-Identifier: Apache-2.0
  */
@@ -26,6 +27,7 @@ extern "C" {
  * ============================================================================
  * TPIU Base Address
  * TPIU 基地址
+ * Reference: Table C1-10 Debug register regions (page C1-699)
  * ============================================================================
  */
 
@@ -35,163 +37,78 @@ extern "C" {
  * ============================================================================
  * TPIU Register Definitions
  * TPIU 寄存器定义
+ * Reference: Table C1-23 TPIU registers (page C1-750)
  * ============================================================================
  */
 
 /**
  * TPIU Supported Parallel Port Sizes Register (TPIU_SSPSR)
- * TPIU 支持的并行端口大小寄存器
- * Reference: Arm(R) v7-M Architecture Reference Manual, B12.1
+ * Address: 0xE0040000
+ * Reference: Arm(R) v7-M Architecture Reference Manual, C1-751
  */
 #define TPIU_SSPSR               (*(volatile uint32_t *)(TPIU_BASE_ADDR + 0x000))
 
 /**
  * TPIU Current Parallel Port Sizes Register (TPIU_CSPSR)
- * TPIU 当前并行端口大小寄存器
- * Reference: Arm(R) v7-M Architecture Reference Manual, B12.2
+ * Address: 0xE0040004
+ * Reference: Arm(R) v7-M Architecture Reference Manual, C1-751
  */
 #define TPIU_CSPSR               (*(volatile uint32_t *)(TPIU_BASE_ADDR + 0x004))
 
 /**
  * TPIU Asynchronous Clock Prescaler Register (TPIU_ACPR)
- * TPIU 异步时钟预分频器寄存器
- * Reference: Arm(R) v7-M Architecture Reference Manual, B12.3
+ * Address: 0xE0040010
+ * Reference: Arm(R) v7-M Architecture Reference Manual, C1-751
  */
 #define TPIU_ACPR                (*(volatile uint32_t *)(TPIU_BASE_ADDR + 0x010))
 
 /**
  * TPIU Selected Pin Protocol Register (TPIU_SPPR)
- * TPIU 选定引脚协议寄存器
- * Reference: Arm(R) v7-M Architecture Reference Manual, B12.4
+ * Address: 0xE00400F0
+ * Reference: Arm(R) v7-M Architecture Reference Manual, C1-752
  */
 #define TPIU_SPPR                (*(volatile uint32_t *)(TPIU_BASE_ADDR + 0x0F0))
 
 /**
  * TPIU Formatter and Flush Status Register (TPIU_FFSR)
- * TPIU 格式化器和刷新状态寄存器
- * Reference: Arm(R) v7-M Architecture Reference Manual, B12.5
+ * Address: 0xE0040300
+ * Reference: Arm(R) v7-M Architecture Reference Manual, C1-752
  */
 #define TPIU_FFSR                (*(volatile uint32_t *)(TPIU_BASE_ADDR + 0x300))
 
 /**
  * TPIU Formatter and Flush Control Register (TPIU_FFCR)
- * TPIU 格式化器和刷新控制寄存器
- * Reference: Arm(R) v7-M Architecture Reference Manual, B12.6
+ * Address: 0xE0040304
+ * Reference: Arm(R) v7-M Architecture Reference Manual, C1-753
  */
 #define TPIU_FFCR                (*(volatile uint32_t *)(TPIU_BASE_ADDR + 0x304))
 
 /**
  * TPIU Claim Tag Set Register (TPIU_CLAIMSET)
- * TPIU 声明标签设置寄存器
+ * Address: 0xE0040FA0
+ * Reference: Arm(R) v7-M Architecture Reference Manual, C1-753
  */
 #define TPIU_CLAIMSET            (*(volatile uint32_t *)(TPIU_BASE_ADDR + 0xFA0))
 
 /**
  * TPIU Claim Tag Clear Register (TPIU_CLAIMCLR)
- * TPIU 声明标签清除寄存器
+ * Address: 0xE0040FA4
+ * Reference: Arm(R) v7-M Architecture Reference Manual, C1-753
  */
 #define TPIU_CLAIMCLR            (*(volatile uint32_t *)(TPIU_BASE_ADDR + 0xFA4))
 
 /**
- * TPIU Software Lock Access Register (TPIU_LAR)
- * TPIU 软件锁访问寄存器
- */
-#define TPIU_LAR                 (*(volatile uint32_t *)(TPIU_BASE_ADDR + 0xFB0))
-
-/**
- * TPIU Software Lock Status Register (TPIU_LSR)
- * TPIU 软件锁状态寄存器
- */
-#define TPIU_LSR                 (*(volatile uint32_t *)(TPIU_BASE_ADDR + 0xFB4))
-
-/**
  * TPIU Device Identifier Register (TPIU_DEVID)
- * TPIU 设备标识符寄存器
+ * Address: 0xE0040FC8
+ * Reference: Arm(R) v7-M Architecture Reference Manual, C1-754
  */
 #define TPIU_DEVID               (*(volatile uint32_t *)(TPIU_BASE_ADDR + 0xFC8))
-
-/**
- * TPIU Device Type Register (TPIU_DEVTYPE)
- * TPIU 设备类型寄存器
- */
-#define TPIU_DEVTYPE             (*(volatile uint32_t *)(TPIU_BASE_ADDR + 0xFCC))
-
-/**
- * TPIU Peripheral Identification Register 4 (TPIU_PIDR4)
- * TPIU 外设标识寄存器4
- */
-#define TPIU_PIDR4               (*(volatile uint32_t *)(TPIU_BASE_ADDR + 0xFD0))
-
-/**
- * TPIU Peripheral Identification Register 5 (TPIU_PIDR5)
- * TPIU 外设标识寄存器5
- */
-#define TPIU_PIDR5               (*(volatile uint32_t *)(TPIU_BASE_ADDR + 0xFD4))
-
-/**
- * TPIU Peripheral Identification Register 6 (TPIU_PIDR6)
- * TPIU 外设标识寄存器6
- */
-#define TPIU_PIDR6               (*(volatile uint32_t *)(TPIU_BASE_ADDR + 0xFD8))
-
-/**
- * TPIU Peripheral Identification Register 7 (TPIU_PIDR7)
- * TPIU 外设标识寄存器7
- */
-#define TPIU_PIDR7               (*(volatile uint32_t *)(TPIU_BASE_ADDR + 0xFDC))
-
-/**
- * TPIU Peripheral Identification Register 0 (TPIU_PIDR0)
- * TPIU 外设标识寄存器0
- */
-#define TPIU_PIDR0               (*(volatile uint32_t *)(TPIU_BASE_ADDR + 0xFE0))
-
-/**
- * TPIU Peripheral Identification Register 1 (TPIU_PIDR1)
- * TPIU 外设标识寄存器1
- */
-#define TPIU_PIDR1               (*(volatile uint32_t *)(TPIU_BASE_ADDR + 0xFE4))
-
-/**
- * TPIU Peripheral Identification Register 2 (TPIU_PIDR2)
- * TPIU 外设标识寄存器2
- */
-#define TPIU_PIDR2               (*(volatile uint32_t *)(TPIU_BASE_ADDR + 0xFE8))
-
-/**
- * TPIU Peripheral Identification Register 3 (TPIU_PIDR3)
- * TPIU 外设标识寄存器3
- */
-#define TPIU_PIDR3               (*(volatile uint32_t *)(TPIU_BASE_ADDR + 0xFEC))
-
-/**
- * TPIU Component Identification Register 0 (TPIU_CIDR0)
- * TPIU 组件标识寄存器0
- */
-#define TPIU_CIDR0               (*(volatile uint32_t *)(TPIU_BASE_ADDR + 0xFF0))
-
-/**
- * TPIU Component Identification Register 1 (TPIU_CIDR1)
- * TPIU 组件标识寄存器1
- */
-#define TPIU_CIDR1               (*(volatile uint32_t *)(TPIU_BASE_ADDR + 0xFF4))
-
-/**
- * TPIU Component Identification Register 2 (TPIU_CIDR2)
- * TPIU 组件标识寄存器2
- */
-#define TPIU_CIDR2               (*(volatile uint32_t *)(TPIU_BASE_ADDR + 0xFF8))
-
-/**
- * TPIU Component Identification Register 3 (TPIU_CIDR3)
- * TPIU 组件标识寄存器3
- */
-#define TPIU_CIDR3               (*(volatile uint32_t *)(TPIU_BASE_ADDR + 0xFFC))
 
 /*
  * ============================================================================
  * TPIU Register Bit Definitions
  * TPIU 寄存器位定义
+ * Reference: Arm(R) v7-M Architecture Reference Manual, C1-752
  * ============================================================================
  */
 

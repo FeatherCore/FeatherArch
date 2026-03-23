@@ -18,7 +18,7 @@
 #ifndef __ARCH_ARM_V7M_CONFIG_H__
 #define __ARCH_ARM_V7M_CONFIG_H__
 
-#include &lt;stdint.h&gt;
+#include <stdint.h>
 
 #ifdef __cplusplus
 extern "C" {
@@ -187,8 +187,8 @@ extern "C" {
 #endif
 
 /**
- * Number of DWT Comparators (0-4)
- * DWT 比较器数量 (0-4)
+ * Number of DWT Comparators (0-15)
+ * DWT 比较器数量 (0-15)
  * Reference: Chapter C1.8 - The Data Watchpoint and Trace unit
  */
 #ifndef __DWT_NUM_COMPARATORS
@@ -243,6 +243,7 @@ extern "C" {
 /**
  * Number of breakpoints supported
  * 支持的断点数量
+ * Reference: Chapter C1.11 - Flash Patch and Breakpoint unit
  */
 #ifndef __NUM_BRP
 #define __NUM_BRP                     6U
@@ -251,6 +252,7 @@ extern "C" {
 /**
  * Number of watchpoints supported
  * 支持的观察点数量
+ * Reference: Chapter C1.8 - The Data Watchpoint and Trace unit
  */
 #ifndef __NUM_WRP
 #define __NUM_WRP                     4U
@@ -283,31 +285,6 @@ extern "C" {
 
 /*
  * ============================================================================
- * Performance Monitor Unit (PMU) Configuration
- * 性能监视器单元 (PMU) 配置
- * ============================================================================
- */
-
-/**
- * PMU Present: 0 = No PMU, 1 = Performance Monitor Unit is present
- * PMU 存在: 0 = 无 PMU, 1 = 性能监视器单元存在
- * Reference: Chapter B3.6 - Performance Monitors Extension
- */
-#ifndef __PMU_PRESENT
-#define __PMU_PRESENT                0U
-#endif
-
-/**
- * Number of PMU Event Counters (0-4)
- * PMU 事件计数器数量 (0-4)
- * Reference: Chapter B3.6 - Performance Monitors Extension
- */
-#ifndef __PMU_NUM_COUNTERS
-#define __PMU_NUM_COUNTERS           4U
-#endif
-
-/*
- * ============================================================================
  * Architecture Feature Checks
  * 架构功能检查
  * ============================================================================
@@ -317,7 +294,7 @@ extern "C" {
  * Check if DSP extension is available with ARMv7-M (requires ARMv7E-M)
  * 检查 ARMv7-M 是否支持 DSP 扩展 (需要 ARMv7E-M)
  */
-#if (__DSP_PRESENT == 1) &amp;&amp; (__ARM_ARCH_V7EM__ == 0)
+#if (__DSP_PRESENT == 1) && (__ARM_ARCH_V7EM__ == 0)
 #error "DSP extension is only available on ARMv7E-M"
 #endif
 

@@ -6,52 +6,55 @@
  * Description: ARMv7-M FPU function implementations
  * 描述: ARMv7-M FPU 函数实现
  *
- * Reference: Arm(R) v7-M Architecture Reference Manual
+ * Reference: Arm(R) v7-M Architecture Reference Manual (DDI 0403E.e)
  *   - Chapter B4: Floating-point Support
+ *   - Table B3-5 Summary of additional SCB registers for the FP extension (page B3-597)
  * ============================================================================
  * SPDX-License-Identifier: Apache-2.0
  */
 
 #include "armv7-m/armv7-m_fpu.h"
+#include "armv7-m/armv7-m_nvic.h"
 
 /*
  * ============================================================================
  * FPU Enable/Disable
  * FPU 启用/禁用
+ * Reference: Arm(R) v7-M Architecture Reference Manual, B3-614 (CPACR register)
  * ============================================================================
  */
 
 void fpu_enable(void)
 {
-    uint32_t cpacr = FPU_CPACR;
+    uint32_t cpacr = SCB_CPACR;
     
-    cpacr &= ~(FPU_CPACR_CP11_Msk | FPU_CPACR_CP10_Msk);
-    cpacr |= (CPACR_CP_FULL_ACCESS << FPU_CPACR_CP11_Pos) | 
-             (CPACR_CP_FULL_ACCESS << FPU_CPACR_CP10_Pos);
+    cpacr &= ~(CPACR_CP11_Msk | CPACR_CP10_Msk);
+    cpacr |= (CPACR_CP_FULL_ACCESS << CPACR_CP11_Pos) | 
+             (CPACR_CP_FULL_ACCESS << CPACR_CP10_Pos);
     
-    FPU_CPACR = cpacr;
+    SCB_CPACR = cpacr;
     
-    __asm__ volatile("dsb");
-    __asm__ volatile("isb");
+    __asm__ volatile("dsb" ::: "memory");
+    __asm__ volatile("isb" ::: "memory");
 }
 
 void fpu_disable(void)
 {
-    uint32_t cpacr = FPU_CPACR;
+    uint32_t cpacr = SCB_CPACR;
     
-    cpacr &= ~(FPU_CPACR_CP11_Msk | FPU_CPACR_CP10_Msk);
+    cpacr &= ~(CPACR_CP11_Msk | CPACR_CP10_Msk);
     
-    FPU_CPACR = cpacr;
+    SCB_CPACR = cpacr;
     
-    __asm__ volatile("dsb");
-    __asm__ volatile("isb");
+    __asm__ volatile("dsb" ::: "memory");
+    __asm__ volatile("isb" ::: "memory");
 }
 
 bool fpu_is_enabled(void)
 {
-    uint32_t cpacr = FPU_CPACR;
-    uint32_t cp10 = (cpacr & FPU_CPACR_CP10_Msk) >> FPU_CPACR_CP10_Pos;
-    uint32_t cp11 = (cpacr & FPU_CPACR_CP11_Msk) >> FPU_CPACR_CP11_Pos;
+    uint32_t cpacr = SCB_CPACR;
+    uint32_t cp10 = (cpacr & CPACR_CP10_Msk) >> CPACR_CP10_Pos;
+    uint32_t cp11 = (cpacr & CPACR_CP11_Msk) >> CPACR_CP11_Pos;
     
     return (cp10 == CPACR_CP_FULL_ACCESS) && (cp11 == CPACR_CP_FULL_ACCESS);
 }
@@ -60,6 +63,7 @@ bool fpu_is_enabled(void)
  * ============================================================================
  * FPU Type Identification
  * FPU 类型识别
+ * Reference: Arm(R) v7-M Architecture Reference Manual, B4-662 (MVFR0 register)
  * ============================================================================
  */
 
@@ -67,21 +71,24 @@ uint32_t fpu_get_type(void)
 {
     uint32_t mvfr0 = FPU_MVFR0;
     
+    /* Check FP rounding modes support */
     if ((mvfr0 & 0xF) == 0) {
-        return 0;
+        return 0;  /* No FPU */
     }
     
+    /* Check double precision support */
     if ((mvfr0 & 0xF0) == 0) {
-        return 1;
+        return 1;  /* Single precision only */
     }
     
-    return 2;
+    return 2;  /* Single and double precision */
 }
 
 /*
  * ============================================================================
  * Lazy State Preservation
  * 惰性状态保存
+ * Reference: Arm(R) v7-M Architecture Reference Manual, B3-615 (FPCCR register)
  * ============================================================================
  */
 
@@ -97,66 +104,46 @@ void fpu_disable_lazy_preservation(void)
 
 /*
  * ============================================================================
- * FPSCR Configuration
- * FPSCR 配置
+ * FPDSCR Configuration
+ * FPU 默认状态控制寄存器配置
+ * Reference: Arm(R) v7-M Architecture Reference Manual, B3-617 (FPDSCR register)
  * ============================================================================
  */
 
-uint32_t fpu_get_fpscr(void)
+uint32_t fpu_get_fpdscr(void)
 {
-    return FPU_FPSCR;
+    return FPU_FPDSCR;
 }
 
-void fpu_set_fpscr(uint32_t fpscr)
+void fpu_set_fpdscr(uint32_t fpdscr)
 {
-    FPU_FPSCR = fpscr;
+    FPU_FPDSCR = fpdscr;
 }
 
 void fpu_set_rounding_mode(uint32_t mode)
 {
-    uint32_t fpscr = FPU_FPSCR;
-    fpscr &= ~FPU_FPSCR_RMode_Msk;
-    fpscr |= (mode << FPU_FPSCR_RMode_Pos);
-    FPU_FPSCR = fpscr;
+    uint32_t fpdscr = FPU_FPDSCR;
+    fpdscr &= ~FPU_FPDSCR_RMode_Msk;
+    fpdscr |= (mode << FPU_FPDSCR_RMode_Pos);
+    FPU_FPDSCR = fpdscr;
 }
 
 void fpu_enable_flush_to_zero(void)
 {
-    FPU_FPSCR |= FPU_FPSCR_FZ_Msk;
+    FPU_FPDSCR |= FPU_FPDSCR_FZ_Msk;
 }
 
 void fpu_disable_flush_to_zero(void)
 {
-    FPU_FPSCR &= ~FPU_FPSCR_FZ_Msk;
+    FPU_FPDSCR &= ~FPU_FPDSCR_FZ_Msk;
 }
 
 void fpu_enable_default_nan(void)
 {
-    FPU_FPSCR |= FPU_FPSCR_DN_Msk;
+    FPU_FPDSCR |= FPU_FPDSCR_DN_Msk;
 }
 
 void fpu_disable_default_nan(void)
 {
-    FPU_FPSCR &= ~FPU_FPSCR_DN_Msk;
-}
-
-/*
- * ============================================================================
- * Exception Handling
- * 异常处理
- * ============================================================================
- */
-
-void fpu_clear_exceptions(void)
-{
-    uint32_t fpscr = FPU_FPSCR;
-    fpscr &= ~(FPU_FPSCR_IOC_Msk | FPU_FPSCR_DZC_Msk | FPU_FPSCR_OFC_Msk | 
-               FPU_FPSCR_UFC_Msk | FPU_FPSCR_IXC_Msk | FPU_FPSCR_IDC_Msk);
-    FPU_FPSCR = fpscr;
-}
-
-uint32_t fpu_get_exceptions(void)
-{
-    return FPU_FPSCR & (FPU_FPSCR_IOC_Msk | FPU_FPSCR_DZC_Msk | FPU_FPSCR_OFC_Msk | 
-                        FPU_FPSCR_UFC_Msk | FPU_FPSCR_IXC_Msk | FPU_FPSCR_IDC_Msk);
+    FPU_FPDSCR &= ~FPU_FPDSCR_DN_Msk;
 }
