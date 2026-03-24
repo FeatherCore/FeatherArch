@@ -7,6 +7,16 @@
  * 描述: ARMv7-M SysTick 定时器定义和函数声明
  *
  * Reference: Arm(R) v7-M Architecture Reference Manual (DDI 0403E.e)
+ *   - Chapter A2: Application Level Programmers' Model
+ *     * A2.4 Exceptions, faults and interrupts (page A2-33)
+ *       - A2.4.1 System-related events
+ *       - SysTick is a system timer for OS scheduling
+ *       - Associated interrupt for periodic tasks
+ *       - Reference: Chapter A2.3.4 Privileged execution (page A2-32)
+ *         * SysTick handler runs in Handler mode with privileged access
+ *   - Chapter A3: Arm Architecture Memory Model
+ *     * A3.1 Address space (page A3-64)
+ *       - Memory-mapped SysTick registers in SCS
  *   - Chapter B3.3 - The system timer, SysTick
  *   - Table B3-7 SysTick register summary (page B3-621)
  * ============================================================================
@@ -145,18 +155,14 @@ uint32_t systick_config(uint32_t ticks, uint8_t use_processor_clock, uint8_t ena
  * @return Current counter value
  * Reference: Arm(R) v7-M Architecture Reference Manual, B3-622
  */
-static inline uint32_t systick_get_value(void) {
-    return SYST_CVR;
-}
+uint32_t systick_get_value(void);
 
 /**
  * @brief Set SysTick reload value
  * @param value Reload value (1-0xFFFFFF)
  * Reference: Arm(R) v7-M Architecture Reference Manual, B3-622
  */
-static inline void systick_set_reload(uint32_t value) {
-    SYST_RVR = (value & SYST_RVR_RELOAD_Msk);
-}
+void systick_set_reload(uint32_t value);
 
 /**
  * @brief Get SysTick reload value
@@ -171,17 +177,13 @@ static inline uint32_t systick_get_reload(void) {
  * @brief Enable SysTick counter
  * Reference: Arm(R) v7-M Architecture Reference Manual, B3-621
  */
-static inline void systick_enable(void) {
-    SYST_CSR |= SYST_CSR_ENABLE_Msk;
-}
+void systick_enable(void);
 
 /**
  * @brief Disable SysTick counter
  * Reference: Arm(R) v7-M Architecture Reference Manual, B3-621
  */
-static inline void systick_disable(void) {
-    SYST_CSR &= ~SYST_CSR_ENABLE_Msk;
-}
+void systick_disable(void);
 
 /**
  * @brief Enable SysTick interrupt
@@ -217,35 +219,27 @@ static inline void systick_set_clock_source(uint8_t source) {
  * @return 1 if counter reached zero since last read, 0 otherwise
  * Reference: Arm(R) v7-M Architecture Reference Manual, B3-621
  */
-static inline uint32_t systick_get_count_flag(void) {
-    return (SYST_CSR & SYST_CSR_COUNTFLAG_Msk) ? 1U : 0U;
-}
+uint32_t systick_get_count_flag(void);
 
 /**
  * @brief Get SysTick calibration value
  * @return Calibration value
  * Reference: Arm(R) v7-M Architecture Reference Manual, B3-623
  */
-static inline uint32_t systick_get_calib(void) {
-    return SYST_CALIB;
-}
+uint32_t systick_get_calib(void);
 
 /**
  * @brief Check if external reference clock is available
  * @return 1 if available, 0 if not
  * Reference: Arm(R) v7-M Architecture Reference Manual, B3-623
  */
-static inline uint32_t systick_has_external_clock(void) {
-    return (SYST_CALIB & SYST_CALIB_NOREF_Msk) ? 0U : 1U;
-}
+uint32_t systick_has_external_clock(void);
 
 /**
  * @brief Reset SysTick counter
  * Reference: Arm(R) v7-M Architecture Reference Manual, B3-622
  */
-static inline void systick_reset(void) {
-    SYST_CVR = 0U;
-}
+void systick_reset(void);
 
 #ifdef __cplusplus
 }

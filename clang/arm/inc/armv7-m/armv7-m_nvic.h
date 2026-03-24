@@ -13,6 +13,22 @@
  * - Priority management functions
  *
  * Reference: Arm(R) v7-M Architecture Reference Manual (DDI 0403E.e)
+ *   - Chapter A2: Application Level Programmers' Model
+ *     * A2.4 Exceptions, faults and interrupts (page A2-33)
+ *       - A2.4.1 System-related events
+ *       - NVIC controls external interrupts
+ *       - PendSV for deferred supervisor calls
+ *       - Reference: Chapter A2.3.4 Privileged execution (page A2-32)
+ *         * All exceptions execute as privileged code in Handler mode
+ *   - Chapter A3: Arm Architecture Memory Model
+ *     * A3.1 Address space (page A3-64)
+ *       - Memory-mapped NVIC registers in SCS (System Control Space)
+ *   - Chapter A4: The Armv7-M Instruction Set
+ *     * A4.3 Branch instructions (page A4-106)
+ *       - Exception entry uses hardware stacking and vector fetch
+ *     * A4.9 Exception-generating instructions (page A4-119)
+ *       - SVC instruction for supervisor calls
+ *       - BKPT instruction for breakpoints
  *   - Chapter B3.4 - Nested Vectored Interrupt Controller, NVIC
  *   - Table B3-4 Summary of SCB registers (page B3-596)
  *   - Table B3-6 Summary of system control and ID registers not in the SCB (page B3-597)
@@ -638,6 +654,256 @@ void scb_set_vtor(uint32_t offset);
  * Reference: Arm(R) v7-M ARM Chapter B3.4 (Nested Vectored Interrupt Controller) - VTOR register
  */
 uint32_t scb_get_vtor(void);
+
+/*
+ * ============================================================================
+ * SCB System Handler Functions
+ * SCB 系统处理函数声明
+ * Reference: Chapter B3.2 - System Control Space (SCS)
+ * ============================================================================
+ */
+
+/**
+ * @brief Set system handler priority
+ * @param handler System handler number (0-15)
+ * @param priority Priority value
+ * Reference: Arm(R) v7-M ARM Chapter B3.2 (System Control Space) - SHPR registers
+ */
+void scb_set_shpr(uint8_t handler, uint8_t priority);
+
+/**
+ * @brief Get system handler priority
+ * @param handler System handler number (0-15)
+ * @return Priority value
+ * Reference: Arm(R) v7-M ARM Chapter B3.2 (System Control Space) - SHPR registers
+ */
+uint8_t scb_get_shpr(uint8_t handler);
+
+/**
+ * @brief Enable system handler
+ * @param handler System handler to enable
+ * Reference: Arm(R) v7-M ARM Chapter B3.2 (System Control Space) - SHCSR register
+ */
+void scb_enable_system_handler(uint32_t handler);
+
+/**
+ * @brief Disable system handler
+ * @param handler System handler to disable
+ * Reference: Arm(R) v7-M ARM Chapter B3.2 (System Control Space) - SHCSR register
+ */
+void scb_disable_system_handler(uint32_t handler);
+
+/**
+ * @brief Get system handler pending status
+ * @param handler System handler
+ * @return 1 if pending, 0 otherwise
+ * Reference: Arm(R) v7-M ARM Chapter B3.2 (System Control Space) - SHCSR register
+ */
+uint32_t scb_get_system_handler_pending(uint32_t handler);
+
+/**
+ * @brief Set system handler pending
+ * @param handler System handler
+ * Reference: Arm(R) v7-M ARM Chapter B3.2 (System Control Space) - ICSR register
+ */
+void scb_set_system_handler_pending(uint32_t handler);
+
+/**
+ * @brief Clear system handler pending
+ * @param handler System handler
+ * Reference: Arm(R) v7-M ARM Chapter B3.2 (System Control Space) - ICSR register
+ */
+void scb_clear_system_handler_pending(uint32_t handler);
+
+/*
+ * ============================================================================
+ * SCB Fault Status Functions
+ * SCB 故障状态函数声明
+ * Reference: Chapter B3.2 - System Control Space (SCS)
+ * ============================================================================
+ */
+
+/**
+ * @brief Get Configurable Fault Status Register
+ * @return CFSR value
+ * Reference: Arm(R) v7-M ARM Chapter B3.2 (System Control Space) - CFSR register
+ */
+uint32_t scb_get_cfsr(void);
+
+/**
+ * @brief Clear Configurable Fault Status Register
+ * Reference: Arm(R) v7-M ARM Chapter B3.2 (System Control Space) - CFSR register
+ */
+void scb_clear_cfsr(void);
+
+/**
+ * @brief Get HardFault Status Register
+ * @return HFSR value
+ * Reference: Arm(R) v7-M ARM Chapter B3.2 (System Control Space) - HFSR register
+ */
+uint32_t scb_get_hfsr(void);
+
+/**
+ * @brief Clear HardFault Status Register
+ * Reference: Arm(R) v7-M ARM Chapter B3.2 (System Control Space) - HFSR register
+ */
+void scb_clear_hfsr(void);
+
+/**
+ * @brief Get Debug Fault Status Register
+ * @return DFSR value
+ * Reference: Arm(R) v7-M ARM Chapter C1.6 (Debug) - DFSR register
+ */
+uint32_t scb_get_dfsr(void);
+
+/**
+ * @brief Clear Debug Fault Status Register
+ * Reference: Arm(R) v7-M ARM Chapter C1.6 (Debug) - DFSR register
+ */
+void scb_clear_dfsr(void);
+
+/**
+ * @brief Get MemManage Fault Address Register
+ * @return MMFAR value
+ * Reference: Arm(R) v7-M ARM Chapter B3.2 (System Control Space) - MMFAR register
+ */
+uint32_t scb_get_mmfar(void);
+
+/**
+ * @brief Get BusFault Address Register
+ * @return BFAR value
+ * Reference: Arm(R) v7-M ARM Chapter B3.2 (System Control Space) - BFAR register
+ */
+uint32_t scb_get_bfar(void);
+
+/**
+ * @brief Get Auxiliary Fault Status Register
+ * @return AFSR value
+ * Reference: Arm(R) v7-M ARM Chapter B3.2 (System Control Space) - AFSR register
+ */
+uint32_t scb_get_afsr(void);
+
+/**
+ * @brief Set Auxiliary Fault Status Register
+ * @param value Value to write
+ * Reference: Arm(R) v7-M ARM Chapter B3.2 (System Control Space) - AFSR register
+ */
+void scb_set_afsr(uint32_t value);
+
+/*
+ * ============================================================================
+ * SCB System Control Functions
+ * SCB 系统控制函数声明
+ * Reference: Chapter B3.2 - System Control Space (SCS)
+ * ============================================================================
+ */
+
+/**
+ * @brief Set system control register
+ * @param value SCR value
+ * Reference: Arm(R) v7-M ARM Chapter B3.2 (System Control Space) - SCR register
+ */
+void scb_set_scr(uint32_t value);
+
+/**
+ * @brief Get system control register
+ * @return SCR value
+ * Reference: Arm(R) v7-M ARM Chapter B3.2 (System Control Space) - SCR register
+ */
+uint32_t scb_get_scr(void);
+
+/**
+ * @brief Set configuration and control register
+ * @param value CCR value
+ * Reference: Arm(R) v7-M ARM Chapter B3.2 (System Control Space) - CCR register
+ */
+void scb_set_ccr(uint32_t value);
+
+/**
+ * @brief Get configuration and control register
+ * @return CCR value
+ * Reference: Arm(R) v7-M ARM Chapter B3.2 (System Control Space) - CCR register
+ */
+uint32_t scb_get_ccr(void);
+
+/**
+ * @brief Get CPUID register
+ * @return CPUID value
+ * Reference: Arm(R) v7-M ARM Chapter B3.2 (System Control Space) - CPUID register
+ */
+uint32_t scb_get_cpuid(void);
+
+/**
+ * @brief Get Interrupt Control and State Register
+ * @return ICSR value
+ * Reference: Arm(R) v7-M ARM Chapter B3.2 (System Control Space) - ICSR register
+ */
+uint32_t scb_get_icsr(void);
+
+/**
+ * @brief Set Interrupt Control and State Register
+ * @param value ICSR value
+ * Reference: Arm(R) v7-M ARM Chapter B3.2 (System Control Space) - ICSR register
+ */
+void scb_set_icsr(uint32_t value);
+
+/**
+ * @brief Set coprocessor access control
+ * @param cp10 CP10 access value (0-3)
+ * @param cp11 CP11 access value (0-3)
+ * Reference: Arm(R) v7-M ARM Chapter B3.2 (System Control Space) - CPACR register
+ */
+void scb_set_cpacr(uint32_t cp10, uint32_t cp11);
+
+/**
+ * @brief Get coprocessor access control
+ * @return CPACR value
+ * Reference: Arm(R) v7-M ARM Chapter B3.2 (System Control Space) - CPACR register
+ */
+uint32_t scb_get_cpacr(void);
+
+/*
+ * ============================================================================
+ * SCB Cache Control Functions
+ * SCB 缓存控制函数声明
+ * Reference: Chapter B3.2 - System Control Space (SCS)
+ * ============================================================================
+ */
+
+/**
+ * @brief Get Cache Level ID Register
+ * @return CLIDR value
+ * Reference: Arm(R) v7-M ARM Chapter B3.2 (System Control Space) - CLIDR register
+ */
+uint32_t scb_get_clidr(void);
+
+/**
+ * @brief Get Cache Type Register
+ * @return CTR value
+ * Reference: Arm(R) v7-M ARM Chapter B3.2 (System Control Space) - CTR register
+ */
+uint32_t scb_get_ctr(void);
+
+/**
+ * @brief Get Cache Size ID Register
+ * @return CCSIDR value
+ * Reference: Arm(R) v7-M ARM Chapter B3.2 (System Control Space) - CCSIDR register
+ */
+uint32_t scb_get_ccsidr(void);
+
+/**
+ * @brief Set Cache Size Selection Register
+ * @param value CSSELR value
+ * Reference: Arm(R) v7-M ARM Chapter B3.2 (System Control Space) - CSSELR register
+ */
+void scb_set_csselr(uint32_t value);
+
+/**
+ * @brief Get Cache Size Selection Register
+ * @return CSSELR value
+ * Reference: Arm(R) v7-M ARM Chapter B3.2 (System Control Space) - CSSELR register
+ */
+uint32_t scb_get_csselr(void);
 
 #ifdef __cplusplus
 }

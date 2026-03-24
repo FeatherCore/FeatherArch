@@ -7,8 +7,41 @@
  * 描述: ARMv7-M MPU 寄存器定义和函数声明
  *
  * Reference: Arm(R) v7-M Architecture Reference Manual (DDI 0403E.e)
- *   - Chapter B3.5 - Protected Memory System Architecture, PMSAv7
- *   - Table B3-11 MPU register summary (page B3-635)
+ *   - Chapter A2: Application Level Programmers' Model
+ *     * A2.3.4 Privileged execution (page A2-32)
+ *       - MPU controls access rights for privileged vs unprivileged execution
+ *   - Chapter A3: Arm Architecture Memory Model
+ *     * A3.1 Address space (page A3-64)
+ *       - 32-bit flat address space (0 to 2^32-1)
+ *     * A3.2 Alignment support (page A3-65)
+ *       - MPU regions must be aligned to region size
+ *     * A3.5 Memory types and attributes (page A3-78)
+ *       - Normal, Device, Strongly-ordered memory types
+ *       - Shareability and cacheability attributes
+ *     * A3.6 Access rights (page A3-87)
+ *       - Memory access permissions (AP bits)
+ *   - Chapter B1: System Level Programmers' Model
+ *     * B1.3.1 Modes, privilege and stacks (page B1-512)
+ *       - MPU controls access rights for privileged vs unprivileged execution
+ *     * B1.5.6 Fault behavior (page B1-531)
+ *       - MPU faults generate MemManage exceptions
+ *   - Chapter B3: System Address Map
+ *     * B3.5 Protected Memory System Architecture, PMSAv7 (page B3-632)
+ *       - B3.5.1 PMSAv7 architecture (page B3-632)
+ *       - B3.5.2 Memory region attributes (page B3-633)
+ *       - Table B3-11 MPU register summary (page B3-635)
+ *       - B3.5.3 MPU register descriptions (page B3-635)
+ *         * MPU_TYPE - MPU Type Register
+ *         * MPU_CTRL - MPU Control Register
+ *         * MPU_RNR - MPU Region Number Register
+ *         * MPU_RBAR - MPU Region Base Address Register
+ *         * MPU_RASR - MPU Region Attribute and Size Register
+ *       - B3.5.4 Memory region programming (page B3-641)
+ *       - B3.5.5 Updates to the MPU region structure (page B3-643)
+ *       - B3.5.6 MPU access permission attributes (page B3-644)
+ *         * Table B3-12 AP encoding and access permissions
+ *       - B3.5.7 MPU matching against the system address map (page B3-645)
+ *       - B3.5.8 MPU faults (page B3-645)
  * ============================================================================
  * SPDX-License-Identifier: Apache-2.0
  */
@@ -392,6 +425,49 @@ uint32_t mpu_calc_size(uint32_t size);
  * @return true if aligned, false otherwise
  */
 bool mpu_is_addr_aligned(uint32_t addr, uint32_t size);
+
+/**
+ * @brief Get MPU region base address
+ * @param region Region number
+ * @return Base address
+ * Reference: Arm(R) v7-M Architecture Reference Manual, B3-638 (MPU_RBAR register)
+ */
+uint32_t mpu_get_region_base(uint32_t region);
+
+/**
+ * @brief Get MPU region attributes
+ * @param region Region number
+ * @return Region attributes
+ * Reference: Arm(R) v7-M Architecture Reference Manual, B3-639 (MPU_RASR register)
+ */
+uint32_t mpu_get_region_attr(uint32_t region);
+
+/**
+ * @brief Check if MPU region is enabled
+ * @param region Region number
+ * @return true if enabled, false otherwise
+ * Reference: Arm(R) v7-M Architecture Reference Manual, B3-639 (MPU_RASR register)
+ */
+bool mpu_is_region_enabled(uint32_t region);
+
+/**
+ * @brief Configure MPU region with detailed attributes
+ * @param region Region number
+ * @param base_addr Region base address
+ * @param size Region size encoding
+ * @param ap Access permission
+ * @param tex Type extension
+ * @param s Shareable
+ * @param c Cacheable
+ * @param b Bufferable
+ * @param xn Execute never
+ * @param srd Subregion disable
+ * @return 0 on success, -1 on error
+ * Reference: Arm(R) v7-M Architecture Reference Manual, B3-639 (MPU_RASR register)
+ */
+int32_t mpu_configure_region_ex(uint32_t region, uint32_t base_addr, uint32_t size,
+                                uint32_t ap, uint32_t tex, uint32_t s, uint32_t c,
+                                uint32_t b, uint32_t xn, uint8_t srd);
 
 #ifdef __cplusplus
 }

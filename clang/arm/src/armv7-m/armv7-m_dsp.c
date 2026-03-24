@@ -10,7 +10,42 @@
  * Most DSP operations are implemented as inline functions in armv7-m_dsp.h
  *
  * Reference: Arm(R) v7-M Architecture Reference Manual (DDI 0403E.e)
- *   - Chapter A4.4 - DSP Extension instructions
+ *   - Chapter A1: Introduction
+ *     * A1.3 Architecture extensions (page A1-22)
+ *       - DSP extension adds saturating and unsigned SIMD instructions
+ *       - Armv7E-M implementation includes DSP extension
+ *   - Chapter A2: Application Level Programmers' Model
+ *     * A2.2 Arm processor data types and arithmetic (page A2-25)
+ *       - SIMD data types: 8-bit x 4, 16-bit x 2 operations
+ *       - Saturation arithmetic (Q flag in APSR)
+ *       - Pseudocode details of saturation
+ *     * A2.3.2 The Application Program Status Register (APSR) (page A2-31)
+ *       - GE[3:0] flags for SIMD operations
+ *       - Q flag for saturation detection (sticky bit)
+ *   - Chapter A4.4 Data-processing instructions (page A4-107)
+ *     * A4.4.3 Multiply instructions (page A4-109)
+ *       - Table A4-6 Signed multiply instructions, Armv7-M DSP extension
+ *         * SMLAD, SMLADX, SMLSD, SMLSDX (Dual multiply accumulate/subtract)
+ *         * SMUAD, SMUADX, SMUSD, SMUSDX (Dual multiply add/subtract)
+ *     * A4.4.4 Saturating instructions (page A4-110)
+ *       - Table A4-10 Halfword saturating instructions, Armv7-M DSP extension
+ *         * SSAT16, USAT16
+ *       - Table A4-11 Saturating addition and subtraction instructions
+ *         * QADD, QSUB, QDADD, QDSUB
+ *     * A4.4.5 Packing and unpacking instructions (page A4-111)
+ *       - Table A4-13 Packing and unpacking instructions, Armv7-M DSP extension
+ *         * PKHBT, PKHTB (Pack Halfword)
+ *         * SXTAB, SXTAB16, SXTAH, SXTB16 (Signed extend and add)
+ *         * UXTAB, UXTAB16, UXTAH, UXTB16 (Unsigned extend and add)
+ *     * A4.4.7 Parallel addition and subtraction instructions, DSP extension (page A4-112)
+ *       - Table A4-14 Parallel addition and subtraction instructions
+ *         * Prefixes: S (Signed), Q (Saturating), SH (Signed Halving)
+ *         *           U (Unsigned), UQ (Unsigned Saturating), UH (Unsigned Halving)
+ *         * Operations: ADD16, ASX, SAX, SUB16, ADD8, SUB8
+ *     * A4.4.8 Miscellaneous data-processing instructions (page A4-113)
+ *       - Table A4-16 Miscellaneous data-processing instructions, Armv7-M DSP extension
+ *         * SEL (Select Bytes using GE flags)
+ *         * USAD8, USADA8 (Unsigned Sum of Absolute Differences)
  * ============================================================================
  * SPDX-License-Identifier: Apache-2.0
  */
@@ -29,7 +64,12 @@
  * @brief Initialize DSP extension
  * 初始化DSP扩展
  * Enables DSP instructions by ensuring the processor is in appropriate mode.
- * Reference: Arm(R) v7-M ARM, A4.4 - DSP Extension
+ *
+ * Reference: Chapter A1.3 Architecture extensions (page A1-22)
+ *   - DSP extension adds saturating and unsigned SIMD instructions
+ *   - Armv7E-M implementation includes DSP extension
+ *   - Reference: Chapter A2.3.2 The Application Program Status Register (APSR) (page A2-31)
+ *     * Q flag is sticky - must be cleared explicitly
  */
 void dsp_init(void)
 {

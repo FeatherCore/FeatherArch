@@ -173,7 +173,6 @@ extern "C" {
  * 检测并包含特定的 Cortex-M 核心头文件
  *
  * __CORTEX_M is defined in device-specific header or can be predefined:
- * - 3 for Cortex-M3
  * - 4 for Cortex-M4
  * - 7 for Cortex-M7
  */
@@ -184,10 +183,11 @@ extern "C" {
     #elif (__CORTEX_M == 7)
         /* Cortex-M7 specific features (DSP + FPU with double precision option) */
         #include "cm7/cm7.h"
-    #elif (__CORTEX_M == 3)
-        /* Cortex-M3 specific features (Base ARMv7-M) */
-        /* No additional includes needed for M3 */
+    #else
+        #error "Unsupported Cortex-M core. Only Cortex-M4 and Cortex-M7 are currently implemented."
     #endif
+#else
+    #error "__CORTEX_M must be defined (4 for Cortex-M4, 7 for Cortex-M7)"
 #endif
 
 /*

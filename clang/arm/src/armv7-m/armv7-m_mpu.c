@@ -7,6 +7,25 @@
  * 描述: ARMv7-M MPU 函数实现
  *
  * Reference: Arm(R) v7-M Architecture Reference Manual (DDI 0403E.e)
+ *   - Chapter A2: Application Level Programmers' Model
+ *     * A2.3.4 Privileged execution (page A2-32)
+ *       - MPU controls access rights for privileged vs unprivileged execution
+ *       - Thread mode privilege controlled by nPRIV bit
+ *   - Chapter A3: Arm Architecture Memory Model
+ *     * A3.1 Address space (page A3-64)
+ *       - 32-bit flat address space (0 to 2^32-1)
+ *     * A3.2 Alignment support (page A3-65)
+ *       - MPU regions must be aligned to region size
+ *       - Region size must be power of 2, minimum 32 bytes
+ *     * A3.5 Memory types and attributes (page A3-78)
+ *       - Normal, Device, Strongly-ordered memory types
+ *       - Shareability and cacheability attributes
+ *       - TEX, C, B, S bits for memory attributes
+ *     * A3.6 Access rights (page A3-87)
+ *       - Memory access permissions (AP bits)
+ *       - Privileged vs unprivileged access control
+ *     * A3.7 Memory access order (page A3-89)
+ *       - DSB and ISB required after MPU configuration changes
  *   - Chapter B3.5: Protected Memory System Architecture, PMSAv7
  *   - Table B3-11 MPU register summary (page B3-635)
  * ============================================================================
@@ -25,6 +44,12 @@
 
 /**
  * @brief Enable MPU
+ *
+ * Reference: Chapter A3.7 Memory access order (page A3-89)
+ *   - DSB and ISB required after enabling MPU
+ *   - Ensures subsequent memory accesses use new MPU settings
+ * Reference: Chapter A2.3.4 Privileged execution (page A2-32)
+ *   - MPU controls access rights for privileged vs unprivileged execution
  * Reference: Arm(R) v7-M ARM Chapter B3.5 (Protected Memory System Architecture) - MPU_CTRL register
  */
 void mpu_enable(void)
@@ -36,6 +61,12 @@ void mpu_enable(void)
 
 /**
  * @brief Disable MPU
+ *
+ * Reference: Chapter A3.7 Memory access order (page A3-89)
+ *   - DSB and ISB required after disabling MPU
+ *   - Ensures all pending memory accesses complete
+ * Reference: Chapter A2.3.4 Privileged execution (page A2-32)
+ *   - When disabled, all accesses use default memory map permissions
  * Reference: Arm(R) v7-M ARM Chapter B3.5 (Protected Memory System Architecture) - MPU_CTRL register
  */
 void mpu_disable(void)

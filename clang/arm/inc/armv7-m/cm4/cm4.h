@@ -10,6 +10,7 @@
  * - Core definitions and configuration
  * - DSP extension functions
  * - FPU (FPv4-SP) functions
+ * - Initialization and system control functions
  *
  * Reference: Arm(R) Cortex-M4 Processor Technical Reference Manual
  *            Arm(R) Cortex-M4 Devices Generic User Guide
@@ -30,6 +31,13 @@ extern "C" {
  * ============================================================================ */
 
 #include "core_cm4.h"
+
+/* ============================================================================
+ * Cortex-M4 Initialization and System Control
+ * Cortex-M4 初始化和系统控制
+ * ============================================================================ */
+
+#include "cm4_init.h"
 
 /* ============================================================================
  * Cortex-M4 DSP Extension
