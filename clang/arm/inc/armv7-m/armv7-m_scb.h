@@ -84,7 +84,6 @@
 #define __ARCH_ARM_V7M_SCB_H__
 
 #include <stdint.h>
-#include "armv7-m_config.h"
 
 #ifdef __cplusplus
 extern "C" {

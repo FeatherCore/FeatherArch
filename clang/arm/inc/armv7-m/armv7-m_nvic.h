@@ -39,7 +39,6 @@
 
 #include <stdint.h>
 #include <stdbool.h>
-#include "armv7-m_config.h"
 #include "armv7-m_scb.h"  /* Include SCB definitions */
 
 #ifdef __cplusplus

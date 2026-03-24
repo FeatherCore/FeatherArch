@@ -28,7 +28,6 @@
 
 #include <stdint.h>
 #include <stdbool.h>
-#include "armv7-m_config.h"
 
 #ifdef __cplusplus
 extern "C" {
