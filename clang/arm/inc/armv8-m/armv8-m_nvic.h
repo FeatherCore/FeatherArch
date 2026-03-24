@@ -97,6 +97,22 @@ extern "C" {
 #define NVIC_IPR_BASE             (NVIC_BASE_ADDR + 0x400)
 #define NVIC_IPR(n)               (*(volatile uint8_t *)(NVIC_IPR_BASE + (n)))
 
+/**
+ * Software Triggered Interrupt Register (STIR)
+ * 软件触发中断寄存器
+ * Reference: Arm(R) v8-M Architecture Reference Manual, D1.2.239
+ * Address: 0xE000EF00
+ */
+#define STIR                      (*(volatile uint32_t *)(0xE000EF00UL))
+#define STIR_NS                   (*(volatile uint32_t *)(0xE002EF00UL))
+
+/**
+ * STIR Register Bit Definitions
+ * STIR 寄存器位定义
+ */
+#define STIR_INTID_Pos            0U
+#define STIR_INTID_Msk            (0x1FFUL << STIR_INTID_Pos)
+
 /*
  * ============================================================================
  * Non-Secure NVIC Register Definitions (TrustZone)
@@ -842,6 +858,24 @@ uint32_t scb_get_vtor(void);
  */
 static inline uint32_t scb_get_active_exception(void) {
     return (SCB_ICSR & SCB_ICSR_VECTACTIVE_Msk) >> SCB_ICSR_VECTACTIVE_Pos;
+}
+
+/**
+ * @brief Trigger software interrupt via STIR
+ * 通过 STIR 触发软件中断
+ * @param intid Interrupt ID (ExceptionNumber - 16)
+ */
+static inline void nvic_trigger_software_interrupt(uint32_t intid) {
+    STIR = (intid << STIR_INTID_Pos) & STIR_INTID_Msk;
+}
+
+/**
+ * @brief Trigger software interrupt via STIR_NS (Non-secure)
+ * 通过 STIR_NS 触发非安全软件中断
+ * @param intid Interrupt ID (ExceptionNumber - 16)
+ */
+static inline void nvic_trigger_software_interrupt_ns(uint32_t intid) {
+    STIR_NS = (intid << STIR_INTID_Pos) & STIR_INTID_Msk;
 }
 
 /**

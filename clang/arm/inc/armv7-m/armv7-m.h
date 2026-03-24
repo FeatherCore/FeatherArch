@@ -163,6 +163,35 @@ extern "C" {
 
 /*
  * ============================================================================
+ * Cortex-M Core Specific Headers
+ * Cortex-M 核心特定头文件
+ * ============================================================================
+ */
+
+/**
+ * Detect and include specific Cortex-M core headers
+ * 检测并包含特定的 Cortex-M 核心头文件
+ *
+ * __CORTEX_M is defined in device-specific header or can be predefined:
+ * - 3 for Cortex-M3
+ * - 4 for Cortex-M4
+ * - 7 for Cortex-M7
+ */
+#if defined(__CORTEX_M)
+    #if (__CORTEX_M == 4)
+        /* Cortex-M4 specific features (DSP + optional FPU) */
+        #include "cm4/cm4.h"
+    #elif (__CORTEX_M == 7)
+        /* Cortex-M7 specific features (DSP + FPU with double precision option) */
+        #include "cm7/cm7.h"
+    #elif (__CORTEX_M == 3)
+        /* Cortex-M3 specific features (Base ARMv7-M) */
+        /* No additional includes needed for M3 */
+    #endif
+#endif
+
+/*
+ * ============================================================================
  * Version Information
  * 版本信息
  * ============================================================================

@@ -1781,6 +1781,108 @@ static inline void mve_init(void) {
     mve_set_vpr(0);
 }
 
+/*
+ * ============================================================================
+ * MVE Vector Register (Qn) Access Functions
+ * MVE 向量寄存器 (Qn) 访问函数
+ * Reference: Arm(R) v8-M Architecture Reference Manual, D1.2.219
+ * ============================================================================
+ */
+
+/**
+ * @brief Get MVE Vector Register Qn (n = 0-7)
+ * 获取MVE向量寄存器 Qn (n = 0-7)
+ * @param n Register number (0-7)
+ * @param low Output low 64 bits
+ * @param high Output high 64 bits
+ */
+static inline void __get_Qn(uint32_t n, uint64_t *low, uint64_t *high) {
+    switch (n) {
+        case 0:
+            __asm__ volatile ("VMOV %0, %H0, d0" : "=r" (*low));
+            __asm__ volatile ("VMOV %0, %H0, d1" : "=r" (*high));
+            break;
+        case 1:
+            __asm__ volatile ("VMOV %0, %H0, d2" : "=r" (*low));
+            __asm__ volatile ("VMOV %0, %H0, d3" : "=r" (*high));
+            break;
+        case 2:
+            __asm__ volatile ("VMOV %0, %H0, d4" : "=r" (*low));
+            __asm__ volatile ("VMOV %0, %H0, d5" : "=r" (*high));
+            break;
+        case 3:
+            __asm__ volatile ("VMOV %0, %H0, d6" : "=r" (*low));
+            __asm__ volatile ("VMOV %0, %H0, d7" : "=r" (*high));
+            break;
+        case 4:
+            __asm__ volatile ("VMOV %0, %H0, d8" : "=r" (*low));
+            __asm__ volatile ("VMOV %0, %H0, d9" : "=r" (*high));
+            break;
+        case 5:
+            __asm__ volatile ("VMOV %0, %H0, d10" : "=r" (*low));
+            __asm__ volatile ("VMOV %0, %H0, d11" : "=r" (*high));
+            break;
+        case 6:
+            __asm__ volatile ("VMOV %0, %H0, d12" : "=r" (*low));
+            __asm__ volatile ("VMOV %0, %H0, d13" : "=r" (*high));
+            break;
+        case 7:
+            __asm__ volatile ("VMOV %0, %H0, d14" : "=r" (*low));
+            __asm__ volatile ("VMOV %0, %H0, d15" : "=r" (*high));
+            break;
+        default:
+            *low = 0;
+            *high = 0;
+            break;
+    }
+}
+
+/**
+ * @brief Set MVE Vector Register Qn (n = 0-7)
+ * 设置MVE向量寄存器 Qn (n = 0-7)
+ * @param n Register number (0-7)
+ * @param low Low 64 bits
+ * @param high High 64 bits
+ */
+static inline void __set_Qn(uint32_t n, uint64_t low, uint64_t high) {
+    switch (n) {
+        case 0:
+            __asm__ volatile ("VMOV d0, %0, %H0" : : "r" (low));
+            __asm__ volatile ("VMOV d1, %0, %H0" : : "r" (high));
+            break;
+        case 1:
+            __asm__ volatile ("VMOV d2, %0, %H0" : : "r" (low));
+            __asm__ volatile ("VMOV d3, %0, %H0" : : "r" (high));
+            break;
+        case 2:
+            __asm__ volatile ("VMOV d4, %0, %H0" : : "r" (low));
+            __asm__ volatile ("VMOV d5, %0, %H0" : : "r" (high));
+            break;
+        case 3:
+            __asm__ volatile ("VMOV d6, %0, %H0" : : "r" (low));
+            __asm__ volatile ("VMOV d7, %0, %H0" : : "r" (high));
+            break;
+        case 4:
+            __asm__ volatile ("VMOV d8, %0, %H0" : : "r" (low));
+            __asm__ volatile ("VMOV d9, %0, %H0" : : "r" (high));
+            break;
+        case 5:
+            __asm__ volatile ("VMOV d10, %0, %H0" : : "r" (low));
+            __asm__ volatile ("VMOV d11, %0, %H0" : : "r" (high));
+            break;
+        case 6:
+            __asm__ volatile ("VMOV d12, %0, %H0" : : "r" (low));
+            __asm__ volatile ("VMOV d13, %0, %H0" : : "r" (high));
+            break;
+        case 7:
+            __asm__ volatile ("VMOV d14, %0, %H0" : : "r" (low));
+            __asm__ volatile ("VMOV d15, %0, %H0" : : "r" (high));
+            break;
+        default:
+            break;
+    }
+}
+
 #ifdef __cplusplus
 }
 #endif

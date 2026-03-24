@@ -280,6 +280,52 @@ static inline uint32_t __get_xPSR(void) {
     return result;
 }
 
+/**
+ * @brief Get Link Register (LR/R14)
+ * @return Current LR value
+ */
+static inline uint32_t __get_LR(void) {
+    uint32_t result;
+    __asm__ volatile ("MOV %0, lr" : "=r" (result));
+    return result;
+}
+
+/**
+ * @brief Set Link Register (LR/R14)
+ * @param lr New LR value
+ */
+static inline void __set_LR(uint32_t lr) {
+    __asm__ volatile ("MOV lr, %0" : : "r" (lr));
+}
+
+/**
+ * @brief Get Program Counter (PC/R15)
+ * @return Current PC value
+ */
+static inline uint32_t __get_PC(void) {
+    uint32_t result;
+    __asm__ volatile ("MOV %0, pc" : "=r" (result));
+    return result;
+}
+
+/**
+ * @brief Get Stack Pointer (SP)
+ * @return Current SP value (MSP or PSP depending on CONTROL.SPSEL)
+ */
+static inline uint32_t __get_SP(void) {
+    uint32_t result;
+    __asm__ volatile ("MOV %0, sp" : "=r" (result));
+    return result;
+}
+
+/**
+ * @brief Set Stack Pointer (SP)
+ * @param sp New SP value
+ */
+static inline void __set_SP(uint32_t sp) {
+    __asm__ volatile ("MOV sp, %0" : : "r" (sp));
+}
+
 /*
  * ============================================================================
  * Memory Barrier Instructions
