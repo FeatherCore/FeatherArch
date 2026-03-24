@@ -118,8 +118,8 @@
 #ifndef __ARCH_ARM_V7M_CORE_H__
 #define __ARCH_ARM_V7M_CORE_H__
 
-#include &lt;stdint.h&gt;
-#include &lt;stdbool.h&gt;
+#include <stdint.h>
+#include <stdbool.h>
 #include "armv7-m_config.h"
 
 #ifdef __cplusplus
@@ -154,56 +154,56 @@ extern "C" {
  *                  Reference: Chapter A2.5 The optional Floating-point Extension (page A2-34)
  */
 #define CONTROL_nPRIV_Pos          0U
-#define CONTROL_nPRIV_Msk         (1UL &lt;&lt; CONTROL_nPRIV_Pos)
+#define CONTROL_nPRIV_Msk         (1UL << CONTROL_nPRIV_Pos)
 #define CONTROL_SPSEL_Pos          1U
-#define CONTROL_SPSEL_Msk          (1UL &lt;&lt; CONTROL_SPSEL_Pos)
+#define CONTROL_SPSEL_Msk          (1UL << CONTROL_SPSEL_Pos)
 #define CONTROL_FPCA_Pos           2U
-#define CONTROL_FPCA_Msk           (1UL &lt;&lt; CONTROL_FPCA_Pos)
+#define CONTROL_FPCA_Msk           (1UL << CONTROL_FPCA_Pos)
 
 /**
  * @brief CONTROL_nPRIV bit: Non-privileged execution level
  * 0: Privileged execution / 特权执行
  * 1: Non-privileged execution / 非特权执行
  */
-#define CONTROL_nPRIV              (1UL &lt;&lt; CONTROL_nPRIV_Pos)
+#define CONTROL_nPRIV              (1UL << CONTROL_nPRIV_Pos)
 
 /**
  * @brief CONTROL_SPSEL bit: Stack pointer select
  * 0: Use MSP (Main Stack Pointer) / 使用 MSP
  * 1: Use PSP (Process Stack Pointer) / 使用 PSP
  */
-#define CONTROL_SPSEL              (1UL &lt;&lt; CONTROL_SPSEL_Pos)
+#define CONTROL_SPSEL              (1UL << CONTROL_SPSEL_Pos)
 
 /**
  * @brief CONTROL_FPCA bit: Floating-point context active
  * 0: No floating-point context active
  * 1: Floating-point context active
  */
-#define CONTROL_FPCA               (1UL &lt;&lt; CONTROL_FPCA_Pos)
+#define CONTROL_FPCA               (1UL << CONTROL_FPCA_Pos)
 
 /**
  * PRIMASK register bit definitions
  * PRIMASK 寄存器位定义
  */
 #define PRIMASK_Pos                0U
-#define PRIMASK_Msk              (1UL &lt;&lt; PRIMASK_Pos)
-#define PRIMASK                  (1UL &lt;&lt; PRIMASK_Pos)
+#define PRIMASK_Msk              (1UL << PRIMASK_Pos)
+#define PRIMASK                  (1UL << PRIMASK_Pos)
 
 /**
  * FAULTMASK register bit definitions
  * FAULTMASK 寄存器位定义
  */
 #define FAULTMASK_Pos             0U
-#define FAULTMASK_Msk            (1UL &lt;&lt; FAULTMASK_Pos)
-#define FAULTMASK                (1UL &lt;&lt; FAULTMASK_Pos)
+#define FAULTMASK_Msk            (1UL << FAULTMASK_Pos)
+#define FAULTMASK                (1UL << FAULTMASK_Pos)
 
 /**
  * BASEPRI register bit definitions
  * BASEPRI 寄存器位定义
  */
 #define BASEPRI_Pos               0U
-#define BASEPRI_Msk              (0xFFUL &lt;&lt; BASEPRI_Pos)
-#define BASEPRI                  (0xFFUL &lt;&lt; BASEPRI_Pos)
+#define BASEPRI_Msk              (0xFFUL << BASEPRI_Pos)
+#define BASEPRI                  (0xFFUL << BASEPRI_Pos)
 
 /**
  * xPSR register bit definitions
@@ -232,31 +232,31 @@ extern "C" {
  * EPSR bits [26:25]: ICI/IT
  */
 #define xPSR_N_Pos               31U
-#define xPSR_N_Msk              (1UL &lt;&lt; xPSR_N_Pos)
+#define xPSR_N_Msk              (1UL << xPSR_N_Pos)
 #define xPSR_Z_Pos               30U
-#define xPSR_Z_Msk              (1UL &lt;&lt; xPSR_Z_Pos)
+#define xPSR_Z_Msk              (1UL << xPSR_Z_Pos)
 #define xPSR_C_Pos               29U
-#define xPSR_C_Msk              (1UL &lt;&lt; xPSR_C_Pos)
+#define xPSR_C_Msk              (1UL << xPSR_C_Pos)
 #define xPSR_V_Pos               28U
-#define xPSR_V_Msk              (1UL &lt;&lt; xPSR_V_Pos)
+#define xPSR_V_Msk              (1UL << xPSR_V_Pos)
 #define xPSR_Q_Pos               27U
-#define xPSR_Q_Msk              (1UL &lt;&lt; xPSR_Q_Pos)
+#define xPSR_Q_Msk              (1UL << xPSR_Q_Pos)
 #define xPSR_GE_Pos              16U
-#define xPSR_GE_Msk             (0xFUL &lt;&lt; xPSR_GE_Pos)
+#define xPSR_GE_Msk             (0xFUL << xPSR_GE_Pos)
 #define xPSR_T_Pos               24U
-#define xPSR_T_Msk              (1UL &lt;&lt; xPSR_T_Pos)
+#define xPSR_T_Msk              (1UL << xPSR_T_Pos)
 #define xPSR_Exception_Pos        0U
-#define xPSR_Exception_Msk       (0x1FFUL &lt;&lt; xPSR_Exception_Pos)
+#define xPSR_Exception_Msk       (0x1FFUL << xPSR_Exception_Pos)
 
 /* xPSR Flag bits */
-#define xPSR_N                   (1UL &lt;&lt; xPSR_N_Pos)
-#define xPSR_Z                   (1UL &lt;&lt; xPSR_Z_Pos)
-#define xPSR_C                   (1UL &lt;&lt; xPSR_C_Pos)
-#define xPSR_V                   (1UL &lt;&lt; xPSR_V_Pos)
-#define xPSR_Q                   (1UL &lt;&lt; xPSR_Q_Pos)
-#define xPSR_GE                  (0xFUL &lt;&lt; xPSR_GE_Pos)
-#define xPSR_T                   (1UL &lt;&lt; xPSR_T_Pos)
-#define xPSR_Exception           (0x1FFUL &lt;&lt; xPSR_Exception_Pos)
+#define xPSR_N                   (1UL << xPSR_N_Pos)
+#define xPSR_Z                   (1UL << xPSR_Z_Pos)
+#define xPSR_C                   (1UL << xPSR_C_Pos)
+#define xPSR_V                   (1UL << xPSR_V_Pos)
+#define xPSR_Q                   (1UL << xPSR_Q_Pos)
+#define xPSR_GE                  (0xFUL << xPSR_GE_Pos)
+#define xPSR_T                   (1UL << xPSR_T_Pos)
+#define xPSR_Exception           (0x1FFUL << xPSR_Exception_Pos)
 
 /*
  * ============================================================================

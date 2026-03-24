@@ -38,6 +38,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+#include <stddef.h>
 #include "armv7-m/armv7-m_rom_table.h"
 
 /*

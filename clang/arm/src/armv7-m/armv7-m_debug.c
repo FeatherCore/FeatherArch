@@ -18,6 +18,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+#include <stddef.h>
 #include "armv7-m/armv7-m_debug.h"
 #include "armv7-m/armv7-m_scs_debug.h"
 

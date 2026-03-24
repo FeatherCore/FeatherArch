@@ -8,9 +8,11 @@
  *
  * This file provides definitions for the Nested Vectored Interrupt Controller:
  * - NVIC register definitions
- * - SCB (System Control Block) register definitions
  * - Interrupt enable/disable/pending functions
  * - Priority management functions
+ *
+ * SCB (System Control Block) definitions are provided by armv7-m_scb.h
+ * which is included by this file for backward compatibility.
  *
  * Reference: Arm(R) v7-M Architecture Reference Manual (DDI 0403E.e)
  *   - Chapter A2: Application Level Programmers' Model
@@ -18,8 +20,6 @@
  *       - A2.4.1 System-related events
  *       - NVIC controls external interrupts
  *       - PendSV for deferred supervisor calls
- *       - Reference: Chapter A2.3.4 Privileged execution (page A2-32)
- *         * All exceptions execute as privileged code in Handler mode
  *   - Chapter A3: Arm Architecture Memory Model
  *     * A3.1 Address space (page A3-64)
  *       - Memory-mapped NVIC registers in SCS (System Control Space)
@@ -30,8 +30,6 @@
  *       - SVC instruction for supervisor calls
  *       - BKPT instruction for breakpoints
  *   - Chapter B3.4 - Nested Vectored Interrupt Controller, NVIC
- *   - Table B3-4 Summary of SCB registers (page B3-596)
- *   - Table B3-6 Summary of system control and ID registers not in the SCB (page B3-597)
  * ============================================================================
  * SPDX-License-Identifier: Apache-2.0
  */
@@ -42,6 +40,7 @@
 #include <stdint.h>
 #include <stdbool.h>
 #include "armv7-m_config.h"
+#include "armv7-m_scb.h"  /* Include SCB definitions */
 
 #ifdef __cplusplus
 extern "C" {
@@ -57,7 +56,6 @@ extern "C" {
 
 #define SCS_BASE_ADDR             0xE000E000UL
 #define NVIC_BASE_ADDR            0xE000E100UL
-#define SCB_BASE_ADDR             0xE000ED00UL
 
 /*
  * ============================================================================
@@ -146,385 +144,6 @@ extern "C" {
  */
 #define NVIC_IPR_BASE             (NVIC_BASE_ADDR + 0x300)
 #define NVIC_IPR(n)               (*(volatile uint8_t *)(NVIC_IPR_BASE + (n)))
-
-/*
- * ============================================================================
- * SCB (System Control Block) Register Definitions
- * 系统控制块寄存器定义
- * Reference: Table B3-4 Summary of SCB registers (page B3-596)
- * ============================================================================
- */
-
-/**
- * CPUID Base Register
- * Address: 0xE000ED00
- * Reference: Arm(R) v7-M Architecture Reference Manual, B3-598
- */
-#define SCB_CPUID                 (*(volatile uint32_t *)(SCB_BASE_ADDR + 0x00))
-
-/**
- * Interrupt Control and State Register (ICSR)
- * Address: 0xE000ED04
- * Reference: Arm(R) v7-M Architecture Reference Manual, B3-599
- */
-#define SCB_ICSR                  (*(volatile uint32_t *)(SCB_BASE_ADDR + 0x04))
-
-/**
- * Vector Table Offset Register (VTOR)
- * Address: 0xE000ED08
- * Reference: Arm(R) v7-M Architecture Reference Manual, B3-601
- */
-#define SCB_VTOR                  (*(volatile uint32_t *)(SCB_BASE_ADDR + 0x08))
-
-/**
- * Application Interrupt and Reset Control Register (AIRCR)
- * Address: 0xE000ED0C
- * Reference: Arm(R) v7-M Architecture Reference Manual, B3-601
- */
-#define SCB_AIRCR                 (*(volatile uint32_t *)(SCB_BASE_ADDR + 0x0C))
-
-/**
- * System Control Register (SCR)
- * Address: 0xE000ED10
- * Reference: Arm(R) v7-M Architecture Reference Manual, B3-603
- */
-#define SCB_SCR                   (*(volatile uint32_t *)(SCB_BASE_ADDR + 0x10))
-
-/**
- * Configuration and Control Register (CCR)
- * Address: 0xE000ED14
- * Reference: Arm(R) v7-M Architecture Reference Manual, B3-604
- */
-#define SCB_CCR                   (*(volatile uint32_t *)(SCB_BASE_ADDR + 0x14))
-
-/**
- * System Handler Priority Register 1 (SHPR1)
- * Address: 0xE000ED18
- * Reference: Arm(R) v7-M Architecture Reference Manual, B3-606
- */
-#define SCB_SHPR1                 (*(volatile uint32_t *)(SCB_BASE_ADDR + 0x18))
-
-/**
- * System Handler Priority Register 2 (SHPR2)
- * Address: 0xE000ED1C
- * Reference: Arm(R) v7-M Architecture Reference Manual, B3-606
- */
-#define SCB_SHPR2                 (*(volatile uint32_t *)(SCB_BASE_ADDR + 0x1C))
-
-/**
- * System Handler Priority Register 3 (SHPR3)
- * Address: 0xE000ED20
- * Reference: Arm(R) v7-M Architecture Reference Manual, B3-607
- */
-#define SCB_SHPR3                 (*(volatile uint32_t *)(SCB_BASE_ADDR + 0x20))
-
-/**
- * System Handler Control and State Register (SHCSR)
- * Address: 0xE000ED24
- * Reference: Arm(R) v7-M Architecture Reference Manual, B3-607
- */
-#define SCB_SHCSR                 (*(volatile uint32_t *)(SCB_BASE_ADDR + 0x24))
-
-/**
- * Configurable Fault Status Register (CFSR)
- * Address: 0xE000ED28
- * Reference: Arm(R) v7-M Architecture Reference Manual, B3-609
- */
-#define SCB_CFSR                  (*(volatile uint32_t *)(SCB_BASE_ADDR + 0x28))
-
-/**
- * HardFault Status Register (HFSR)
- * Address: 0xE000ED2C
- * Reference: Arm(R) v7-M Architecture Reference Manual, B3-612
- */
-#define SCB_HFSR                  (*(volatile uint32_t *)(SCB_BASE_ADDR + 0x2C))
-
-/**
- * Debug Fault Status Register (DFSR)
- * Address: 0xE000ED30
- * Reference: Arm(R) v7-M Architecture Reference Manual, C1-699
- */
-#define SCB_DFSR                  (*(volatile uint32_t *)(SCB_BASE_ADDR + 0x30))
-
-/**
- * MemManage Fault Address Register (MMFAR)
- * Address: 0xE000ED34
- * Reference: Arm(R) v7-M Architecture Reference Manual, B3-613
- */
-#define SCB_MMFAR                 (*(volatile uint32_t *)(SCB_BASE_ADDR + 0x34))
-
-/**
- * BusFault Address Register (BFAR)
- * Address: 0xE000ED38
- * Reference: Arm(R) v7-M Architecture Reference Manual, B3-614
- */
-#define SCB_BFAR                  (*(volatile uint32_t *)(SCB_BASE_ADDR + 0x38))
-
-/**
- * Auxiliary Fault Status Register (AFSR)
- * Address: 0xE000ED3C
- * Reference: Arm(R) v7-M Architecture Reference Manual, B3-614
- */
-#define SCB_AFSR                  (*(volatile uint32_t *)(SCB_BASE_ADDR + 0x3C))
-
-/**
- * Processor Feature Register 0 (ID_PFR0)
- * Address: 0xE000ED40
- * Reference: Arm(R) v7-M Architecture Reference Manual, B4-646
- */
-#define SCB_ID_PFR0               (*(volatile uint32_t *)(SCB_BASE_ADDR + 0x40))
-
-/**
- * Processor Feature Register 1 (ID_PFR1)
- * Address: 0xE000ED44
- * Reference: Arm(R) v7-M Architecture Reference Manual, B4-646
- */
-#define SCB_ID_PFR1               (*(volatile uint32_t *)(SCB_BASE_ADDR + 0x44))
-
-/**
- * Debug Feature Register 0 (ID_DFR0)
- * Address: 0xE000ED48
- * Reference: Arm(R) v7-M Architecture Reference Manual, B4-648
- */
-#define SCB_ID_DFR0               (*(volatile uint32_t *)(SCB_BASE_ADDR + 0x48))
-
-/**
- * Auxiliary Feature Register 0 (ID_AFR0)
- * Address: 0xE000ED4C
- * Reference: Arm(R) v7-M Architecture Reference Manual, B4-649
- */
-#define SCB_ID_AFR0               (*(volatile uint32_t *)(SCB_BASE_ADDR + 0x4C))
-
-/**
- * Memory Model Feature Register 0 (ID_MMFR0)
- * Address: 0xE000ED50
- * Reference: Arm(R) v7-M Architecture Reference Manual, B4-650
- */
-#define SCB_ID_MMFR0              (*(volatile uint32_t *)(SCB_BASE_ADDR + 0x50))
-
-/**
- * Memory Model Feature Register 1 (ID_MMFR1)
- * Address: 0xE000ED54
- * Reference: Arm(R) v7-M Architecture Reference Manual, B4-650
- */
-#define SCB_ID_MMFR1              (*(volatile uint32_t *)(SCB_BASE_ADDR + 0x54))
-
-/**
- * Memory Model Feature Register 2 (ID_MMFR2)
- * Address: 0xE000ED58
- * Reference: Arm(R) v7-M Architecture Reference Manual, B4-650
- */
-#define SCB_ID_MMFR2              (*(volatile uint32_t *)(SCB_BASE_ADDR + 0x58))
-
-/**
- * Memory Model Feature Register 3 (ID_MMFR3)
- * Address: 0xE000ED5C
- * Reference: Arm(R) v7-M Architecture Reference Manual, B4-650
- */
-#define SCB_ID_MMFR3              (*(volatile uint32_t *)(SCB_BASE_ADDR + 0x5C))
-
-/**
- * Instruction Set Attribute Register 0 (ID_ISAR0)
- * Address: 0xE000ED60
- * Reference: Arm(R) v7-M Architecture Reference Manual, B4-653
- */
-#define SCB_ID_ISAR0              (*(volatile uint32_t *)(SCB_BASE_ADDR + 0x60))
-
-/**
- * Instruction Set Attribute Register 1 (ID_ISAR1)
- * Address: 0xE000ED64
- * Reference: Arm(R) v7-M Architecture Reference Manual, B4-653
- */
-#define SCB_ID_ISAR1              (*(volatile uint32_t *)(SCB_BASE_ADDR + 0x64))
-
-/**
- * Instruction Set Attribute Register 2 (ID_ISAR2)
- * Address: 0xE000ED68
- * Reference: Arm(R) v7-M Architecture Reference Manual, B4-653
- */
-#define SCB_ID_ISAR2              (*(volatile uint32_t *)(SCB_BASE_ADDR + 0x68))
-
-/**
- * Instruction Set Attribute Register 3 (ID_ISAR3)
- * Address: 0xE000ED6C
- * Reference: Arm(R) v7-M Architecture Reference Manual, B4-653
- */
-#define SCB_ID_ISAR3              (*(volatile uint32_t *)(SCB_BASE_ADDR + 0x6C))
-
-/**
- * Instruction Set Attribute Register 4 (ID_ISAR4)
- * Address: 0xE000ED70
- * Reference: Arm(R) v7-M Architecture Reference Manual, B4-653
- */
-#define SCB_ID_ISAR4              (*(volatile uint32_t *)(SCB_BASE_ADDR + 0x70))
-
-/**
- * Cache Level ID Register (CLIDR)
- * Address: 0xE000ED78
- * Reference: Arm(R) v7-M Architecture Reference Manual, B4-665
- */
-#define SCB_CLIDR                 (*(volatile uint32_t *)(SCB_BASE_ADDR + 0x78))
-
-/**
- * Cache Type Register (CTR)
- * Address: 0xE000ED7C
- * Reference: Arm(R) v7-M Architecture Reference Manual, B4-665
- */
-#define SCB_CTR                   (*(volatile uint32_t *)(SCB_BASE_ADDR + 0x7C))
-
-/**
- * Cache Size ID Register (CCSIDR)
- * Address: 0xE000ED80
- * Reference: Arm(R) v7-M Architecture Reference Manual, B4-665
- */
-#define SCB_CCSIDR                (*(volatile uint32_t *)(SCB_BASE_ADDR + 0x80))
-
-/**
- * Cache Size Selection Register (CSSELR)
- * Address: 0xE000ED84
- * Reference: Arm(R) v7-M Architecture Reference Manual, B4-665
- */
-#define SCB_CSSELR                (*(volatile uint32_t *)(SCB_BASE_ADDR + 0x84))
-
-/**
- * Coprocessor Access Control Register (CPACR)
- * Address: 0xE000ED88
- * Reference: Arm(R) v7-M Architecture Reference Manual, B3-614
- */
-#define SCB_CPACR                 (*(volatile uint32_t *)(SCB_BASE_ADDR + 0x88))
-
-/*
- * ============================================================================
- * SCB Register Bit Definitions
- * SCB 寄存器位定义
- * ============================================================================
- */
-
-/**
- * ICSR (Interrupt Control and State Register) bit definitions
- * Reference: Arm(R) v7-M Architecture Reference Manual, B3-599
- */
-#define SCB_ICSR_VECTACTIVE_Pos   0U
-#define SCB_ICSR_VECTACTIVE_Msk  (0x1FFUL << SCB_ICSR_VECTACTIVE_Pos)
-#define SCB_ICSR_VECTACTIVE       SCB_ICSR_VECTACTIVE_Msk
-
-#define SCB_ICSR_RETTOBASE_Pos    11U
-#define SCB_ICSR_RETTOBASE_Msk   (1UL << SCB_ICSR_RETTOBASE_Pos)
-#define SCB_ICSR_RETTOBASE        SCB_ICSR_RETTOBASE_Msk
-
-#define SCB_ICSR_VECTPENDING_Pos  12U
-#define SCB_ICSR_VECTPENDING_Msk (0x1FFUL << SCB_ICSR_VECTPENDING_Pos)
-#define SCB_ICSR_VECTPENDING      SCB_ICSR_VECTPENDING_Msk
-
-#define SCB_ICSR_ISRPENDING_Pos   22U
-#define SCB_ICSR_ISRPENDING_Msk  (1UL << SCB_ICSR_ISRPENDING_Pos)
-#define SCB_ICSR_ISRPENDING       SCB_ICSR_ISRPENDING_Msk
-
-#define SCB_ICSR_PENDSTCLR_Pos    25U
-#define SCB_ICSR_PENDSTCLR_Msk   (1UL << SCB_ICSR_PENDSTCLR_Pos)
-#define SCB_ICSR_PENDSTCLR        SCB_ICSR_PENDSTCLR_Msk
-
-#define SCB_ICSR_PENDSTSET_Pos    26U
-#define SCB_ICSR_PENDSTSET_Msk   (1UL << SCB_ICSR_PENDSTSET_Pos)
-#define SCB_ICSR_PENDSTSET        SCB_ICSR_PENDSTSET_Msk
-
-#define SCB_ICSR_PENDSVCLR_Pos    27U
-#define SCB_ICSR_PENDSVCLR_Msk   (1UL << SCB_ICSR_PENDSVCLR_Pos)
-#define SCB_ICSR_PENDSVCLR        SCB_ICSR_PENDSVCLR_Msk
-
-#define SCB_ICSR_PENDSVSET_Pos    28U
-#define SCB_ICSR_PENDSVSET_Msk   (1UL << SCB_ICSR_PENDSVSET_Pos)
-#define SCB_ICSR_PENDSVSET        SCB_ICSR_PENDSVSET_Msk
-
-#define SCB_ICSR_NMIPENDSET_Pos  31U
-#define SCB_ICSR_NMIPENDSET_Msk  (1UL << SCB_ICSR_NMIPENDSET_Pos)
-#define SCB_ICSR_NMIPENDSET       SCB_ICSR_NMIPENDSET_Msk
-
-/**
- * AIRCR (Application Interrupt and Reset Control Register) bit definitions
- * Reference: Arm(R) v7-M Architecture Reference Manual, B3-601
- */
-#define SCB_AIRCR_VECTRESET_Pos   0U
-#define SCB_AIRCR_VECTRESET_Msk  (1UL << SCB_AIRCR_VECTRESET_Pos)
-#define SCB_AIRCR_VECTRESET       SCB_AIRCR_VECTRESET_Msk
-
-#define SCB_AIRCR_VECTCLRACTIVE_Pos  1U
-#define SCB_AIRCR_VECTCLRACTIVE_Msk (1UL << SCB_AIRCR_VECTCLRACTIVE_Pos)
-#define SCB_AIRCR_VECTCLRACTIVE  SCB_AIRCR_VECTCLRACTIVE_Msk
-
-#define SCB_AIRCR_SYSRESETREQ_Pos  2U
-#define SCB_AIRCR_SYSRESETREQ_Msk (1UL << SCB_AIRCR_SYSRESETREQ_Pos)
-#define SCB_AIRCR_SYSRESETREQ    SCB_AIRCR_SYSRESETREQ_Msk
-
-#define SCB_AIRCR_PRIGROUP_Pos   8U
-#define SCB_AIRCR_PRIGROUP_Msk  (0x7UL << SCB_AIRCR_PRIGROUP_Pos)
-#define SCB_AIRCR_PRIGROUP       SCB_AIRCR_PRIGROUP_Msk
-
-#define SCB_AIRCR_ENDIANESS_Pos  15U
-#define SCB_AIRCR_ENDIANESS_Msk (1UL << SCB_AIRCR_ENDIANESS_Pos)
-#define SCB_AIRCR_ENDIANESS      SCB_AIRCR_ENDIANESS_Msk
-
-#define SCB_AIRCR_VECTKEY_Pos    16U
-#define SCB_AIRCR_VECTKEY_Msk   (0xFFFFUL << SCB_AIRCR_VECTKEY_Pos)
-#define SCB_AIRCR_VECTKEY        SCB_AIRCR_VECTKEY_Msk
-#define SCB_AIRCR_VECTKEYSTAT    (0x5FAUL << SCB_AIRCR_VECTKEY_Pos)
-#define SCB_AIRCR_VECTKEY_VALUE  (0x5FAUL << SCB_AIRCR_VECTKEY_Pos)
-
-/**
- * SCR (System Control Register) bit definitions
- * Reference: Arm(R) v7-M Architecture Reference Manual, B3-603
- */
-#define SCB_SCR_SLEEPONEXIT_Pos   1U
-#define SCB_SCR_SLEEPONEXIT_Msk  (1UL << SCB_SCR_SLEEPONEXIT_Pos)
-#define SCB_SCR_SLEEPONEXIT       SCB_SCR_SLEEPONEXIT_Msk
-
-#define SCB_SCR_SLEEPDEEP_Pos    2U
-#define SCB_SCR_SLEEPDEEP_Msk   (1UL << SCB_SCR_SLEEPDEEP_Pos)
-#define SCB_SCR_SLEEPDEEP        SCB_SCR_SLEEPDEEP_Msk
-
-#define SCB_SCR_SEVONPEND_Pos    4U
-#define SCB_SCR_SEVONPEND_Msk   (1UL << SCB_SCR_SEVONPEND_Pos)
-#define SCB_SCR_SEVONPEND        SCB_SCR_SEVONPEND_Msk
-
-/**
- * CCR (Configuration and Control Register) bit definitions
- * Reference: Arm(R) v7-M Architecture Reference Manual, B3-604
- */
-#define SCB_CCR_NONBASETHRDENA_Pos  0U
-#define SCB_CCR_NONBASETHRDENA_Msk (1UL << SCB_CCR_NONBASETHRDENA_Pos)
-#define SCB_CCR_NONBASETHRDENA  SCB_CCR_NONBASETHRDENA_Msk
-
-#define SCB_CCR_USERSETMPEND_Pos  1U
-#define SCB_CCR_USERSETMPEND_Msk (1UL << SCB_CCR_USERSETMPEND_Pos)
-#define SCB_CCR_USERSETMPEND     SCB_CCR_USERSETMPEND_Msk
-
-#define SCB_CCR_UNALIGN_TRP_Pos  3U
-#define SCB_CCR_UNALIGN_TRP_Msk (1UL << SCB_CCR_UNALIGN_TRP_Pos)
-#define SCB_CCR_UNALIGN_TRP      SCB_CCR_UNALIGN_TRP_Msk
-
-#define SCB_CCR_DIV_0_TRP_Pos    4U
-#define SCB_CCR_DIV_0_TRP_Msk   (1UL << SCB_CCR_DIV_0_TRP_Pos)
-#define SCB_CCR_DIV_0_TRP        SCB_CCR_DIV_0_TRP_Msk
-
-#define SCB_CCR_BFHFNMIGN_Pos    8U
-#define SCB_CCR_BFHFNMIGN_Msk   (1UL << SCB_CCR_BFHFNMIGN_Pos)
-#define SCB_CCR_BFHFNMIGN        SCB_CCR_BFHFNMIGN_Msk
-
-#define SCB_CCR_STKALIGN_Pos     9U
-#define SCB_CCR_STKALIGN_Msk    (1UL << SCB_CCR_STKALIGN_Pos)
-#define SCB_CCR_STKALIGN         SCB_CCR_STKALIGN_Msk
-
-#define SCB_CCR_DC_Pos          16U
-#define SCB_CCR_DC_Msk          (1UL << SCB_CCR_DC_Pos)
-#define SCB_CCR_DC              SCB_CCR_DC_Msk
-
-#define SCB_CCR_IC_Pos          17U
-#define SCB_CCR_IC_Msk          (1UL << SCB_CCR_IC_Pos)
-#define SCB_CCR_IC              SCB_CCR_IC_Msk
-
-#define SCB_CCR_BP_Pos          18U
-#define SCB_CCR_BP_Msk          (1UL << SCB_CCR_BP_Pos)
-#define SCB_CCR_BP              SCB_CCR_BP_Msk
 
 /*
  * ============================================================================
@@ -641,6 +260,16 @@ void nvic_decode_priority(uint32_t priority, uint32_t priority_group, uint32_t *
  */
 void nvic_system_reset(void);
 
+/*
+ * ============================================================================
+ * Backward Compatibility: SCB Functions
+ * 向后兼容: SCB 函数
+ *
+ * These functions are declared in armv7-m_scb.h and implemented in armv7-m_scb.c
+ * They are available here for backward compatibility.
+ * ============================================================================
+ */
+
 /**
  * @brief Set vector table offset
  * @param offset Vector table offset address
@@ -655,254 +284,43 @@ void scb_set_vtor(uint32_t offset);
  */
 uint32_t scb_get_vtor(void);
 
-/*
- * ============================================================================
- * SCB System Handler Functions
- * SCB 系统处理函数声明
- * Reference: Chapter B3.2 - System Control Space (SCS)
- * ============================================================================
- */
-
-/**
- * @brief Set system handler priority
- * @param handler System handler number (0-15)
- * @param priority Priority value
- * Reference: Arm(R) v7-M ARM Chapter B3.2 (System Control Space) - SHPR registers
- */
+/* SCB system handler functions - declared in armv7-m_scb.h */
 void scb_set_shpr(uint8_t handler, uint8_t priority);
-
-/**
- * @brief Get system handler priority
- * @param handler System handler number (0-15)
- * @return Priority value
- * Reference: Arm(R) v7-M ARM Chapter B3.2 (System Control Space) - SHPR registers
- */
 uint8_t scb_get_shpr(uint8_t handler);
-
-/**
- * @brief Enable system handler
- * @param handler System handler to enable
- * Reference: Arm(R) v7-M ARM Chapter B3.2 (System Control Space) - SHCSR register
- */
 void scb_enable_system_handler(uint32_t handler);
-
-/**
- * @brief Disable system handler
- * @param handler System handler to disable
- * Reference: Arm(R) v7-M ARM Chapter B3.2 (System Control Space) - SHCSR register
- */
 void scb_disable_system_handler(uint32_t handler);
-
-/**
- * @brief Get system handler pending status
- * @param handler System handler
- * @return 1 if pending, 0 otherwise
- * Reference: Arm(R) v7-M ARM Chapter B3.2 (System Control Space) - SHCSR register
- */
 uint32_t scb_get_system_handler_pending(uint32_t handler);
-
-/**
- * @brief Set system handler pending
- * @param handler System handler
- * Reference: Arm(R) v7-M ARM Chapter B3.2 (System Control Space) - ICSR register
- */
 void scb_set_system_handler_pending(uint32_t handler);
-
-/**
- * @brief Clear system handler pending
- * @param handler System handler
- * Reference: Arm(R) v7-M ARM Chapter B3.2 (System Control Space) - ICSR register
- */
 void scb_clear_system_handler_pending(uint32_t handler);
 
-/*
- * ============================================================================
- * SCB Fault Status Functions
- * SCB 故障状态函数声明
- * Reference: Chapter B3.2 - System Control Space (SCS)
- * ============================================================================
- */
-
-/**
- * @brief Get Configurable Fault Status Register
- * @return CFSR value
- * Reference: Arm(R) v7-M ARM Chapter B3.2 (System Control Space) - CFSR register
- */
+/* SCB fault status functions - declared in armv7-m_scb.h */
 uint32_t scb_get_cfsr(void);
-
-/**
- * @brief Clear Configurable Fault Status Register
- * Reference: Arm(R) v7-M ARM Chapter B3.2 (System Control Space) - CFSR register
- */
 void scb_clear_cfsr(void);
-
-/**
- * @brief Get HardFault Status Register
- * @return HFSR value
- * Reference: Arm(R) v7-M ARM Chapter B3.2 (System Control Space) - HFSR register
- */
 uint32_t scb_get_hfsr(void);
-
-/**
- * @brief Clear HardFault Status Register
- * Reference: Arm(R) v7-M ARM Chapter B3.2 (System Control Space) - HFSR register
- */
 void scb_clear_hfsr(void);
-
-/**
- * @brief Get Debug Fault Status Register
- * @return DFSR value
- * Reference: Arm(R) v7-M ARM Chapter C1.6 (Debug) - DFSR register
- */
 uint32_t scb_get_dfsr(void);
-
-/**
- * @brief Clear Debug Fault Status Register
- * Reference: Arm(R) v7-M ARM Chapter C1.6 (Debug) - DFSR register
- */
 void scb_clear_dfsr(void);
-
-/**
- * @brief Get MemManage Fault Address Register
- * @return MMFAR value
- * Reference: Arm(R) v7-M ARM Chapter B3.2 (System Control Space) - MMFAR register
- */
 uint32_t scb_get_mmfar(void);
-
-/**
- * @brief Get BusFault Address Register
- * @return BFAR value
- * Reference: Arm(R) v7-M ARM Chapter B3.2 (System Control Space) - BFAR register
- */
 uint32_t scb_get_bfar(void);
-
-/**
- * @brief Get Auxiliary Fault Status Register
- * @return AFSR value
- * Reference: Arm(R) v7-M ARM Chapter B3.2 (System Control Space) - AFSR register
- */
 uint32_t scb_get_afsr(void);
-
-/**
- * @brief Set Auxiliary Fault Status Register
- * @param value Value to write
- * Reference: Arm(R) v7-M ARM Chapter B3.2 (System Control Space) - AFSR register
- */
 void scb_set_afsr(uint32_t value);
 
-/*
- * ============================================================================
- * SCB System Control Functions
- * SCB 系统控制函数声明
- * Reference: Chapter B3.2 - System Control Space (SCS)
- * ============================================================================
- */
-
-/**
- * @brief Set system control register
- * @param value SCR value
- * Reference: Arm(R) v7-M ARM Chapter B3.2 (System Control Space) - SCR register
- */
+/* SCB system control functions - declared in armv7-m_scb.h */
 void scb_set_scr(uint32_t value);
-
-/**
- * @brief Get system control register
- * @return SCR value
- * Reference: Arm(R) v7-M ARM Chapter B3.2 (System Control Space) - SCR register
- */
 uint32_t scb_get_scr(void);
-
-/**
- * @brief Set configuration and control register
- * @param value CCR value
- * Reference: Arm(R) v7-M ARM Chapter B3.2 (System Control Space) - CCR register
- */
 void scb_set_ccr(uint32_t value);
-
-/**
- * @brief Get configuration and control register
- * @return CCR value
- * Reference: Arm(R) v7-M ARM Chapter B3.2 (System Control Space) - CCR register
- */
 uint32_t scb_get_ccr(void);
-
-/**
- * @brief Get CPUID register
- * @return CPUID value
- * Reference: Arm(R) v7-M ARM Chapter B3.2 (System Control Space) - CPUID register
- */
 uint32_t scb_get_cpuid(void);
-
-/**
- * @brief Get Interrupt Control and State Register
- * @return ICSR value
- * Reference: Arm(R) v7-M ARM Chapter B3.2 (System Control Space) - ICSR register
- */
 uint32_t scb_get_icsr(void);
-
-/**
- * @brief Set Interrupt Control and State Register
- * @param value ICSR value
- * Reference: Arm(R) v7-M ARM Chapter B3.2 (System Control Space) - ICSR register
- */
 void scb_set_icsr(uint32_t value);
-
-/**
- * @brief Set coprocessor access control
- * @param cp10 CP10 access value (0-3)
- * @param cp11 CP11 access value (0-3)
- * Reference: Arm(R) v7-M ARM Chapter B3.2 (System Control Space) - CPACR register
- */
 void scb_set_cpacr(uint32_t cp10, uint32_t cp11);
-
-/**
- * @brief Get coprocessor access control
- * @return CPACR value
- * Reference: Arm(R) v7-M ARM Chapter B3.2 (System Control Space) - CPACR register
- */
 uint32_t scb_get_cpacr(void);
 
-/*
- * ============================================================================
- * SCB Cache Control Functions
- * SCB 缓存控制函数声明
- * Reference: Chapter B3.2 - System Control Space (SCS)
- * ============================================================================
- */
-
-/**
- * @brief Get Cache Level ID Register
- * @return CLIDR value
- * Reference: Arm(R) v7-M ARM Chapter B3.2 (System Control Space) - CLIDR register
- */
+/* SCB cache control functions - declared in armv7-m_scb.h */
 uint32_t scb_get_clidr(void);
-
-/**
- * @brief Get Cache Type Register
- * @return CTR value
- * Reference: Arm(R) v7-M ARM Chapter B3.2 (System Control Space) - CTR register
- */
 uint32_t scb_get_ctr(void);
-
-/**
- * @brief Get Cache Size ID Register
- * @return CCSIDR value
- * Reference: Arm(R) v7-M ARM Chapter B3.2 (System Control Space) - CCSIDR register
- */
 uint32_t scb_get_ccsidr(void);
-
-/**
- * @brief Set Cache Size Selection Register
- * @param value CSSELR value
- * Reference: Arm(R) v7-M ARM Chapter B3.2 (System Control Space) - CSSELR register
- */
 void scb_set_csselr(uint32_t value);
-
-/**
- * @brief Get Cache Size Selection Register
- * @return CSSELR value
- * Reference: Arm(R) v7-M ARM Chapter B3.2 (System Control Space) - CSSELR register
- */
 uint32_t scb_get_csselr(void);
 
 #ifdef __cplusplus
