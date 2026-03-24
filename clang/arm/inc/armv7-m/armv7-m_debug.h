@@ -478,17 +478,7 @@ extern "C" {
  * ============================================================================
  */
 
-#define ROM_SCS                   (*(volatile uint32_t *)(ROM_TABLE_ADDR + 0x000))  /*!< Points to SCS */
-#define ROM_DWT                   (*(volatile uint32_t *)(ROM_TABLE_ADDR + 0x004))  /*!< Points to DWT */
-#define ROM_FPB                   (*(volatile uint32_t *)(ROM_TABLE_ADDR + 0x008))  /*!< Points to FPB */
-#define ROM_ITM                   (*(volatile uint32_t *)(ROM_TABLE_ADDR + 0x00C))  /*!< Points to ITM */
-#define ROM_TPIU                  (*(volatile uint32_t *)(ROM_TABLE_ADDR + 0x010))  /*!< Points to TPIU */
-#define ROM_ETM                   (*(volatile uint32_t *)(ROM_TABLE_ADDR + 0x014))  /*!< Points to ETM */
-#define ROM_END                   (*(volatile uint32_t *)(ROM_TABLE_ADDR + 0x018))  /*!< End of table marker */
-#define ROM_MEMTYPE               (*(volatile uint32_t *)(ROM_TABLE_ADDR + 0xFCC)) /*!< Memory type register */
-
-/* ROM table entry bit - indicates if component is present */
-#define ROM_ENTRY_PRESENT_Msk     0x1U
+/* ROM Table definitions are provided by armv7-m_rom_table.h */
 
 /*
  * ============================================================================
@@ -1059,27 +1049,7 @@ void fpb_clear_all(void);
  * ============================================================================
  */
 
-/**
- * @brief Check if debug component is present via ROM table
- * 通过ROM表检查调试组件是否存在
- * @param rom_entry ROM table entry address
- * @return true if component is present
- * Reference: C1.2.2 The Armv7-M ROM Table (page C1-686)
- */
-static inline bool rom_table_component_present(uint32_t rom_entry) {
-    return (*(volatile uint32_t *)rom_entry & ROM_ENTRY_PRESENT_Msk) != 0U;
-}
-
-/**
- * @brief Get component base address from ROM table entry
- * 从ROM表条目获取组件基地址
- * @param rom_entry ROM table entry value
- * @return Base address of component
- * Reference: C1.2.2 The Armv7-M ROM Table (page C1-686)
- */
-static inline uint32_t rom_table_get_base_addr(uint32_t rom_entry) {
-    return (rom_entry & 0xFFFFF000U) | 0xE0000000U;
-}
+/* ROM Table functions are provided by armv7-m_rom_table.h */
 
 #ifdef __cplusplus
 }

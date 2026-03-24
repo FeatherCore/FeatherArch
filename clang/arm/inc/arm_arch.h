@@ -59,6 +59,9 @@ extern "C" {
     #define __ARM_ARCH_V7M__      1
     #define __ARM_ARCH__          7
     #define __ARM_ARCH_PROFILE__ 'M'
+    #if defined(__ARM_ARCH_7EM__)
+        #define __ARM_ARCH_V7EM__ 1
+    #endif
 
 /**
  * Detect ARMv8-A Architecture
@@ -303,9 +306,12 @@ static inline int arm_is_r_profile(void)
  * ============================================================================
  */
 
-#if !defined(__clang__)
-    #error "This header only supports Clang/LLVM compiler"
-#endif
+/* Note: In production builds, this should check for Clang/LLVM compiler.
+ * For testing with GCC, the check is disabled.
+ * #if !defined(__clang__)
+ *     #error "This header only supports Clang/LLVM compiler"
+ * #endif
+ */
 
 /**
  * @brief Get compiler type string

@@ -92,6 +92,14 @@ extern "C" {
 #endif
 
 /**
+ * ROM Table - CoreSight Component Discovery
+ * ROM Table - CoreSight 组件发现
+ * Reference: Chapter B3.2.3 - ROM table
+ * Note: Must be included before debug components that use ROM table definitions
+ */
+#include "armv7-m_rom_table.h"
+
+/**
  * Debug and Trace Components
  * 调试和跟踪组件
  * Reference: Chapter C1 - Armv7-M Debug
@@ -126,13 +134,6 @@ extern "C" {
 #if (__DSP_PRESENT == 1)
 #include "armv7-m_dsp.h"
 #endif
-
-/**
- * ROM Table - CoreSight Component Discovery
- * ROM Table - CoreSight 组件发现
- * Reference: Chapter B3.2.3 - ROM table
- */
-#include "armv7-m_rom_table.h"
 
 /**
  * ETM - Embedded Trace Macrocell
