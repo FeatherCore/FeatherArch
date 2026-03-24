@@ -118,6 +118,15 @@ extern "C" {
 #include "armv7-m_cache.h"
 #endif
 
+/**
+ * DSP - Digital Signal Processing Extension
+ * DSP - 数字信号处理扩展
+ * Reference: Chapter A4.4 - DSP Extension instructions
+ */
+#if (__DSP_PRESENT == 1)
+#include "armv7-m_dsp.h"
+#endif
+
 /*
  * ============================================================================
  * Version Information

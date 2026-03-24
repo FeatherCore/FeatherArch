@@ -175,7 +175,14 @@ extern "C" {
 #include "armv8-m_cache.h"
 #endif
 
-
+/**
+ * DSP - Digital Signal Processing Extension
+ * DSP - 数字信号处理扩展
+ * Reference: Chapter B4 - Floating-point Support (DSP instructions)
+ */
+#if (__DSP_PRESENT == 1)
+#include "armv8-m_dsp.h"
+#endif
 
 /*
  * ============================================================================
