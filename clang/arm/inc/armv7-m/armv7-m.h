@@ -127,6 +127,31 @@ extern "C" {
 #include "armv7-m_dsp.h"
 #endif
 
+/**
+ * ROM Table - CoreSight Component Discovery
+ * ROM Table - CoreSight 组件发现
+ * Reference: Chapter B3.2.3 - ROM table
+ */
+#include "armv7-m_rom_table.h"
+
+/**
+ * ETM - Embedded Trace Macrocell
+ * ETM - 嵌入式跟踪宏单元
+ * Reference: Chapter C1.10 - Embedded Trace Macrocell
+ */
+#if (__ETM_PRESENT == 1)
+#include "armv7-m_etm.h"
+#endif
+
+/**
+ * MTB - Micro Trace Buffer
+ * MTB - 微跟踪缓冲区
+ * Reference: Appendix D - Micro Trace Buffer
+ */
+#if (__MTB_PRESENT == 1)
+#include "armv7-m_mtb.h"
+#endif
+
 /*
  * ============================================================================
  * Version Information

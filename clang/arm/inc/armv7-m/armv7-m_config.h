@@ -283,6 +283,22 @@ extern "C" {
 #define __DCACHE_PRESENT              0U
 #endif
 
+/**
+ * ETM Present: 0 = No ETM, 1 = Embedded Trace Macrocell is present
+ * ETM 存在: 0 = 无 ETM, 1 = 嵌入式跟踪宏单元存在
+ */
+#ifndef __ETM_PRESENT
+#define __ETM_PRESENT                 0U
+#endif
+
+/**
+ * MTB Present: 0 = No MTB, 1 = Micro Trace Buffer is present
+ * MTB 存在: 0 = 无 MTB, 1 = 微跟踪缓冲区存在
+ */
+#ifndef __MTB_PRESENT
+#define __MTB_PRESENT                 0U
+#endif
+
 /*
  * ============================================================================
  * Architecture Feature Checks

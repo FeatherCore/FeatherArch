@@ -152,7 +152,10 @@ void etm_wait_for_idle(void)
 
 void etm_software_trigger(void)
 {
-    /* Generate software trigger */
-    /* In ETMv4, this is done through the TRIVR register */
-    /* For now, this is a placeholder */
+    /* Generate software trigger via ETM TRIVTR register */
+    /* Address: ETM_BASE + 0x028 */
+    volatile uint32_t *trivtr = (volatile uint32_t *)(ETM_BASE_ADDR + 0x028);
+    *trivtr = 0x1;  /* Set trigger bit */
+    __asm__ volatile ("dsb" ::: "memory");
+    __asm__ volatile ("isb" ::: "memory");
 }

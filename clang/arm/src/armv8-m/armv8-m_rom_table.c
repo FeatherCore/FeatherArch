@@ -202,10 +202,6 @@ bool rom_table_system_memory_present(void)
  */
 void rom_table_scan(void)
 {
-    /* This is a placeholder for a debug function */
-    /* In a real implementation, this would output component information */
-    /* through ITM or a debug console */
-    
     /* Scan all ROM table entries */
     for (uint32_t offset = 0; offset < 0x20; offset += 4) {
         uint32_t entry = *(volatile uint32_t *)(ROM_TABLE_BASE_ADDR + offset);
@@ -215,7 +211,29 @@ void rom_table_scan(void)
             break;
         }
         
-        /* Process entry (would print in real implementation) */
-        (void)entry;
+        /* Check if component is present */
+        if ((entry & ROM_ENTRY_PRESENT_Msk) == ROM_ENTRY_PRESENT) {
+            /* Calculate component address */
+            int32_t addr_offset = (int32_t)(entry & ~0xFFFUL);
+            uint32_t comp_addr = (uint32_t)((int32_t)ROM_TABLE_BASE_ADDR + addr_offset);
+            
+            /* Determine component name based on offset */
+            const char *comp_name = "Unknown";
+            switch (offset) {
+                case ROM_TABLE_ENTRY0_OFFSET: comp_name = "SCS"; break;
+                case ROM_TABLE_ENTRY1_OFFSET: comp_name = "DWT"; break;
+                case ROM_TABLE_ENTRY2_OFFSET: comp_name = "FPB"; break;
+                case ROM_TABLE_ENTRY3_OFFSET: comp_name = "ITM"; break;
+                case ROM_TABLE_ENTRY4_OFFSET: comp_name = "TPIU"; break;
+                case ROM_TABLE_ENTRY5_OFFSET: comp_name = "ETM"; break;
+                case ROM_TABLE_ENTRY6_OFFSET: comp_name = "Reserved"; break;
+                case ROM_TABLE_ENTRY7_OFFSET: comp_name = "End"; break;
+            }
+            
+            /* Output via ITM if available, otherwise store in debug buffer */
+            /* In a real implementation, this would use ITM_SendChar or similar */
+            (void)comp_name;
+            (void)comp_addr;
+        }
     }
 }
