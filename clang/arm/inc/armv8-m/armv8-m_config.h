@@ -319,6 +319,30 @@ extern "C" {
 #define __NUM_WRP                     4U
 #endif
 
+/**
+ * ETM Present: 0 = No ETM, 1 = Embedded Trace Macrocell is present
+ * ETM 存在: 0 = 无 ETM, 1 = 嵌入式跟踪宏单元存在
+ */
+#ifndef __ETM_PRESENT
+#define __ETM_PRESENT                 0U
+#endif
+
+/**
+ * MTB Present: 0 = No MTB, 1 = Micro Trace Buffer is present
+ * MTB 存在: 0 = 无 MTB, 1 = 微跟踪缓冲区存在
+ */
+#ifndef __MTB_PRESENT
+#define __MTB_PRESENT                 0U
+#endif
+
+/**
+ * CTI Present: 0 = No CTI, 1 = Cross-trigger Interface is present
+ * CTI 存在: 0 = 无 CTI, 1 = 交叉触发接口存在
+ */
+#ifndef __CTI_PRESENT
+#define __CTI_PRESENT                 0U
+#endif
+
 /*
  * ============================================================================
  * PACBTI Extension Configuration

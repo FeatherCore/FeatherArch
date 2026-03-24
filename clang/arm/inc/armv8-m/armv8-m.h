@@ -184,6 +184,40 @@ extern "C" {
 #include "armv8-m_dsp.h"
 #endif
 
+/**
+ * ROM Table - CoreSight Component Discovery
+ * ROM Table - CoreSight 组件发现
+ * Reference: Chapter B13.2.1 - ROM table
+ */
+#include "armv8-m_rom_table.h"
+
+/**
+ * ETM - Embedded Trace Macrocell
+ * ETM - 嵌入式跟踪宏单元
+ * Reference: Chapter B13.5 - Embedded Trace Macrocell
+ */
+#if (__ETM_PRESENT == 1)
+#include "armv8-m_etm.h"
+#endif
+
+/**
+ * MTB - Micro Trace Buffer
+ * MTB - 微跟踪缓冲区
+ * Reference: Chapter B13.6 - Micro Trace Buffer
+ */
+#if (__MTB_PRESENT == 1)
+#include "armv8-m_mtb.h"
+#endif
+
+/**
+ * CTI - Cross-trigger Interface
+ * CTI - 交叉触发接口
+ * Reference: Chapter B13.4 - Cross-trigger Interface
+ */
+#if (__CTI_PRESENT == 1)
+#include "armv8-m_cti.h"
+#endif
+
 /*
  * ============================================================================
  * Version Information
