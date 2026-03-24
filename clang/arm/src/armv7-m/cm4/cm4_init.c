@@ -6,13 +6,20 @@
  * Description: Cortex-M4 specific initialization functions
  * 描述: Cortex-M4 特定初始化功能
  *
- * Reference: Arm(R) Cortex-M4 Processor Technical Reference Manual
- *            Arm(R) Cortex-M4 Devices Generic User Guide
+ * Reference: Arm(R) Cortex-M4 Devices Generic User Guide (DUI 0553)
+ *   - Chapter 1: Introduction
+ *   - Chapter 2: The Cortex-M4 Processor
+ *   - Chapter 3: Cortex-M4 Instructions
+ *   - Chapter 4: Cortex-M4 Peripherals
  * ============================================================================
  * SPDX-License-Identifier: Apache-2.0
  */
 
+#include <stdint.h>
+#include <stdbool.h>
 #include "armv7-m/cm4/cm4.h"
+#include "armv7-m/armv7-m_nvic.h"
+#include "armv7-m/armv7-m_fpu.h"
 
 /* ============================================================================
  * Cortex-M4 System Initialization

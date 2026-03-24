@@ -3,17 +3,17 @@
  *
  * ============================================================================
  * File: cm4_fpu.h
- * Description: Cortex-M4 specific FPU (FPv4-SP) functions
- * 描述: Cortex-M4 特定 FPU (FPv4-SP) 功能
+ * Description: Cortex-M4 specific FPU functions (FPv4-SP)
+ * 描述: Cortex-M4 特定 FPU 功能 (FPv4-SP)
  *
- * IMPORTANT: This file ONLY contains FPU functions specific to Cortex-M4.
- * Generic ARMv7-M FPU functions are in armv7-m/armv7-m_fpu.h
+ * IMPORTANT: This file ONLY contains FPU functions specific to Cortex-M4
+ * that are NOT in armv7-m/armv7-m_fpu.h.
  *
- * Cortex-M4 specific FPU features:
- * - MVFR0/MVFR1 feature detection (FPv4-SP capability detection)
- *
- * Reference: Arm(R) Cortex-M4 Processor Technical Reference Manual, Chapter 4
- *            Arm(R) Cortex-M4 Devices Generic User Guide, Chapter 3.3
+ * Reference: Arm(R) Cortex-M4 Devices Generic User Guide (DUI 0553)
+ *   - Chapter 1.1: Cortex-M4 processor and core peripherals (FPU)
+ *   - Chapter 2.1.1: Processor registers (CONTROL register FPCA bit)
+ *   - Chapter 3.3: Cortex-M4 FPU instructions
+ *   - Chapter 4: Cortex-M4 Peripherals (FPU)
  * ============================================================================
  * SPDX-License-Identifier: Apache-2.0
  */

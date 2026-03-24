@@ -9,12 +9,16 @@
  * IMPORTANT: This file ONLY contains FPU functions specific to Cortex-M4.
  * Generic ARMv7-M FPU functions are in armv7-m/armv7-m_fpu.c
  *
- * Reference: Arm(R) Cortex-M4 Processor Technical Reference Manual, Chapter 4
- *            Arm(R) Cortex-M4 Devices Generic User Guide, Chapter 3.3
+ * Reference: Arm(R) Cortex-M4 Devices Generic User Guide (DUI 0553)
+ *   - Chapter 2.1.1: Processor registers (CONTROL register FPCA bit)
+ *   - Chapter 4: Cortex-M4 Peripherals (FPU)
+ *   - Chapter 3.3: Cortex-M4 FPU instructions
  * ============================================================================
  * SPDX-License-Identifier: Apache-2.0
  */
 
+#include <stdint.h>
+#include <stdbool.h>
 #include "armv7-m/cm4/cm4.h"
 
 #if (__FPU_PRESENT == 1)

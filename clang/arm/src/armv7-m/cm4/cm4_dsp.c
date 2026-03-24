@@ -3,15 +3,18 @@
  *
  * ============================================================================
  * File: cm4_dsp.c
- * Description: Cortex-M4 DSP non-inline functions
- * 描述: Cortex-M4 DSP 非内联函数
+ * Description: Cortex-M4 DSP instruction implementations
+ * 描述: Cortex-M4 DSP 指令实现
  *
- * Reference: Arm(R) Cortex-M4 Devices Generic User Guide, Chapter 3.7
- *            Arm(R) Cortex-M4 Processor Technical Reference Manual
+ * Reference: Arm(R) Cortex-M4 Devices Generic User Guide (DUI 0553)
+ *   - Chapter 3.4: Cortex-M4 DSP instructions
+ *   - Chapter 2.1.1: Processor registers
  * ============================================================================
  * SPDX-License-Identifier: Apache-2.0
  */
 
+#include <stdint.h>
+#include <stdbool.h>
 #include "armv7-m/cm4/cm4.h"
 
 #if (__DSP_PRESENT == 1)

@@ -1,16 +1,15 @@
 /*
- * ARM Architecture - Cortex-M4 DSP Specific Functions
+ * ARM Architecture - Cortex-M4 DSP Extensions
  *
  * ============================================================================
  * File: cm4_dsp.h
- * Description: Cortex-M4 specific DSP functions (ARMv7E-M extensions)
- * 描述: Cortex-M4 特定 DSP 功能 (ARMv7E-M 扩展)
+ * Description: Cortex-M4 DSP instruction inline functions and definitions
+ * 描述: Cortex-M4 DSP 指令内联函数和定义
  *
- * IMPORTANT: This file ONLY contains DSP functions specific to Cortex-M4
- * that are NOT in armv7-m/armv7-m_dsp.h.
- *
- * Reference: Arm(R) Cortex-M4 Devices Generic User Guide
- *            Arm(R) Cortex-M4 Processor Technical Reference Manual
+ * Reference: Arm(R) Cortex-M4 Devices Generic User Guide (DUI 0553)
+ *   - Chapter 1.1: Cortex-M4 processor and core peripherals (DSP extension)
+ *   - Chapter 2.1.1: Processor registers (xPSR.GE bits)
+ *   - Chapter 3.4: Cortex-M4 DSP instructions
  * ============================================================================
  * SPDX-License-Identifier: Apache-2.0
  */
