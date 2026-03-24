@@ -6,11 +6,11 @@
  * Description: Cortex-M4 specific initialization functions
  * 描述: Cortex-M4 特定初始化功能
  *
- * Reference: Arm(R) Cortex-M4 Devices Generic User Guide (DUI 0553)
- *   - Chapter 1: Introduction
- *   - Chapter 2: The Cortex-M4 Processor
- *   - Chapter 3: Cortex-M4 Instructions
- *   - Chapter 4: Cortex-M4 Peripherals
+ * Reference: Arm(R) Cortex-M4 Devices Generic User Guide (DUI 0553B)
+ *   - Chapter 2.1 Programmers model (page 2-2)
+ *   - Chapter 2.2 Memory model (page 2-10)
+ *   - Chapter 2.4 Fault handling (page 2-29)
+ *   - Chapter 2.5 Power management (page 2-32)
  * ============================================================================
  * SPDX-License-Identifier: Apache-2.0
  */
@@ -24,6 +24,7 @@
 /* ============================================================================
  * Cortex-M4 System Initialization
  * Cortex-M4 系统初始化
+ * Reference: Arm(R) Cortex-M4 Devices Generic User Guide, Chapter 2.1 (page 2-2)
  * ============================================================================ */
 
 /**
@@ -35,6 +36,7 @@
  * 2. Configure lazy stacking
  * 3. Initialize DSP features
  * 4. Configure bit-banding if needed
+ * Reference: Arm(R) Cortex-M4 Devices Generic User Guide, Chapter 2.1 (page 2-2)
  */
 void cm4_system_init(void)
 {
@@ -75,7 +77,6 @@ void cm4_pre_main_init(void)
  * 启用 DWT 周期计数器
  *
  * The DWT cycle counter can be used for profiling and timing measurements.
- * Reference: Cortex-M4 TRM, Chapter 9 - Data Watchpoint and Trace Unit
  */
 void cm4_dwt_enable(void)
 {
@@ -119,6 +120,7 @@ uint32_t cm4_dwt_get_cycles(void)
 /* ============================================================================
  * Cortex-M4 Sleep Mode
  * Cortex-M4 睡眠模式
+ * Reference: Arm(R) Cortex-M4 Devices Generic User Guide, Chapter 2.5 (page 2-32)
  * ============================================================================ */
 
 /**
@@ -127,7 +129,7 @@ uint32_t cm4_dwt_get_cycles(void)
  *
  * In Sleep mode, the processor clock is stopped.
  * Wake up on interrupt or event.
- * Reference: Generic User Guide, Section 2.5 - Power management
+ * Reference: Arm(R) Cortex-M4 Devices Generic User Guide, Chapter 2.5 (page 2-32)
  */
 void cm4_sleep(void)
 {
@@ -143,7 +145,7 @@ void cm4_sleep(void)
  *
  * In Deep Sleep mode, the system clock is stopped.
  * Wake up on interrupt or event.
- * Reference: Generic User Guide, Section 2.5 - Power management
+ * Reference: Arm(R) Cortex-M4 Devices Generic User Guide, Chapter 2.5 (page 2-32)
  */
 void cm4_deep_sleep(void)
 {
@@ -160,11 +162,11 @@ void cm4_deep_sleep(void)
 }
 
 /**
- * @brief Enter Sleep-on-Exit mode
- * 进入退出时睡眠模式
+ * @brief Enable Sleep-on-Exit mode
+ * 启用退出时睡眠模式
  *
  * When set, the processor enters sleep mode on return from an ISR.
- * Reference: Generic User Guide, Section 2.5 - Power management
+ * Reference: Arm(R) Cortex-M4 Devices Generic User Guide, Chapter 2.5 (page 2-32)
  */
 void cm4_sleep_on_exit_enable(void)
 {
@@ -174,6 +176,7 @@ void cm4_sleep_on_exit_enable(void)
 /**
  * @brief Disable Sleep-on-Exit mode
  * 禁用退出时睡眠模式
+ * Reference: Arm(R) Cortex-M4 Devices Generic User Guide, Chapter 2.5 (page 2-32)
  */
 void cm4_sleep_on_exit_disable(void)
 {
@@ -183,12 +186,13 @@ void cm4_sleep_on_exit_disable(void)
 /* ============================================================================
  * Cortex-M4 Fault Handling
  * Cortex-M4 故障处理
+ * Reference: Arm(R) Cortex-M4 Devices Generic User Guide, Chapter 2.4 (page 2-29)
  * ============================================================================ */
 
 /**
  * @brief Enable all configurable faults
  * 启用所有可配置故障
- * Reference: Generic User Guide, Section 2.4 - Fault handling
+ * Reference: Arm(R) Cortex-M4 Devices Generic User Guide, Chapter 2.4 (page 2-29)
  */
 void cm4_fault_enable_all(void)
 {
@@ -201,6 +205,7 @@ void cm4_fault_enable_all(void)
 /**
  * @brief Disable all configurable faults
  * 禁用所有可配置故障
+ * Reference: Arm(R) Cortex-M4 Devices Generic User Guide, Chapter 2.4 (page 2-29)
  */
 void cm4_fault_disable_all(void)
 {
@@ -271,6 +276,7 @@ uint32_t cm4_fault_get_busfault_addr(void)
 /* ============================================================================
  * Cortex-M4 Bit-Banding Support
  * Cortex-M4 位带支持
+ * Reference: Arm(R) Cortex-M4 Devices Generic User Guide, Chapter 2.2.5 (page 2-16)
  * ============================================================================ */
 
 #if (__BITBAND_PRESENT == 1)
@@ -279,8 +285,8 @@ uint32_t cm4_fault_get_busfault_addr(void)
  * @brief Set bit using bit-banding (SRAM region)
  * 使用位带设置位 (SRAM 区域)
  * @param addr Byte address in SRAM bit-band region (0x20000000-0x200FFFFF)
- * @param bit Bit number (0-31)
- * Reference: Generic User Guide, Section 2.2 - Memory model, Bit-banding
+ * @param bit Bit number (0-7)
+ * Reference: Arm(R) Cortex-M4 Devices Generic User Guide, Chapter 2.2.5 (page 2-16)
  */
 void cm4_bitband_sram_set(volatile void *addr, uint32_t bit)
 {
@@ -291,7 +297,8 @@ void cm4_bitband_sram_set(volatile void *addr, uint32_t bit)
  * @brief Clear bit using bit-banding (SRAM region)
  * 使用位带清除位 (SRAM 区域)
  * @param addr Byte address in SRAM bit-band region
- * @param bit Bit number (0-31)
+ * @param bit Bit number (0-7)
+ * Reference: Arm(R) Cortex-M4 Devices Generic User Guide, Chapter 2.2.5 (page 2-16)
  */
 void cm4_bitband_sram_clear(volatile void *addr, uint32_t bit)
 {
@@ -302,8 +309,9 @@ void cm4_bitband_sram_clear(volatile void *addr, uint32_t bit)
  * @brief Read bit using bit-banding (SRAM region)
  * 使用位带读取位 (SRAM 区域)
  * @param addr Byte address in SRAM bit-band region
- * @param bit Bit number (0-31)
+ * @param bit Bit number (0-7)
  * @return Bit value (0 or 1)
+ * Reference: Arm(R) Cortex-M4 Devices Generic User Guide, Chapter 2.2.5 (page 2-16)
  */
 uint32_t cm4_bitband_sram_read(volatile void *addr, uint32_t bit)
 {
@@ -314,7 +322,7 @@ uint32_t cm4_bitband_sram_read(volatile void *addr, uint32_t bit)
  * @brief Toggle bit using bit-banding (SRAM region)
  * 使用位带翻转位 (SRAM 区域)
  * @param addr Byte address in SRAM bit-band region
- * @param bit Bit number (0-31)
+ * @param bit Bit number (0-7)
  */
 void cm4_bitband_sram_toggle(volatile void *addr, uint32_t bit)
 {
@@ -326,8 +334,8 @@ void cm4_bitband_sram_toggle(volatile void *addr, uint32_t bit)
  * @brief Set bit using bit-banding (Peripheral region)
  * 使用位带设置位 (外设区域)
  * @param addr Byte address in peripheral bit-band region (0x40000000-0x400FFFFF)
- * @param bit Bit number (0-31)
- * Reference: Generic User Guide, Section 2.2 - Memory model, Bit-banding
+ * @param bit Bit number (0-7)
+ * Reference: Arm(R) Cortex-M4 Devices Generic User Guide, Chapter 2.2.5 (page 2-16)
  */
 void cm4_bitband_periph_set(volatile void *addr, uint32_t bit)
 {
@@ -338,7 +346,8 @@ void cm4_bitband_periph_set(volatile void *addr, uint32_t bit)
  * @brief Clear bit using bit-banding (Peripheral region)
  * 使用位带清除位 (外设区域)
  * @param addr Byte address in peripheral bit-band region
- * @param bit Bit number (0-31)
+ * @param bit Bit number (0-7)
+ * Reference: Arm(R) Cortex-M4 Devices Generic User Guide, Chapter 2.2.5 (page 2-16)
  */
 void cm4_bitband_periph_clear(volatile void *addr, uint32_t bit)
 {
@@ -349,8 +358,9 @@ void cm4_bitband_periph_clear(volatile void *addr, uint32_t bit)
  * @brief Read bit using bit-banding (Peripheral region)
  * 使用位带读取位 (外设区域)
  * @param addr Byte address in peripheral bit-band region
- * @param bit Bit number (0-31)
+ * @param bit Bit number (0-7)
  * @return Bit value (0 or 1)
+ * Reference: Arm(R) Cortex-M4 Devices Generic User Guide, Chapter 2.2.5 (page 2-16)
  */
 uint32_t cm4_bitband_periph_read(volatile void *addr, uint32_t bit)
 {
@@ -361,7 +371,7 @@ uint32_t cm4_bitband_periph_read(volatile void *addr, uint32_t bit)
  * @brief Toggle bit using bit-banding (Peripheral region)
  * 使用位带翻转位 (外设区域)
  * @param addr Byte address in peripheral bit-band region
- * @param bit Bit number (0-31)
+ * @param bit Bit number (0-7)
  */
 void cm4_bitband_periph_toggle(volatile void *addr, uint32_t bit)
 {
@@ -374,6 +384,7 @@ void cm4_bitband_periph_toggle(volatile void *addr, uint32_t bit)
 /* ============================================================================
  * Cortex-M4 Exclusive Access Support
  * Cortex-M4 独占访问支持
+ * Reference: Arm(R) Cortex-M4 Devices Generic User Guide, Chapter 2.2.7 (page 2-18)
  * ============================================================================ */
 
 /**
@@ -381,7 +392,7 @@ void cm4_bitband_periph_toggle(volatile void *addr, uint32_t bit)
  * 独占加载 (8位)
  * @param addr Address to load from
  * @return Loaded value
- * Reference: Generic User Guide, Section 2.2 - Memory model, Exclusive monitors
+ * Reference: Arm(R) Cortex-M4 Devices Generic User Guide, Chapter 2.2.7 (page 2-18)
  */
 uint8_t cm4_ldrex8(volatile uint8_t *addr)
 {
@@ -399,6 +410,7 @@ uint8_t cm4_ldrex8(volatile uint8_t *addr)
  * 独占加载 (16位)
  * @param addr Address to load from
  * @return Loaded value
+ * Reference: Arm(R) Cortex-M4 Devices Generic User Guide, Chapter 2.2.7 (page 2-18)
  */
 uint16_t cm4_ldrex16(volatile uint16_t *addr)
 {
@@ -416,6 +428,7 @@ uint16_t cm4_ldrex16(volatile uint16_t *addr)
  * 独占加载 (32位)
  * @param addr Address to load from
  * @return Loaded value
+ * Reference: Arm(R) Cortex-M4 Devices Generic User Guide, Chapter 2.2.7 (page 2-18)
  */
 uint32_t cm4_ldrex32(volatile uint32_t *addr)
 {
@@ -434,6 +447,7 @@ uint32_t cm4_ldrex32(volatile uint32_t *addr)
  * @param addr Address to store to
  * @param value Value to store
  * @return 0 if store succeeded, 1 if failed
+ * Reference: Arm(R) Cortex-M4 Devices Generic User Guide, Chapter 2.2.7 (page 2-18)
  */
 uint32_t cm4_strex8(volatile uint8_t *addr, uint8_t value)
 {
@@ -452,6 +466,7 @@ uint32_t cm4_strex8(volatile uint8_t *addr, uint8_t value)
  * @param addr Address to store to
  * @param value Value to store
  * @return 0 if store succeeded, 1 if failed
+ * Reference: Arm(R) Cortex-M4 Devices Generic User Guide, Chapter 2.2.7 (page 2-18)
  */
 uint32_t cm4_strex16(volatile uint16_t *addr, uint16_t value)
 {
@@ -470,6 +485,7 @@ uint32_t cm4_strex16(volatile uint16_t *addr, uint16_t value)
  * @param addr Address to store to
  * @param value Value to store
  * @return 0 if store succeeded, 1 if failed
+ * Reference: Arm(R) Cortex-M4 Devices Generic User Guide, Chapter 2.2.7 (page 2-18)
  */
 uint32_t cm4_strex32(volatile uint32_t *addr, uint32_t value)
 {
@@ -486,6 +502,7 @@ uint32_t cm4_strex32(volatile uint32_t *addr, uint32_t value)
  * @brief Clear Exclusive
  * 清除独占标记
  * Clears the local exclusive monitor.
+ * Reference: Arm(R) Cortex-M4 Devices Generic User Guide, Chapter 2.2.7 (page 2-18)
  */
 void cm4_clrex(void)
 {
@@ -497,13 +514,14 @@ void cm4_clrex(void)
 /* ============================================================================
  * Cortex-M4 CPUID and System Information
  * Cortex-M4 CPUID 和系统信息
+ * Reference: Arm(R) Cortex-M4 Devices Generic User Guide, Table 2-2 (page 2-3)
  * ============================================================================ */
 
 /**
  * @brief Get CPUID
  * 获取 CPUID
  * @return CPUID register value
- * Reference: Generic User Guide, Section 4.3 - System control block
+ * Reference: Arm(R) Cortex-M4 Devices Generic User Guide, Table 2-2 (page 2-3)
  */
 uint32_t cm4_get_cpuid(void)
 {
@@ -545,12 +563,13 @@ int cm4_is_cortex_m4(void)
 /* ============================================================================
  * Cortex-M4 Interrupt Control
  * Cortex-M4 中断控制
+ * Reference: Arm(R) Cortex-M4 Devices Generic User Guide, Chapter 2.1.3 (page 2-7)
  * ============================================================================ */
 
 /**
  * @brief Disable all interrupts (except NMI and HardFault)
  * 禁用所有中断 (除了 NMI 和 HardFault)
- * Reference: Generic User Guide, Section 2.1 - Programmers model
+ * Reference: Arm(R) Cortex-M4 Devices Generic User Guide, Table 2-7 (page 2-8)
  */
 void cm4_disable_interrupts(void)
 {
@@ -563,6 +582,7 @@ void cm4_disable_interrupts(void)
 /**
  * @brief Enable all interrupts
  * 启用所有中断
+ * Reference: Arm(R) Cortex-M4 Devices Generic User Guide, Table 2-7 (page 2-8)
  */
 void cm4_enable_interrupts(void)
 {
@@ -575,6 +595,7 @@ void cm4_enable_interrupts(void)
 /**
  * @brief Disable all faults
  * 禁用所有故障
+ * Reference: Arm(R) Cortex-M4 Devices Generic User Guide, Table 2-8 (page 2-8)
  */
 void cm4_disable_faults(void)
 {
@@ -587,6 +608,7 @@ void cm4_disable_faults(void)
 /**
  * @brief Enable all faults
  * 启用所有故障
+ * Reference: Arm(R) Cortex-M4 Devices Generic User Guide, Table 2-8 (page 2-8)
  */
 void cm4_enable_faults(void)
 {
@@ -614,13 +636,14 @@ int cm4_get_interrupt_state(void)
 /* ============================================================================
  * Cortex-M4 Data Synchronization and Instruction Synchronization
  * Cortex-M4 数据同步和指令同步
+ * Reference: Arm(R) Cortex-M4 Devices Generic User Guide, Chapter 2.2.4 (page 2-15)
  * ============================================================================ */
 
 /**
  * @brief Data Synchronization Barrier
  * 数据同步屏障
  * Ensures that all memory accesses are completed before subsequent instructions.
- * Reference: Generic User Guide, Section 3.12 - Miscellaneous instructions
+ * Reference: Arm(R) Cortex-M4 Devices Generic User Guide, Chapter 2.2.4 (page 2-15)
  */
 void cm4_dsb(void)
 {
@@ -634,6 +657,7 @@ void cm4_dsb(void)
  * @brief Data Memory Barrier
  * 数据内存屏障
  * Ensures that all memory accesses are completed before subsequent memory accesses.
+ * Reference: Arm(R) Cortex-M4 Devices Generic User Guide, Chapter 2.2.4 (page 2-15)
  */
 void cm4_dmb(void)
 {
@@ -647,6 +671,7 @@ void cm4_dmb(void)
  * @brief Instruction Synchronization Barrier
  * 指令同步屏障
  * Ensures that all instructions are completed before subsequent instructions.
+ * Reference: Arm(R) Cortex-M4 Devices Generic User Guide, Chapter 2.2.4 (page 2-15)
  */
 void cm4_isb(void)
 {
@@ -659,13 +684,14 @@ void cm4_isb(void)
 /* ============================================================================
  * Cortex-M4 Wait For Interrupt and Event
  * Cortex-M4 等待中断和事件
+ * Reference: Arm(R) Cortex-M4 Devices Generic User Guide, Chapter 2.5 (page 2-32)
  * ============================================================================ */
 
 /**
  * @brief Wait For Interrupt
  * 等待中断
  * Suspends execution until an interrupt occurs.
- * Reference: Generic User Guide, Section 3.12 - Miscellaneous instructions
+ * Reference: Arm(R) Cortex-M4 Devices Generic User Guide, Chapter 2.5 (page 2-32)
  */
 void cm4_wfi(void)
 {
@@ -679,6 +705,7 @@ void cm4_wfi(void)
  * @brief Wait For Event
  * 等待事件
  * Suspends execution until an event occurs.
+ * Reference: Arm(R) Cortex-M4 Devices Generic User Guide, Chapter 2.5 (page 2-32)
  */
 void cm4_wfe(void)
 {
@@ -692,6 +719,7 @@ void cm4_wfe(void)
  * @brief Send Event
  * 发送事件
  * Sends an event to all processors in the system.
+ * Reference: Arm(R) Cortex-M4 Devices Generic User Guide, Chapter 2.5 (page 2-32)
  */
 void cm4_sev(void)
 {

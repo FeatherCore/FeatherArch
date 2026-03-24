@@ -7,15 +7,15 @@
  * 描述: Cortex-M4 核心寄存器定义和内联函数
  *
  * Reference: Arm(R) Cortex-M4 Devices Generic User Guide (DUI 0553B)
- *   - Chapter 2.1.3: Core registers (page 2-3)
- *   - Table 2-2: Core register set summary (page 2-3)
- *   - Table 2-4: APSR bit assignments (page 2-5)
- *   - Table 2-5: IPSR bit assignments (page 2-6)
- *   - Table 2-6: EPSR bit assignments (page 2-6)
- *   - Table 2-7: PRIMASK register bit assignments (page 2-8)
- *   - Table 2-8: FAULTMASK register bit assignments (page 2-8)
- *   - Table 2-9: BASEPRI register bit assignments (page 2-9)
- *   - Table 2-10: CONTROL register bit assignments (page 2-9)
+ *   - Chapter 2.1.3 Core registers (page 2-3)
+ *   - Table 2-2 Core register set summary (page 2-3)
+ *   - Table 2-4 APSR bit assignments (page 2-5)
+ *   - Table 2-5 IPSR bit assignments (page 2-6)
+ *   - Table 2-6 EPSR bit assignments (page 2-6)
+ *   - Table 2-7 PRIMASK register bit assignments (page 2-8)
+ *   - Table 2-8 FAULTMASK register bit assignments (page 2-8)
+ *   - Table 2-9 BASEPRI register bit assignments (page 2-9)
+ *   - Table 2-10 CONTROL register bit assignments (page 2-9)
  * ============================================================================
  * SPDX-License-Identifier: Apache-2.0
  */
@@ -36,7 +36,7 @@ extern "C" {
  * ============================================================================
  */
 
-/* APSR bit positions */
+/* APSR bit positions - Reference: Table 2-4 (page 2-5) */
 #define APSR_N_Pos                        31U
 #define APSR_Z_Pos                        30U
 #define APSR_C_Pos                        29U
@@ -59,13 +59,13 @@ extern "C" {
  * ============================================================================
  */
 
-/* IPSR bit positions */
+/* IPSR bit positions - Reference: Table 2-5 (page 2-6) */
 #define IPSR_ISR_Pos                      0U
 
 /* IPSR bit masks */
 #define IPSR_ISR_Msk                      (0x1FFUL << IPSR_ISR_Pos)
 
-/* Exception number definitions */
+/* Exception number definitions - Reference: Table 2-5 (page 2-6) */
 #define IPSR_ISR_THREAD                   0U    /* Thread mode */
 #define IPSR_ISR_NMI                      2U    /* NMI */
 #define IPSR_ISR_HARDFAULT                3U    /* HardFault */
@@ -85,7 +85,7 @@ extern "C" {
  * ============================================================================
  */
 
-/* EPSR bit positions */
+/* EPSR bit positions - Reference: Table 2-6 (page 2-6) */
 #define EPSR_ICI_IT_Pos                   10U
 #define EPSR_T_Pos                        24U
 
@@ -100,7 +100,7 @@ extern "C" {
  * ============================================================================
  */
 
-/* PRIMASK bit positions */
+/* PRIMASK bit positions - Reference: Table 2-7 (page 2-8) */
 #define PRIMASK_PRIMASK_Pos               0U
 
 /* PRIMASK bit masks */
@@ -113,7 +113,7 @@ extern "C" {
  * ============================================================================
  */
 
-/* FAULTMASK bit positions */
+/* FAULTMASK bit positions - Reference: Table 2-8 (page 2-8) */
 #define FAULTMASK_FAULTMASK_Pos           0U
 
 /* FAULTMASK bit masks */
@@ -126,7 +126,7 @@ extern "C" {
  * ============================================================================
  */
 
-/* BASEPRI bit positions */
+/* BASEPRI bit positions - Reference: Table 2-9 (page 2-9) */
 #define BASEPRI_BASEPRI_Pos               0U
 
 /* BASEPRI bit masks */
@@ -139,7 +139,7 @@ extern "C" {
  * ============================================================================
  */
 
-/* CONTROL bit positions */
+/* CONTROL bit positions - Reference: Table 2-10 (page 2-9) */
 #define CONTROL_nPRIV_Pos                 0U
 #define CONTROL_SPSEL_Pos                 1U
 #define CONTROL_FPCA_Pos                  2U
@@ -149,7 +149,7 @@ extern "C" {
 #define CONTROL_SPSEL_Msk                 (1UL << CONTROL_SPSEL_Pos)
 #define CONTROL_FPCA_Msk                  (1UL << CONTROL_FPCA_Pos)
 
-/* CONTROL register values */
+/* CONTROL register values - Reference: Table 2-10 (page 2-9) */
 #define CONTROL_nPRIV_PRIV                0U    /* Privileged level */
 #define CONTROL_nPRIV_UNPRIV              1U    /* Unprivileged level */
 #define CONTROL_SPSEL_MSP                 0U    /* Use MSP */
@@ -160,7 +160,7 @@ extern "C" {
 /*
  * ============================================================================
  * Core Register Access Functions
- * Reference: Arm(R) Cortex-M4 Devices Generic User Guide, Chapter 2.1.3 (page 2-3)
+ * Reference: Arm(R) Cortex-M4 Devices Generic User Guide, Table 2-2 (page 2-3)
  * ============================================================================
  */
 
@@ -366,6 +366,8 @@ static inline uint32_t cm4_get_pc(void)
 /**
  * @brief Select Main Stack Pointer (MSP)
  * Reference: Arm(R) Cortex-M4 Devices Generic User Guide, Table 2-10 (page 2-9)
+ * Note: When changing stack pointer, software must use ISB immediately after MSR
+ * Reference: Chapter 2.1.3 (page 2-9)
  */
 static inline void cm4_select_msp(void)
 {
@@ -378,6 +380,8 @@ static inline void cm4_select_msp(void)
 /**
  * @brief Select Process Stack Pointer (PSP)
  * Reference: Arm(R) Cortex-M4 Devices Generic User Guide, Table 2-10 (page 2-9)
+ * Note: When changing stack pointer, software must use ISB immediately after MSR
+ * Reference: Chapter 2.1.3 (page 2-9)
  */
 static inline void cm4_select_psp(void)
 {

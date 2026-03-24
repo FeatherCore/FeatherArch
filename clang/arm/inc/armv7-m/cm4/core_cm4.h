@@ -13,8 +13,10 @@
  * - Bit-banding support
  * - Nested Vectored Interrupt Controller (NVIC)
  *
- * Reference: Arm(R) Cortex-M4 Processor Technical Reference Manual (DDI 0439)
- *            Arm(R) Cortex-M4 Devices Generic User Guide (DUI 0553)
+ * Reference: Arm(R) Cortex-M4 Devices Generic User Guide (DUI 0553B)
+ *   - Chapter 1.1 About the Cortex-M4 processor and core peripherals (page 1-2)
+ *   - Chapter 1.1.4 Cortex-M4 core peripherals (page 1-4)
+ *   - Chapter 2.2.5 Optional bit-banding (page 2-16)
  * ============================================================================
  * SPDX-License-Identifier: Apache-2.0
  */
@@ -34,6 +36,7 @@ extern "C" {
 /**
  * @brief Cortex-M4 Core Configuration
  * Cortex-M4 核心配置
+ * Reference: Arm(R) Cortex-M4 Devices Generic User Guide, Chapter 1.1 (page 1-2)
  */
 #ifndef __CORTEX_M
 #define __CORTEX_M              4U
@@ -42,6 +45,7 @@ extern "C" {
 /**
  * @brief ARMv7E-M Architecture
  * ARMv7E-M 架构
+ * Reference: Arm(R) Cortex-M4 Devices Generic User Guide, Chapter 1.1 (page 1-2)
  */
 #ifndef __ARM_ARCH
 #define __ARM_ARCH              7U
@@ -58,12 +62,14 @@ extern "C" {
 /* ============================================================================
  * Cortex-M4 Feature Configuration
  * Cortex-M4 特性配置
+ * Reference: Arm(R) Cortex-M4 Devices Generic User Guide, Chapter 1.1.4 (page 1-4)
  * ============================================================================ */
 
 /**
  * @brief DSP Extension Present
  * DSP 扩展存在
  * Cortex-M4 always has DSP extension
+ * Reference: Arm(R) Cortex-M4 Devices Generic User Guide, Chapter 1.1.4 (page 1-4)
  */
 #ifndef __DSP_PRESENT
 #define __DSP_PRESENT           1U
@@ -73,6 +79,7 @@ extern "C" {
  * @brief FPU Present
  * FPU 存在
  * Optional on Cortex-M4
+ * Reference: Arm(R) Cortex-M4 Devices Generic User Guide, Chapter 1.1.4 (page 1-4)
  */
 #ifndef __FPU_PRESENT
 #define __FPU_PRESENT           1U
@@ -81,6 +88,7 @@ extern "C" {
 /**
  * @brief FPU Version - FPv4-SP (Single Precision)
  * FPU 版本 - FPv4-SP（单精度）
+ * Reference: Arm(R) Cortex-M4 Devices Generic User Guide, Chapter 1.1.4 (page 1-4)
  */
 #ifndef __FPU_DP
 #define __FPU_DP                0U  /* 0 = Single precision only */
@@ -90,6 +98,7 @@ extern "C" {
  * @brief MPU Present
  * MPU 存在
  * Optional on Cortex-M4
+ * Reference: Arm(R) Cortex-M4 Devices Generic User Guide, Chapter 1.1.4 (page 1-4)
  */
 #ifndef __MPU_PRESENT
 #define __MPU_PRESENT           1U
@@ -99,6 +108,7 @@ extern "C" {
  * @brief Number of MPU Regions
  * MPU 区域数量
  * Cortex-M4 supports up to 8 regions
+ * Reference: Arm(R) Cortex-M4 Devices Generic User Guide, Chapter 1.1.4 (page 1-4)
  */
 #ifndef __MPU_NUM_REGIONS
 #define __MPU_NUM_REGIONS       8U
@@ -108,6 +118,7 @@ extern "C" {
  * @brief NVIC Priority Bits
  * NVIC 优先级位数
  * Cortex-M4 supports 4 bits (16 priority levels)
+ * Reference: Arm(R) Cortex-M4 Devices Generic User Guide, Chapter 1.1 (page 1-2)
  */
 #ifndef __NVIC_PRIO_BITS
 #define __NVIC_PRIO_BITS        4U
@@ -125,6 +136,7 @@ extern "C" {
  * @brief Bit-banding Present
  * 位带(Bit-banding)存在
  * Cortex-M4 supports bit-banding
+ * Reference: Arm(R) Cortex-M4 Devices Generic User Guide, Chapter 2.2.5 (page 2-16)
  */
 #ifndef __BITBAND_PRESENT
 #define __BITBAND_PRESENT       1U
@@ -133,12 +145,13 @@ extern "C" {
 /* ============================================================================
  * Cortex-M4 Bit-banding Definitions
  * Cortex-M4 位带定义
+ * Reference: Arm(R) Cortex-M4 Devices Generic User Guide, Chapter 2.2.5 (page 2-16)
  * ============================================================================ */
 
 /**
  * @brief Bit-banding Base Addresses
  * 位带基地址
- * Reference: Cortex-M4 TRM, Section 3.7 Bit-banding
+ * Reference: Arm(R) Cortex-M4 Devices Generic User Guide, Chapter 2.2.5 (page 2-16)
  */
 #define BITBAND_SRAM_BASE           0x20000000UL
 #define BITBAND_SRAM_ALIAS_BASE     0x22000000UL
@@ -149,8 +162,9 @@ extern "C" {
  * @brief Convert SRAM address to bit-band alias address
  * 将 SRAM 地址转换为位带别名地址
  * @param addr Byte address in SRAM bit-band region (0x20000000-0x200FFFFF)
- * @param bit Bit number (0-31)
+ * @param bit Bit number (0-7)
  * @return Bit-band alias address
+ * Reference: Arm(R) Cortex-M4 Devices Generic User Guide, Chapter 2.2.5 (page 2-16)
  */
 #define BITBAND_SRAM_ADDR(addr, bit) \
     (((((uint32_t)(addr)) - BITBAND_SRAM_BASE) * 32) + ((uint32_t)(bit) * 4) + BITBAND_SRAM_ALIAS_BASE)
@@ -159,8 +173,9 @@ extern "C" {
  * @brief Convert Peripheral address to bit-band alias address
  * 将外设地址转换为位带别名地址
  * @param addr Byte address in peripheral bit-band region (0x40000000-0x400FFFFF)
- * @param bit Bit number (0-31)
+ * @param bit Bit number (0-7)
  * @return Bit-band alias address
+ * Reference: Arm(R) Cortex-M4 Devices Generic User Guide, Chapter 2.2.5 (page 2-16)
  */
 #define BITBAND_PERIPH_ADDR(addr, bit) \
     (((((uint32_t)(addr)) - BITBAND_PERIPH_BASE) * 32) + ((uint32_t)(bit) * 4) + BITBAND_PERIPH_ALIAS_BASE)
@@ -169,8 +184,9 @@ extern "C" {
  * @brief Bit-band access macro for SRAM
  * SRAM 位带访问宏
  * @param addr Byte address in SRAM bit-band region
- * @param bit Bit number (0-31)
+ * @param bit Bit number (0-7)
  * @return Pointer to bit-band alias word
+ * Reference: Arm(R) Cortex-M4 Devices Generic User Guide, Chapter 2.2.5 (page 2-16)
  */
 #define BITBAND_SRAM_PTR(addr, bit) \
     ((volatile uint32_t *)BITBAND_SRAM_ADDR(addr, bit))
@@ -179,8 +195,9 @@ extern "C" {
  * @brief Bit-band access macro for Peripheral
  * 外设位带访问宏
  * @param addr Byte address in peripheral bit-band region
- * @param bit Bit number (0-31)
+ * @param bit Bit number (0-7)
  * @return Pointer to bit-band alias word
+ * Reference: Arm(R) Cortex-M4 Devices Generic User Guide, Chapter 2.2.5 (page 2-16)
  */
 #define BITBAND_PERIPH_PTR(addr, bit) \
     ((volatile uint32_t *)BITBAND_PERIPH_ADDR(addr, bit))
@@ -188,6 +205,7 @@ extern "C" {
 /**
  * @brief Set bit using bit-banding (SRAM)
  * 使用位带设置位 (SRAM)
+ * Reference: Arm(R) Cortex-M4 Devices Generic User Guide, Chapter 2.2.5 (page 2-16)
  */
 #define BITBAND_SRAM_SET(addr, bit) \
     (*BITBAND_SRAM_PTR(addr, bit) = 1)
@@ -195,6 +213,7 @@ extern "C" {
 /**
  * @brief Clear bit using bit-banding (SRAM)
  * 使用位带清除位 (SRAM)
+ * Reference: Arm(R) Cortex-M4 Devices Generic User Guide, Chapter 2.2.5 (page 2-16)
  */
 #define BITBAND_SRAM_CLR(addr, bit) \
     (*BITBAND_SRAM_PTR(addr, bit) = 0)
@@ -202,6 +221,7 @@ extern "C" {
 /**
  * @brief Read bit using bit-banding (SRAM)
  * 使用位带读取位 (SRAM)
+ * Reference: Arm(R) Cortex-M4 Devices Generic User Guide, Chapter 2.2.5 (page 2-16)
  */
 #define BITBAND_SRAM_GET(addr, bit) \
     (*BITBAND_SRAM_PTR(addr, bit))
@@ -209,6 +229,7 @@ extern "C" {
 /**
  * @brief Set bit using bit-banding (Peripheral)
  * 使用位带设置位 (外设)
+ * Reference: Arm(R) Cortex-M4 Devices Generic User Guide, Chapter 2.2.5 (page 2-16)
  */
 #define BITBAND_PERIPH_SET(addr, bit) \
     (*BITBAND_PERIPH_PTR(addr, bit) = 1)
@@ -216,6 +237,7 @@ extern "C" {
 /**
  * @brief Clear bit using bit-banding (Peripheral)
  * 使用位带清除位 (外设)
+ * Reference: Arm(R) Cortex-M4 Devices Generic User Guide, Chapter 2.2.5 (page 2-16)
  */
 #define BITBAND_PERIPH_CLR(addr, bit) \
     (*BITBAND_PERIPH_PTR(addr, bit) = 0)
@@ -223,6 +245,7 @@ extern "C" {
 /**
  * @brief Read bit using bit-banding (Peripheral)
  * 使用位带读取位 (外设)
+ * Reference: Arm(R) Cortex-M4 Devices Generic User Guide, Chapter 2.2.5 (page 2-16)
  */
 #define BITBAND_PERIPH_GET(addr, bit) \
     (*BITBAND_PERIPH_PTR(addr, bit))
@@ -230,59 +253,69 @@ extern "C" {
 /* ============================================================================
  * Cortex-M4 Instruction Set Features
  * Cortex-M4 指令集特性
+ * Reference: Arm(R) Cortex-M4 Devices Generic User Guide, Chapter 1.1 (page 1-2)
  * ============================================================================ */
 
 /**
  * @brief Cortex-M4 supports DSP instructions
  * Cortex-M4 支持 DSP 指令
+ * Reference: Arm(R) Cortex-M4 Devices Generic User Guide, Chapter 1.1 (page 1-2)
  */
 #define __CM4_DSP_INSTRUCTIONS      1
 
 /**
  * @brief Cortex-M4 supports SIMD instructions
  * Cortex-M4 支持 SIMD 指令
+ * Reference: Arm(R) Cortex-M4 Devices Generic User Guide, Chapter 1.1 (page 1-2)
  */
 #define __CM4_SIMD_INSTRUCTIONS     1
 
 /**
  * @brief Cortex-M4 supports saturating instructions
  * Cortex-M4 支持饱和指令
+ * Reference: Arm(R) Cortex-M4 Devices Generic User Guide, Chapter 1.1 (page 1-2)
  */
 #define __CM4_SAT_INSTRUCTIONS      1
 
 /**
  * @brief Cortex-M4 supports exclusive access instructions
  * Cortex-M4 支持独占访问指令
+ * Reference: Arm(R) Cortex-M4 Devices Generic User Guide, Chapter 2.2.7 (page 2-18)
  */
 #define __CM4_EXCLUSIVE_ACCESS      1
 
 /* ============================================================================
  * Cortex-M4 FPU Configuration
  * Cortex-M4 FPU 配置
+ * Reference: Arm(R) Cortex-M4 Devices Generic User Guide, Chapter 1.1.4 (page 1-4)
  * ============================================================================ */
 
 #if (__FPU_PRESENT == 1)
 /**
  * @brief FPU Type - FPv4-SP
  * FPU 类型 - FPv4-SP
+ * Reference: Arm(R) Cortex-M4 Devices Generic User Guide, Chapter 1.1.4 (page 1-4)
  */
 #define __FPU_TYPE                  4U
 
 /**
  * @brief FPU Double Precision Support
  * FPU 双精度支持
+ * Reference: Arm(R) Cortex-M4 Devices Generic User Guide, Chapter 1.1.4 (page 1-4)
  */
 #define __FPU_HAS_DOUBLE_PRECISION  0U
 
 /**
  * @brief FPU Register Count (S0-S31)
  * FPU 寄存器数量 (S0-S31)
+ * Reference: Arm(R) Cortex-M4 Devices Generic User Guide, Chapter 1.1.4 (page 1-4)
  */
 #define __FPU_REG_COUNT             32U
 
 /**
  * @brief FPU Double-precision Register Count (D0-D15)
  * FPU 双精度寄存器数量 (D0-D15)
+ * Reference: Arm(R) Cortex-M4 Devices Generic User Guide, Chapter 1.1.4 (page 1-4)
  */
 #define __FPU_DREG_COUNT            16U
 #endif /* __FPU_PRESENT */
