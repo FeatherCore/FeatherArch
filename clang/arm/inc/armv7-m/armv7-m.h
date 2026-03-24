@@ -152,6 +152,15 @@ extern "C" {
 #include "armv7-m_mtb.h"
 #endif
 
+/**
+ * SCS Debug - System Control Space Debug Registers
+ * SCS 调试 - 系统控制空间调试寄存器
+ * Reference: Chapter C1.6 - Debug register summary
+ */
+#if (__DEBUG_PRESENT == 1)
+#include "armv7-m_scs_debug.h"
+#endif
+
 /*
  * ============================================================================
  * Version Information

@@ -218,6 +218,15 @@ extern "C" {
 #include "armv8-m_cti.h"
 #endif
 
+/**
+ * SCS Debug - System Control Space Debug Registers
+ * SCS 调试 - 系统控制空间调试寄存器
+ * Reference: Chapter D1.2 - SCS Register Descriptions
+ */
+#if (__DEBUG_PRESENT == 1)
+#include "armv8-m_scs_debug.h"
+#endif
+
 /*
  * ============================================================================
  * Version Information
