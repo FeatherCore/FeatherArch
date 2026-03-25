@@ -1,14 +1,19 @@
 /*
- * ARM Architecture - Cortex-M4 FPU (Floating-Point Unit) Registers
+ * ARM Architecture - Cortex-M4 FPU (Floating Point Unit)
  *
  * ============================================================================
  * File: cm4_fpu.h
- * Description: Cortex-M4 FPU register definitions
- * 描述: Cortex-M4 FPU 寄存器定义
+ * Description: Cortex-M4 FPU register definitions (wrapper for armv7-m_fpu.h)
+ * 描述: Cortex-M4 FPU 寄存器定义（armv7-m_fpu.h 的包装层）
  *
- * Reference: Arm(R) Cortex-M4 Processor Technical Reference Manual (100166_0001_04_en)
- *   - Chapter 7 Floating-Point Unit (page 7-65)
- *   - Table 7-4 Cortex-M4 Floating Point system registers (page 7-71)
+ * This file provides CM4-specific naming conventions while delegating
+ * all actual definitions to armv7-m_fpu.h.
+ *
+ * Reference: Arm(R) Cortex-M4 Devices Generic User Guide (DUI 0553B)
+ *   - Chapter 4.6 Floating Point Unit (page 4-48)
+ *   - Table 4-49 Cortex-M4 Floating Point system registers (page 4-48)
+ *
+ * Implementation: All functionality is provided by armv7-m/armv7-m_fpu.h
  * ============================================================================
  * SPDX-License-Identifier: Apache-2.0
  */
@@ -18,199 +23,274 @@
 
 #include <stdint.h>
 
+/* Include the underlying ARMv7-M implementation */
+#include "armv7-m/armv7-m_fpu.h"
+
 #ifdef __cplusplus
 extern "C" {
 #endif
 
 /*
  * ============================================================================
- * FPU System Registers Base Address
- * Reference: Arm(R) Cortex-M4 Processor Technical Reference Manual, Table 7-4 (page 7-71)
+ * FPU Base Address
+ * FPU 基地址
+ * Reference: Arm(R) Cortex-M4 Devices Generic User Guide, Table 4-49 (page 4-48)
  * ============================================================================
  */
 
-#define CM4_FPU_BASE_ADDR             0xE000EF34UL
+#define CM4_FPU_BASE_ADDR             FPU_BASE_ADDR
 
 /*
  * ============================================================================
- * FP Context Control Register (FPCCR)
- * Reference: Arm(R) Cortex-M4 Processor Technical Reference Manual, Table 7-4 (page 7-71)
- * Address: 0xE000EF34
- * Reset value: 0xC0000000
+ * FPU Register Aliases - Map CM4 naming to ARMv7-M naming
+ * FPU 寄存器别名 - 将 CM4 命名映射到 ARMv7-M 命名
  * ============================================================================
  */
 
-#define FPU_FPCCR                     (*(volatile uint32_t *)(CM4_FPU_BASE_ADDR + 0x000))
+/* Floating-Point Context Control Register */
+#define FPU_FPCCR                     FPU_FPCCR
 
 /* FPCCR bit definitions */
-#define FPU_FPCCR_LSPACT_Pos          0U
-#define FPU_FPCCR_LSPACT_Msk          (1UL << FPU_FPCCR_LSPACT_Pos)
+#define FPU_FPCCR_ASPEN_Pos           FPCCR_ASPEN_Pos
+#define FPU_FPCCR_ASPEN_Msk           FPCCR_ASPEN_Msk
+#define FPU_FPCCR_LSPEN_Pos           FPCCR_LSPEN_Pos
+#define FPU_FPCCR_LSPEN_Msk           FPCCR_LSPEN_Msk
+#define FPU_FPCCR_MONRDY_Pos          FPCCR_MONRDY_Pos
+#define FPU_FPCCR_MONRDY_Msk          FPCCR_MONRDY_Msk
+#define FPU_FPCCR_BFRDY_Pos           FPCCR_BFRDY_Pos
+#define FPU_FPCCR_BFRDY_Msk           FPCCR_BFRDY_Msk
+#define FPU_FPCCR_MMRDY_Pos           FPCCR_MMRDY_Pos
+#define FPU_FPCCR_MMRDY_Msk           FPCCR_MMRDY_Msk
+#define FPU_FPCCR_HFRDY_Pos           FPCCR_HFRDY_Pos
+#define FPU_FPCCR_HFRDY_Msk           FPCCR_HFRDY_Msk
+#define FPU_FPCCR_THREAD_Pos          FPCCR_THREAD_Pos
+#define FPU_FPCCR_THREAD_Msk          FPCCR_THREAD_Msk
+#define FPU_FPCCR_USER_Pos            FPCCR_USER_Pos
+#define FPU_FPCCR_USER_Msk            FPCCR_USER_Msk
+#define FPU_FPCCR_LSPACT_Pos          FPCCR_LSPACT_Pos
+#define FPU_FPCCR_LSPACT_Msk          FPCCR_LSPACT_Msk
 
-#define FPU_FPCCR_USER_Pos            1U
-#define FPU_FPCCR_USER_Msk            (1UL << FPU_FPCCR_USER_Pos)
-
-#define FPU_FPCCR_THREAD_Pos          3U
-#define FPU_FPCCR_THREAD_Msk          (1UL << FPU_FPCCR_THREAD_Pos)
-
-#define FPU_FPCCR_HFRDY_Pos           4U
-#define FPU_FPCCR_HFRDY_Msk           (1UL << FPU_FPCCR_HFRDY_Pos)
-
-#define FPU_FPCCR_MMRDY_Pos           5U
-#define FPU_FPCCR_MMRDY_Msk           (1UL << FPU_FPCCR_MMRDY_Pos)
-
-#define FPU_FPCCR_BFRDY_Pos           6U
-#define FPU_FPCCR_BFRDY_Msk           (1UL << FPU_FPCCR_BFRDY_Pos)
-
-#define FPU_FPCCR_MONRDY_Pos          8U
-#define FPU_FPCCR_MONRDY_Msk          (1UL << FPU_FPCCR_MONRDY_Pos)
-
-#define FPU_FPCCR_LSPEN_Pos           30U
-#define FPU_FPCCR_LSPEN_Msk           (1UL << FPU_FPCCR_LSPEN_Pos)
-
-#define FPU_FPCCR_ASPEN_Pos           31U
-#define FPU_FPCCR_ASPEN_Msk           (1UL << FPU_FPCCR_ASPEN_Pos)
-
-/*
- * ============================================================================
- * FP Context Address Register (FPCAR)
- * Reference: Arm(R) Cortex-M4 Processor Technical Reference Manual, Table 7-4 (page 7-71)
- * Address: 0xE000EF38
- * ============================================================================
- */
-
-#define FPU_FPCAR                     (*(volatile uint32_t *)(CM4_FPU_BASE_ADDR + 0x004))
+/* Floating-Point Context Address Register */
+#define FPU_FPCAR                     FPU_FPCAR
 
 /* FPCAR bit definitions */
-#define FPU_FPCAR_ADDRESS_Pos         3U
-#define FPU_FPCAR_ADDRESS_Msk         (0x1FFFFFFFUL << FPU_FPCAR_ADDRESS_Pos)
+#define FPU_FPCAR_ADDRESS_Pos         FPCAR_ADDRESS_Pos
+#define FPU_FPCAR_ADDRESS_Msk         FPCAR_ADDRESS_Msk
+
+/* Floating-Point Default Status Control Register */
+#define FPU_FPDSCR                    FPU_FPDSCR
+
+/* FPDSCR bit definitions */
+#define FPU_FPDSCR_AHP_Pos            FPDSCR_AHP_Pos
+#define FPU_FPDSCR_AHP_Msk            FPDSCR_AHP_Msk
+#define FPU_FPDSCR_DN_Pos             FPDSCR_DN_Pos
+#define FPU_FPDSCR_DN_Msk             FPDSCR_DN_Msk
+#define FPU_FPDSCR_FZ_Pos             FPDSCR_FZ_Pos
+#define FPU_FPDSCR_FZ_Msk             FPDSCR_FZ_Msk
+#define FPU_FPDSCR_RMode_Pos          FPDSCR_RMode_Pos
+#define FPU_FPDSCR_RMode_Msk          FPDSCR_RMode_Msk
+
+/* Media and FP Feature Register 0 */
+#define FPU_MVFR0                     FPU_MVFR0
+
+/* MVFR0 bit definitions */
+#define FPU_MVFR0_A_SIMD_registers_Pos  MVFR0_A_SIMD_registers_Pos
+#define FPU_MVFR0_A_SIMD_registers_Msk  MVFR0_A_SIMD_registers_Msk
+#define FPU_MVFR0_Single_precision_Pos  MVFR0_Single_precision_Pos
+#define FPU_MVFR0_Single_precision_Msk  MVFR0_Single_precision_Msk
+#define FPU_MVFR0_Double_precision_Pos  MVFR0_Double_precision_Pos
+#define FPU_MVFR0_Double_precision_Msk  MVFR0_Double_precision_Msk
+#define FPU_MVFR0_FP_excep_trapping_Pos MVFR0_FP_excep_trapping_Pos
+#define FPU_MVFR0_FP_excep_trapping_Msk MVFR0_FP_excep_trapping_Msk
+#define FPU_MVFR0_Divide_Pos            MVFR0_Divide_Pos
+#define FPU_MVFR0_Divide_Msk            MVFR0_Divide_Msk
+#define FPU_MVFR0_Square_root_Pos       MVFR0_Square_root_Pos
+#define FPU_MVFR0_Square_root_Msk       MVFR0_Square_root_Msk
+#define FPU_MVFR0_Short_vectors_Pos     MVFR0_Short_vectors_Pos
+#define FPU_MVFR0_Short_vectors_Msk     MVFR0_Short_vectors_Msk
+#define FPU_MVFR0_FP_rounding_modes_Pos MVFR0_FP_rounding_modes_Pos
+#define FPU_MVFR0_FP_rounding_modes_Msk MVFR0_FP_rounding_modes_Msk
+
+/* Media and FP Feature Register 1 */
+#define FPU_MVFR1                     FPU_MVFR1
+
+/* MVFR1 bit definitions */
+#define FPU_MVFR1_FP_fused_MAC_Pos      MVFR1_FP_fused_MAC_Pos
+#define FPU_MVFR1_FP_fused_MAC_Msk      MVFR1_FP_fused_MAC_Msk
+#define FPU_MVFR1_FP_HPFP_Pos           MVFR1_FP_HPFP_Pos
+#define FPU_MVFR1_FP_HPFP_Msk           MVFR1_FP_HPFP_Msk
+#define FPU_MVFR1_D_NaN_mode_Pos        MVFR1_D_NaN_mode_Pos
+#define FPU_MVFR1_D_NaN_mode_Msk        MVFR1_D_NaN_mode_Msk
+#define FPU_MVFR1_FTZ_mode_Pos          MVFR1_FTZ_mode_Pos
+#define FPU_MVFR1_FTZ_mode_Msk          MVFR1_FTZ_mode_Msk
+
+/* Rounding Mode definitions */
+#define FPU_ROUND_NEAREST             FPU_ROUND_NEAREST
+#define FPU_ROUND_PLUSINF             FPU_ROUND_PLUSINF
+#define FPU_ROUND_MINUSINF            FPU_ROUND_MINUSINF
+#define FPU_ROUND_TOWARDZERO          FPU_ROUND_TOWARDZERO
 
 /*
  * ============================================================================
- * FP Default Status Control Register (FPDSCR)
- * Reference: Arm(R) Cortex-M4 Processor Technical Reference Manual, Table 7-4 (page 7-71)
- * Address: 0xE000EF3C
- * Reset value: 0x00000000
- * ============================================================================
- */
-
-#define FPU_FPDSCR                    (*(volatile uint32_t *)(CM4_FPU_BASE_ADDR + 0x008))
-
-/* FPDSCR bit definitions - Reference: FPSCR bit definitions */
-#define FPU_FPDSCR_IOC_Pos            0U
-#define FPU_FPDSCR_IOC_Msk            (1UL << FPU_FPDSCR_IOC_Pos)
-
-#define FPU_FPDSCR_DZC_Pos            1U
-#define FPU_FPDSCR_DZC_Msk            (1UL << FPU_FPDSCR_DZC_Pos)
-
-#define FPU_FPDSCR_OFC_Pos            2U
-#define FPU_FPDSCR_OFC_Msk            (1UL << FPU_FPDSCR_OFC_Pos)
-
-#define FPU_FPDSCR_UFC_Pos            3U
-#define FPU_FPDSCR_UFC_Msk            (1UL << FPU_FPDSCR_UFC_Pos)
-
-#define FPU_FPDSCR_IXC_Pos            4U
-#define FPU_FPDSCR_IXC_Msk            (1UL << FPU_FPDSCR_IXC_Pos)
-
-#define FPU_FPDSCR_IDC_Pos            7U
-#define FPU_FPDSCR_IDC_Msk            (1UL << FPU_FPDSCR_IDC_Pos)
-
-#define FPU_FPDSCR_RMode_Pos          22U
-#define FPU_FPDSCR_RMode_Msk          (3UL << FPU_FPDSCR_RMode_Pos)
-
-#define FPU_FPDSCR_FZ_Pos             24U
-#define FPU_FPDSCR_FZ_Msk             (1UL << FPU_FPDSCR_FZ_Pos)
-
-#define FPU_FPDSCR_DN_Pos             25U
-#define FPU_FPDSCR_DN_Msk             (1UL << FPU_FPDSCR_DN_Pos)
-
-#define FPU_FPDSCR_AHP_Pos            26U
-#define FPU_FPDSCR_AHP_Msk            (1UL << FPU_FPDSCR_AHP_Pos)
-
-/* RMode values */
-#define FPU_FPDSCR_RMode_RN           0UL
-#define FPU_FPDSCR_RMode_RP           1UL
-#define FPU_FPDSCR_RMode_RM           2UL
-#define FPU_FPDSCR_RMode_RZ           3UL
-
-/*
- * ============================================================================
- * Media and VFP Feature Register 0 (MVFR0)
- * Reference: Arm(R) Cortex-M4 Processor Technical Reference Manual, Table 7-4 (page 7-71)
- * Address: 0xE000EF40
- * Reset value: 0x10110021
- * ============================================================================
- */
-
-#define FPU_MVFR0                     (*(volatile uint32_t *)(CM4_FPU_BASE_ADDR + 0x00C))
-
-/* MVFR0 reset value - Reference: Table 7-4 (page 7-71) */
-#define FPU_MVFR0_RESET_VALUE         0x10110021UL
-
-/*
- * ============================================================================
- * Media and VFP Feature Register 1 (MVFR1)
- * Reference: Arm(R) Cortex-M4 Processor Technical Reference Manual, Table 7-4 (page 7-71)
- * Address: 0xE000EF44
- * Reset value: 0x11000011
- * ============================================================================
- */
-
-#define FPU_MVFR1                     (*(volatile uint32_t *)(CM4_FPU_BASE_ADDR + 0x010))
-
-/* MVFR1 reset value - Reference: Table 7-4 (page 7-71) */
-#define FPU_MVFR1_RESET_VALUE         0x11000011UL
-
-/*
- * ============================================================================
- * FPU Function Declarations
- * Reference: Arm(R) Cortex-M4 Processor Technical Reference Manual, Chapter 7.3.2 (page 7-71)
+ * Function Aliases - Map CM4 naming to ARMv7-M naming
+ * 函数别名 - 将 CM4 命名映射到 ARMv7-M 命名
  * ============================================================================
  */
 
 /**
  * @brief Enable FPU
- * Reference: Arm(R) Cortex-M4 Processor Technical Reference Manual, Chapter 7.3.2 (page 7-71)
+ * Reference: Arm(R) Cortex-M4 Devices Generic User Guide, Chapter 4.6.6 (page 4-52)
+ * Implementation: Delegates to fpu_enable() in armv7-m_fpu.c
  */
-void cm4_fpu_enable(void);
+static inline void cm4_fpu_enable(void)
+{
+    fpu_enable();
+}
 
 /**
  * @brief Disable FPU
- * Reference: Arm(R) Cortex-M4 Processor Technical Reference Manual, Chapter 7.3.2 (page 7-71)
+ * Reference: Arm(R) Cortex-M4 Devices Generic User Guide, Chapter 4.6.6 (page 4-52)
+ * Implementation: Delegates to fpu_disable() in armv7-m_fpu.c
  */
-void cm4_fpu_disable(void);
+static inline void cm4_fpu_disable(void)
+{
+    fpu_disable();
+}
 
 /**
- * @brief Enable lazy stacking
- * Reference: Arm(R) Cortex-M4 Processor Technical Reference Manual, Chapter 7.2.7 (page 7-70)
+ * @brief Check if FPU is enabled
+ * @return 1 if enabled, 0 if disabled
+ * Reference: Arm(R) Cortex-M4 Devices Generic User Guide, Chapter 4.6.6 (page 4-52)
+ * Implementation: Delegates to fpu_is_enabled() in armv7-m_fpu.c
  */
-void cm4_fpu_enable_lazy_stacking(void);
+static inline int cm4_fpu_is_enabled(void)
+{
+    return fpu_is_enabled();
+}
 
 /**
- * @brief Disable lazy stacking
- * Reference: Arm(R) Cortex-M4 Processor Technical Reference Manual, Chapter 7.2.7 (page 7-70)
+ * @brief Enable automatic lazy state preservation
+ * Reference: Arm(R) Cortex-M4 Devices Generic User Guide, Chapter 4.6.2 (page 4-49)
+ * Implementation: Delegates to fpu_enable_lazy_state_preservation() in armv7-m_fpu.c
  */
-void cm4_fpu_disable_lazy_stacking(void);
+static inline void cm4_fpu_enable_lazy_state_preservation(void)
+{
+    fpu_enable_lazy_state_preservation();
+}
 
 /**
- * @brief Check if lazy stacking is active
- * @return 1 if active, 0 if not
- * Reference: Arm(R) Cortex-M4 Processor Technical Reference Manual, Chapter 7.2.7 (page 7-70)
+ * @brief Disable automatic lazy state preservation
+ * Reference: Arm(R) Cortex-M4 Devices Generic User Guide, Chapter 4.6.2 (page 4-49)
+ * Implementation: Delegates to fpu_disable_lazy_state_preservation() in armv7-m_fpu.c
  */
-int cm4_fpu_is_lazy_active(void);
+static inline void cm4_fpu_disable_lazy_state_preservation(void)
+{
+    fpu_disable_lazy_state_preservation();
+}
 
 /**
- * @brief Get FPU feature register 0
- * @return MVFR0 value
- * Reference: Arm(R) Cortex-M4 Processor Technical Reference Manual, Table 7-4 (page 7-71)
+ * @brief Enable automatic hardware state preservation
+ * Reference: Arm(R) Cortex-M4 Devices Generic User Guide, Chapter 4.6.2 (page 4-49)
+ * Implementation: Delegates to fpu_enable_auto_state_preservation() in armv7-m_fpu.c
  */
-uint32_t cm4_fpu_get_mvfr0(void);
+static inline void cm4_fpu_enable_auto_state_preservation(void)
+{
+    fpu_enable_auto_state_preservation();
+}
 
 /**
- * @brief Get FPU feature register 1
- * @return MVFR1 value
- * Reference: Arm(R) Cortex-M4 Processor Technical Reference Manual, Table 7-4 (page 7-71)
+ * @brief Disable automatic hardware state preservation
+ * Reference: Arm(R) Cortex-M4 Devices Generic User Guide, Chapter 4.6.2 (page 4-49)
+ * Implementation: Delegates to fpu_disable_auto_state_preservation() in armv7-m_fpu.c
  */
-uint32_t cm4_fpu_get_mvfr1(void);
+static inline void cm4_fpu_disable_auto_state_preservation(void)
+{
+    fpu_disable_auto_state_preservation();
+}
+
+/**
+ * @brief Get FPU lazy state preservation status
+ * @return 1 if active, 0 if inactive
+ * Reference: Arm(R) Cortex-M4 Devices Generic User Guide, Chapter 4.6.2 (page 4-49)
+ * Implementation: Delegates to fpu_get_lazy_state_active() in armv7-m_fpu.c
+ */
+static inline int cm4_fpu_get_lazy_state_active(void)
+{
+    return fpu_get_lazy_state_active();
+}
+
+/**
+ * @brief Set default rounding mode
+ * @param mode Rounding mode (FPU_ROUND_*)
+ * Reference: Arm(R) Cortex-M4 Devices Generic User Guide, Chapter 4.6.5 (page 4-51)
+ * Implementation: Delegates to fpu_set_default_rounding_mode() in armv7-m_fpu.c
+ */
+static inline void cm4_fpu_set_default_rounding_mode(uint32_t mode)
+{
+    fpu_set_default_rounding_mode(mode);
+}
+
+/**
+ * @brief Get default rounding mode
+ * @return Current rounding mode
+ * Reference: Arm(R) Cortex-M4 Devices Generic User Guide, Chapter 4.6.5 (page 4-51)
+ * Implementation: Delegates to fpu_get_default_rounding_mode() in armv7-m_fpu.c
+ */
+static inline uint32_t cm4_fpu_get_default_rounding_mode(void)
+{
+    return fpu_get_default_rounding_mode();
+}
+
+/**
+ * @brief Enable default flush-to-zero mode
+ * Reference: Arm(R) Cortex-M4 Devices Generic User Guide, Chapter 4.6.5 (page 4-51)
+ * Implementation: Delegates to fpu_enable_default_ftz() in armv7-m_fpu.c
+ */
+static inline void cm4_fpu_enable_default_ftz(void)
+{
+    fpu_enable_default_ftz();
+}
+
+/**
+ * @brief Disable default flush-to-zero mode
+ * Reference: Arm(R) Cortex-M4 Devices Generic User Guide, Chapter 4.6.5 (page 4-51)
+ * Implementation: Delegates to fpu_disable_default_ftz() in armv7-m_fpu.c
+ */
+static inline void cm4_fpu_disable_default_ftz(void)
+{
+    fpu_disable_default_ftz();
+}
+
+/**
+ * @brief Enable default default NaN mode
+ * Reference: Arm(R) Cortex-M4 Devices Generic User Guide, Chapter 4.6.5 (page 4-51)
+ * Implementation: Delegates to fpu_enable_default_dnan() in armv7-m_fpu.c
+ */
+static inline void cm4_fpu_enable_default_dnan(void)
+{
+    fpu_enable_default_dnan();
+}
+
+/**
+ * @brief Disable default default NaN mode
+ * Reference: Arm(R) Cortex-M4 Devices Generic User Guide, Chapter 4.6.5 (page 4-51)
+ * Implementation: Delegates to fpu_disable_default_dnan() in armv7-m_fpu.c
+ */
+static inline void cm4_fpu_disable_default_dnan(void)
+{
+    fpu_disable_default_dnan();
+}
+
+/**
+ * @brief Check if FPU is present
+ * @return 1 if present, 0 if not
+ * Reference: Arm(R) Cortex-M4 Devices Generic User Guide, Chapter 4.6 (page 4-48)
+ * Implementation: Delegates to fpu_is_present() in armv7-m_fpu.c
+ */
+static inline int cm4_fpu_is_present(void)
+{
+    return fpu_is_present();
+}
 
 #ifdef __cplusplus
 }

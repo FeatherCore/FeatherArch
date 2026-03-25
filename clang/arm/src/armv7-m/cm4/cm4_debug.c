@@ -3,71 +3,64 @@
  *
  * ============================================================================
  * File: cm4_debug.c
- * Description: Cortex-M4 Debug function implementations
- * 描述: Cortex-M4 调试函数实现
+ * Description: Cortex-M4 Debug function implementations (wrapper for armv7-m_debug.c)
+ * 描述: Cortex-M4 Debug 函数实现（armv7-m_debug.c 的包装层）
  *
- * Reference: Arm(R) Cortex-M4 Processor Technical Reference Manual (100166_0001_04_en)
- *   - Chapter 8 Debug (page 8-72)
- *   - Table 8-4 Debug registers (page 8-77)
+ * This file is a placeholder. All Debug functionality is provided by:
+ * - armv7-m/armv7-m_debug.h (register definitions)
+ * - armv7-m/armv7-m_debug.c (function implementations)
+ *
+ * The CM4-specific functions (cm4_debug_*) are implemented as static inline
+ * wrappers in cm4_debug.h, which delegate to the ARMv7-M implementations.
+ *
+ * Reference: Arm(R) Cortex-M4 Devices Generic User Guide (DUI 0553B)
+ *   - Chapter 4.7 Debug system (page 4-53)
+ *   - Table 4-54 Debug registers (page 4-54)
+ *
+ * Implementation Location:
+ *   - Header: armv7-m/armv7-m_debug.h
+ *   - Source: armv7-m/armv7-m_debug.c
  * ============================================================================
  * SPDX-License-Identifier: Apache-2.0
  */
 
-#include <stdint.h>
 #include "armv7-m/cm4/cm4_debug.h"
 
-/**
- * @brief Enable debug
- * Reference: Arm(R) Cortex-M4 Processor Technical Reference Manual, Chapter 8.1 (page 8-72)
+/*
+ * All Debug functions are implemented as static inline wrappers in cm4_debug.h.
+ * They delegate to the corresponding functions in armv7-m_debug.c:
+ *
+ * cm4_debug_enable()                    -> debug_enable()
+ * cm4_debug_disable()                   -> debug_disable()
+ * cm4_debug_is_enabled()                -> debug_is_enabled()
+ * cm4_debug_halt()                      -> debug_halt()
+ * cm4_debug_resume()                    -> debug_resume()
+ * cm4_debug_is_halted()                 -> debug_is_halted()
+ * cm4_debug_step()                      -> debug_step()
+ * cm4_debug_enable_trace()              -> debug_enable_trace()
+ * cm4_debug_disable_trace()             -> debug_disable_trace()
+ * cm4_debug_is_trace_enabled()          -> debug_is_trace_enabled()
+ * cm4_debug_enable_monitor()            -> debug_enable_monitor()
+ * cm4_debug_disable_monitor()           -> debug_disable_monitor()
+ * cm4_debug_enable_vc_harderr()         -> debug_enable_vc_harderr()
+ * cm4_debug_disable_vc_harderr()        -> debug_disable_vc_harderr()
+ * cm4_debug_enable_vc_reset()           -> debug_enable_vc_reset()
+ * cm4_debug_disable_vc_reset()          -> debug_disable_vc_reset()
+ *
+ * Additional functions available in armv7-m_debug.c:
+ * - debug_get_dhcsr()
+ * - debug_set_dhcsr(dhcsr)
+ * - debug_get_dcrsr()
+ * - debug_set_dcrsr(dcrsr)
+ * - debug_get_dcrdr()
+ * - debug_set_dcrdr(dcrdr)
+ * - debug_get_demcr()
+ * - debug_set_demcr(demcr)
+ * - debug_is_reset_st()
+ * - debug_is_retire_st()
+ * - debug_is_lockup()
+ * - debug_is_sleep()
+ * - debug_is_regrdy()
+ * - debug_mask_interrupts(mask)
+ * - debug_is_interrupts_masked()
  */
-void cm4_debug_enable(void)
-{
-    DEBUG_DHCSR = (DEBUG_DHCSR_DBGKEY_VALUE << DEBUG_DHCSR_DBGKEY_Pos) | DEBUG_DHCSR_C_DEBUGEN_Msk;
-}
-
-/**
- * @brief Disable debug
- * Reference: Arm(R) Cortex-M4 Processor Technical Reference Manual, Chapter 8.1 (page 8-72)
- */
-void cm4_debug_disable(void)
-{
-    DEBUG_DHCSR = (DEBUG_DHCSR_DBGKEY_VALUE << DEBUG_DHCSR_DBGKEY_Pos);
-}
-
-/**
- * @brief Halt the processor
- * Reference: Arm(R) Cortex-M4 Processor Technical Reference Manual, Chapter 8.1 (page 8-72)
- */
-void cm4_debug_halt(void)
-{
-    DEBUG_DHCSR = (DEBUG_DHCSR_DBGKEY_VALUE << DEBUG_DHCSR_DBGKEY_Pos) |
-                  DEBUG_DHCSR_C_DEBUGEN_Msk | DEBUG_DHCSR_C_HALT_Msk;
-}
-
-/**
- * @brief Check if processor is halted
- * @return 1 if halted, 0 if not
- * Reference: Arm(R) Cortex-M4 Processor Technical Reference Manual, Chapter 8.1 (page 8-72)
- */
-int cm4_debug_is_halted(void)
-{
-    return (DEBUG_DHCSR & DEBUG_DHCSR_S_HALT_Msk) ? 1 : 0;
-}
-
-/**
- * @brief Enable trace
- * Reference: Arm(R) Cortex-M4 Processor Technical Reference Manual, Chapter 8.1 (page 8-72)
- */
-void cm4_debug_enable_trace(void)
-{
-    DEBUG_DEMCR |= DEBUG_DEMCR_TRCENA_Msk;
-}
-
-/**
- * @brief Disable trace
- * Reference: Arm(R) Cortex-M4 Processor Technical Reference Manual, Chapter 8.1 (page 8-72)
- */
-void cm4_debug_disable_trace(void)
-{
-    DEBUG_DEMCR &= ~DEBUG_DEMCR_TRCENA_Msk;
-}

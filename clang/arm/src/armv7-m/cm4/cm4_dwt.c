@@ -3,98 +3,65 @@
  *
  * ============================================================================
  * File: cm4_dwt.c
- * Description: Cortex-M4 DWT function implementations
- * 描述: Cortex-M4 DWT 函数实现
+ * Description: Cortex-M4 DWT function implementations (wrapper for armv7-m_dwt.c)
+ * 描述: Cortex-M4 DWT 函数实现（armv7-m_dwt.c 的包装层）
  *
- * Reference: Arm(R) Cortex-M4 Processor Technical Reference Manual (100166_0001_04_en)
- *   - Chapter 9 Data Watchpoint and Trace Unit (page 9-83)
- *   - Table 9-1 DWT register summary (page 9-85)
+ * This file is a placeholder. All DWT functionality is provided by:
+ * - armv7-m/armv7-m_dwt.h (register definitions)
+ * - armv7-m/armv7-m_dwt.c (function implementations)
+ *
+ * The CM4-specific functions (cm4_dwt_*) are implemented as static inline
+ * wrappers in cm4_dwt.h, which delegate to the ARMv7-M implementations.
+ *
+ * Reference: Arm(R) Cortex-M4 Devices Generic User Guide (DUI 0553B)
+ *   - Chapter 4.8 Data Watchpoint and Trace unit (page 4-59)
+ *   - Table 4-57 DWT registers summary (page 4-59)
+ *
+ * Implementation Location:
+ *   - Header: armv7-m/armv7-m_dwt.h
+ *   - Source: armv7-m/armv7-m_dwt.c
  * ============================================================================
  * SPDX-License-Identifier: Apache-2.0
  */
 
-#include <stdint.h>
 #include "armv7-m/cm4/cm4_dwt.h"
 
-/**
- * @brief Enable DWT cycle counter
- * Reference: Arm(R) Cortex-M4 Processor Technical Reference Manual, Chapter 9.1 (page 9-84)
+/*
+ * All DWT functions are implemented as static inline wrappers in cm4_dwt.h.
+ * They delegate to the corresponding functions in armv7-m_dwt.c:
+ *
+ * cm4_dwt_init()                          -> dwt_init()
+ * cm4_dwt_enable_cycle_counter()          -> dwt_enable_cycle_counter()
+ * cm4_dwt_disable_cycle_counter()         -> dwt_disable_cycle_counter()
+ * cm4_dwt_get_cycle_count()               -> dwt_get_cycle_count()
+ * cm4_dwt_set_cycle_count(count)          -> dwt_set_cycle_count(count)
+ * cm4_dwt_reset_cycle_counter()           -> dwt_reset_cycle_counter()
+ * cm4_dwt_set_comparator(comp, value)     -> dwt_set_comparator(comp, value)
+ * cm4_dwt_get_comparator(comp)            -> dwt_get_comparator(comp)
+ * cm4_dwt_set_comparator_mask(comp, mask) -> dwt_set_comparator_mask(comp, mask)
+ * cm4_dwt_set_comparator_function(comp, func) -> dwt_set_comparator_function(comp, func)
+ * cm4_dwt_enable_comparator(comp)         -> dwt_enable_comparator(comp)
+ * cm4_dwt_disable_comparator(comp)        -> dwt_disable_comparator(comp)
+ * cm4_dwt_comparator_matched(comp)        -> dwt_comparator_matched(comp)
+ * cm4_dwt_get_num_comparators()           -> dwt_get_num_comparators()
+ * cm4_dwt_is_present()                    -> dwt_is_present()
+ *
+ * Additional functions available in armv7-m_dwt.c:
+ * - dwt_get_ctrl()
+ * - dwt_set_ctrl(ctrl)
+ * - dwt_get_cpicnt()
+ * - dwt_set_cpicnt(cnt)
+ * - dwt_get_exccnt()
+ * - dwt_set_exccnt(cnt)
+ * - dwt_get_sleepcnt()
+ * - dwt_set_sleepcnt(cnt)
+ * - dwt_get_lsucnt()
+ * - dwt_set_lsucnt(cnt)
+ * - dwt_get_foldcnt()
+ * - dwt_set_foldcnt(cnt)
+ * - dwt_get_pcsr()
+ * - dwt_get_mask(n)
+ * - dwt_set_mask(n, mask)
+ * - dwt_get_function(n)
+ * - dwt_set_function(n, func)
  */
-void cm4_dwt_enable_cycle_counter(void)
-{
-    DWT_CTRL |= DWT_CTRL_CYCCNTENA_Msk;
-}
-
-/**
- * @brief Disable DWT cycle counter
- * Reference: Arm(R) Cortex-M4 Processor Technical Reference Manual, Chapter 9.1 (page 9-84)
- */
-void cm4_dwt_disable_cycle_counter(void)
-{
-    DWT_CTRL &= ~DWT_CTRL_CYCCNTENA_Msk;
-}
-
-/**
- * @brief Get DWT cycle count
- * @return Current cycle count
- * Reference: Arm(R) Cortex-M4 Processor Technical Reference Manual, Table 9-1 (page 9-85)
- */
-uint32_t cm4_dwt_get_cycle_count(void)
-{
-    return DWT_CYCCNT;
-}
-
-/**
- * @brief Reset DWT cycle counter
- * Reference: Arm(R) Cortex-M4 Processor Technical Reference Manual, Table 9-1 (page 9-85)
- */
-void cm4_dwt_reset_cycle_counter(void)
-{
-    DWT_CYCCNT = 0;
-}
-
-/**
- * @brief Configure DWT comparator
- * @param comp Comparator number (0-3)
- * @param value Comparator value
- * Reference: Arm(R) Cortex-M4 Processor Technical Reference Manual, Table 9-1 (page 9-85)
- */
-void cm4_dwt_set_comparator(uint32_t comp, uint32_t value)
-{
-    volatile uint32_t *comp_reg = (volatile uint32_t *)(CM4_DWT_BASE_ADDR + 0x020 + (comp * 0x10));
-    *comp_reg = value;
-}
-
-/**
- * @brief Configure DWT comparator mask
- * @param comp Comparator number (0-3)
- * @param mask Mask value (0-15)
- * Reference: Arm(R) Cortex-M4 Processor Technical Reference Manual, Table 9-1 (page 9-85)
- */
-void cm4_dwt_set_comparator_mask(uint32_t comp, uint32_t mask)
-{
-    volatile uint32_t *mask_reg = (volatile uint32_t *)(CM4_DWT_BASE_ADDR + 0x024 + (comp * 0x10));
-    *mask_reg = mask & 0x0F;
-}
-
-/**
- * @brief Configure DWT comparator function
- * @param comp Comparator number (0-3)
- * @param function Function value
- * Reference: Arm(R) Cortex-M4 Processor Technical Reference Manual, Table 9-1 (page 9-85)
- */
-void cm4_dwt_set_comparator_function(uint32_t comp, uint32_t function)
-{
-    volatile uint32_t *func_reg = (volatile uint32_t *)(CM4_DWT_BASE_ADDR + 0x028 + (comp * 0x10));
-    *func_reg = function & 0x0F;
-}
-
-/**
- * @brief Get sampled PC value
- * @return PC sample value
- * Reference: Arm(R) Cortex-M4 Processor Technical Reference Manual, Table 9-1 (page 9-85)
- */
-uint32_t cm4_dwt_get_pc_sample(void)
-{
-    return DWT_PCSR;
-}

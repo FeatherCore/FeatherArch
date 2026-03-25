@@ -3,13 +3,18 @@
  *
  * ============================================================================
  * File: cm4_nvic.h
- * Description: Cortex-M4 NVIC register definitions
- * 描述: Cortex-M4 NVIC 寄存器定义
+ * Description: Cortex-M4 NVIC register definitions (wrapper for armv7-m_nvic.h)
+ * 描述: Cortex-M4 NVIC 寄存器定义（armv7-m_nvic.h 的包装层）
+ *
+ * This file provides CM4-specific naming conventions while delegating
+ * all actual definitions to armv7-m_nvic.h.
  *
  * Reference: Arm(R) Cortex-M4 Devices Generic User Guide (DUI 0553B)
  *   - Chapter 4.2 Nested Vectored Interrupt Controller (page 4-3)
  *   - Table 4-1 NVIC registers summary (page 4-3)
  *   - Table 4-2 NVIC register map (page 4-3)
+ *
+ * Implementation: All functionality is provided by armv7-m/armv7-m_nvic.h
  * ============================================================================
  * SPDX-License-Identifier: Apache-2.0
  */
@@ -20,153 +25,88 @@
 #include <stdint.h>
 #include <stdbool.h>
 
+/* Include the underlying ARMv7-M implementation */
+#include "armv7-m/armv7-m_nvic.h"
+
 #ifdef __cplusplus
 extern "C" {
 #endif
 
 /*
  * ============================================================================
- * NVIC Base Address
+ * NVIC Base Address Alias
+ * NVIC 基地址别名
  * Reference: Arm(R) Cortex-M4 Devices Generic User Guide, Table 4-2 (page 4-3)
  * ============================================================================
  */
 
-#define CM4_NVIC_BASE_ADDR            0xE000E100UL
+#define CM4_NVIC_BASE_ADDR            ARMV7M_NVIC_BASE
 
 /*
  * ============================================================================
- * Interrupt Controller Type Register (ICTR)
- * Reference: Arm(R) Cortex-M4 Processor Technical Reference Manual, Table 6-1 (page 6-62), Table 6-2 (page 6-63)
- * Address: 0xE000E004
+ * Register Aliases - Map CM4 naming to ARMv7-M naming
+ * 寄存器别名 - 将 CM4 命名映射到 ARMv7-M 命名
  * ============================================================================
  */
 
-#define NVIC_ICTR                     (*(volatile uint32_t *)(0xE000E004UL))
+/* Interrupt Set-Enable Registers */
+#define NVIC_ISER0                    NVIC_ISER(0)
+#define NVIC_ISER1                    NVIC_ISER(1)
+#define NVIC_ISER2                    NVIC_ISER(2)
+#define NVIC_ISER3                    NVIC_ISER(3)
+#define NVIC_ISER4                    NVIC_ISER(4)
+#define NVIC_ISER5                    NVIC_ISER(5)
+#define NVIC_ISER6                    NVIC_ISER(6)
+#define NVIC_ISER7                    NVIC_ISER(7)
 
-/* ICTR bit definitions - Reference: Table 6-2 (page 6-63) */
-#define NVIC_ICTR_INTLINESNUM_Pos     0U
-#define NVIC_ICTR_INTLINESNUM_Msk     (0xFUL << NVIC_ICTR_INTLINESNUM_Pos)
+/* Interrupt Clear-Enable Registers */
+#define NVIC_ICER0                    NVIC_ICER(0)
+#define NVIC_ICER1                    NVIC_ICER(1)
+#define NVIC_ICER2                    NVIC_ICER(2)
+#define NVIC_ICER3                    NVIC_ICER(3)
+#define NVIC_ICER4                    NVIC_ICER(4)
+#define NVIC_ICER5                    NVIC_ICER(5)
+#define NVIC_ICER6                    NVIC_ICER(6)
+#define NVIC_ICER7                    NVIC_ICER(7)
 
-/* ICTR INTLINESNUM values - Reference: Table 6-2 (page 6-63) */
-#define NVIC_ICTR_INTLINESNUM_32      0x0UL
-#define NVIC_ICTR_INTLINESNUM_64      0x1UL
-#define NVIC_ICTR_INTLINESNUM_96      0x2UL
-#define NVIC_ICTR_INTLINESNUM_128     0x3UL
-#define NVIC_ICTR_INTLINESNUM_160     0x4UL
-#define NVIC_ICTR_INTLINESNUM_192     0x5UL
-#define NVIC_ICTR_INTLINESNUM_224     0x6UL
-#define NVIC_ICTR_INTLINESNUM_240     0x7UL
+/* Interrupt Set-Pending Registers */
+#define NVIC_ISPR0                    NVIC_ISPR(0)
+#define NVIC_ISPR1                    NVIC_ISPR(1)
+#define NVIC_ISPR2                    NVIC_ISPR(2)
+#define NVIC_ISPR3                    NVIC_ISPR(3)
+#define NVIC_ISPR4                    NVIC_ISPR(4)
+#define NVIC_ISPR5                    NVIC_ISPR(5)
+#define NVIC_ISPR6                    NVIC_ISPR(6)
+#define NVIC_ISPR7                    NVIC_ISPR(7)
 
-/*
- * ============================================================================
- * Interrupt Set-Enable Registers (NVIC_ISER0-NVIC_ISER7)
- * Reference: Arm(R) Cortex-M4 Devices Generic User Guide, Table 4-2 (page 4-3)
- * Address: 0xE000E100-0xE000E11C
- * ============================================================================
- */
+/* Interrupt Clear-Pending Registers */
+#define NVIC_ICPR0                    NVIC_ICPR(0)
+#define NVIC_ICPR1                    NVIC_ICPR(1)
+#define NVIC_ICPR2                    NVIC_ICPR(2)
+#define NVIC_ICPR3                    NVIC_ICPR(3)
+#define NVIC_ICPR4                    NVIC_ICPR(4)
+#define NVIC_ICPR5                    NVIC_ICPR(5)
+#define NVIC_ICPR6                    NVIC_ICPR(6)
+#define NVIC_ICPR7                    NVIC_ICPR(7)
 
-#define NVIC_ISER0                    (*(volatile uint32_t *)(CM4_NVIC_BASE_ADDR + 0x000))
-#define NVIC_ISER1                    (*(volatile uint32_t *)(CM4_NVIC_BASE_ADDR + 0x004))
-#define NVIC_ISER2                    (*(volatile uint32_t *)(CM4_NVIC_BASE_ADDR + 0x008))
-#define NVIC_ISER3                    (*(volatile uint32_t *)(CM4_NVIC_BASE_ADDR + 0x00C))
-#define NVIC_ISER4                    (*(volatile uint32_t *)(CM4_NVIC_BASE_ADDR + 0x010))
-#define NVIC_ISER5                    (*(volatile uint32_t *)(CM4_NVIC_BASE_ADDR + 0x014))
-#define NVIC_ISER6                    (*(volatile uint32_t *)(CM4_NVIC_BASE_ADDR + 0x018))
-#define NVIC_ISER7                    (*(volatile uint32_t *)(CM4_NVIC_BASE_ADDR + 0x01C))
+/* Interrupt Active Bit Registers */
+#define NVIC_IABR0                    NVIC_IABR(0)
+#define NVIC_IABR1                    NVIC_IABR(1)
+#define NVIC_IABR2                    NVIC_IABR(2)
+#define NVIC_IABR3                    NVIC_IABR(3)
+#define NVIC_IABR4                    NVIC_IABR(4)
+#define NVIC_IABR5                    NVIC_IABR(5)
+#define NVIC_IABR6                    NVIC_IABR(6)
+#define NVIC_IABR7                    NVIC_IABR(7)
 
-/*
- * ============================================================================
- * Interrupt Clear-Enable Registers (NVIC_ICER0-NVIC_ICER7)
- * Reference: Arm(R) Cortex-M4 Devices Generic User Guide, Table 4-2 (page 4-3)
- * Address: 0xE000E180-0xE000E19C
- * ============================================================================
- */
+/* Interrupt Priority Register - already defined as NVIC_IPR(irq) in armv7-m_nvic.h */
 
-#define NVIC_ICER0                    (*(volatile uint32_t *)(CM4_NVIC_BASE_ADDR + 0x080))
-#define NVIC_ICER1                    (*(volatile uint32_t *)(CM4_NVIC_BASE_ADDR + 0x084))
-#define NVIC_ICER2                    (*(volatile uint32_t *)(CM4_NVIC_BASE_ADDR + 0x088))
-#define NVIC_ICER3                    (*(volatile uint32_t *)(CM4_NVIC_BASE_ADDR + 0x08C))
-#define NVIC_ICER4                    (*(volatile uint32_t *)(CM4_NVIC_BASE_ADDR + 0x090))
-#define NVIC_ICER5                    (*(volatile uint32_t *)(CM4_NVIC_BASE_ADDR + 0x094))
-#define NVIC_ICER6                    (*(volatile uint32_t *)(CM4_NVIC_BASE_ADDR + 0x098))
-#define NVIC_ICER7                    (*(volatile uint32_t *)(CM4_NVIC_BASE_ADDR + 0x09C))
-
-/*
- * ============================================================================
- * Interrupt Set-Pending Registers (NVIC_ISPR0-NVIC_ISPR7)
- * Reference: Arm(R) Cortex-M4 Devices Generic User Guide, Table 4-2 (page 4-3)
- * Address: 0xE000E200-0xE000E21C
- * ============================================================================
- */
-
-#define NVIC_ISPR0                    (*(volatile uint32_t *)(CM4_NVIC_BASE_ADDR + 0x100))
-#define NVIC_ISPR1                    (*(volatile uint32_t *)(CM4_NVIC_BASE_ADDR + 0x104))
-#define NVIC_ISPR2                    (*(volatile uint32_t *)(CM4_NVIC_BASE_ADDR + 0x108))
-#define NVIC_ISPR3                    (*(volatile uint32_t *)(CM4_NVIC_BASE_ADDR + 0x10C))
-#define NVIC_ISPR4                    (*(volatile uint32_t *)(CM4_NVIC_BASE_ADDR + 0x110))
-#define NVIC_ISPR5                    (*(volatile uint32_t *)(CM4_NVIC_BASE_ADDR + 0x114))
-#define NVIC_ISPR6                    (*(volatile uint32_t *)(CM4_NVIC_BASE_ADDR + 0x118))
-#define NVIC_ISPR7                    (*(volatile uint32_t *)(CM4_NVIC_BASE_ADDR + 0x11C))
+/* Software Triggered Interrupt Register - already defined as NVIC_STIR in armv7-m_nvic.h */
 
 /*
  * ============================================================================
- * Interrupt Clear-Pending Registers (NVIC_ICPR0-NVIC_ICPR7)
- * Reference: Arm(R) Cortex-M4 Devices Generic User Guide, Table 4-2 (page 4-3)
- * Address: 0xE000E280-0xE000E29C
- * ============================================================================
- */
-
-#define NVIC_ICPR0                    (*(volatile uint32_t *)(CM4_NVIC_BASE_ADDR + 0x180))
-#define NVIC_ICPR1                    (*(volatile uint32_t *)(CM4_NVIC_BASE_ADDR + 0x184))
-#define NVIC_ICPR2                    (*(volatile uint32_t *)(CM4_NVIC_BASE_ADDR + 0x188))
-#define NVIC_ICPR3                    (*(volatile uint32_t *)(CM4_NVIC_BASE_ADDR + 0x18C))
-#define NVIC_ICPR4                    (*(volatile uint32_t *)(CM4_NVIC_BASE_ADDR + 0x190))
-#define NVIC_ICPR5                    (*(volatile uint32_t *)(CM4_NVIC_BASE_ADDR + 0x194))
-#define NVIC_ICPR6                    (*(volatile uint32_t *)(CM4_NVIC_BASE_ADDR + 0x198))
-#define NVIC_ICPR7                    (*(volatile uint32_t *)(CM4_NVIC_BASE_ADDR + 0x19C))
-
-/*
- * ============================================================================
- * Interrupt Active Bit Registers (NVIC_IABR0-NVIC_IABR7)
- * Reference: Arm(R) Cortex-M4 Devices Generic User Guide, Table 4-2 (page 4-3)
- * Address: 0xE000E300-0xE000E31C
- * ============================================================================
- */
-
-#define NVIC_IABR0                    (*(volatile uint32_t *)(CM4_NVIC_BASE_ADDR + 0x200))
-#define NVIC_IABR1                    (*(volatile uint32_t *)(CM4_NVIC_BASE_ADDR + 0x204))
-#define NVIC_IABR2                    (*(volatile uint32_t *)(CM4_NVIC_BASE_ADDR + 0x208))
-#define NVIC_IABR3                    (*(volatile uint32_t *)(CM4_NVIC_BASE_ADDR + 0x20C))
-#define NVIC_IABR4                    (*(volatile uint32_t *)(CM4_NVIC_BASE_ADDR + 0x210))
-#define NVIC_IABR5                    (*(volatile uint32_t *)(CM4_NVIC_BASE_ADDR + 0x214))
-#define NVIC_IABR6                    (*(volatile uint32_t *)(CM4_NVIC_BASE_ADDR + 0x218))
-#define NVIC_IABR7                    (*(volatile uint32_t *)(CM4_NVIC_BASE_ADDR + 0x21C))
-
-/*
- * ============================================================================
- * Interrupt Priority Registers (NVIC_IPR0-NVIC_IPR59)
- * Reference: Arm(R) Cortex-M4 Devices Generic User Guide, Table 4-2 (page 4-3)
- * Address: 0xE000E400-0xE000E4EC
- * ============================================================================
- */
-
-#define NVIC_IPR_BASE                 (CM4_NVIC_BASE_ADDR + 0x300)
-#define NVIC_IPR(n)                   (*(volatile uint8_t *)(NVIC_IPR_BASE + (n)))
-
-/*
- * ============================================================================
- * Software Triggered Interrupt Register (STIR)
- * Reference: Arm(R) Cortex-M4 Devices Generic User Guide, Table 4-2 (page 4-3)
- * Address: 0xE000EF00
- * ============================================================================
- */
-
-#define NVIC_STIR                     (*(volatile uint32_t *)(0xE000EF00UL))
-
-/*
- * ============================================================================
- * NVIC Function Declarations
- * Reference: Arm(R) Cortex-M4 Devices Generic User Guide, Chapter 4.2 (page 4-3)
+ * Function Aliases - Map CM4 naming to ARMv7-M naming
+ * 函数别名 - 将 CM4 命名映射到 ARMv7-M 命名
  * ============================================================================
  */
 
@@ -174,76 +114,116 @@ extern "C" {
  * @brief Enable specified interrupt
  * @param irq Interrupt number (0-239)
  * Reference: Arm(R) Cortex-M4 Devices Generic User Guide, Chapter 4.2 (page 4-3)
+ * Implementation: Delegates to nvic_enable_irq() in armv7-m_nvic.c
  */
-void cm4_nvic_enable_irq(uint32_t irq);
+static inline void cm4_nvic_enable_irq(uint32_t irq)
+{
+    nvic_enable_irq((uint8_t)irq);
+}
 
 /**
  * @brief Disable specified interrupt
- * @param irq Interrupt number
+ * @param irq Interrupt number (0-239)
  * Reference: Arm(R) Cortex-M4 Devices Generic User Guide, Chapter 4.2 (page 4-3)
+ * Implementation: Delegates to nvic_disable_irq() in armv7-m_nvic.c
  */
-void cm4_nvic_disable_irq(uint32_t irq);
+static inline void cm4_nvic_disable_irq(uint32_t irq)
+{
+    nvic_disable_irq((uint8_t)irq);
+}
 
 /**
  * @brief Get interrupt enable status
- * @param irq Interrupt number
+ * @param irq Interrupt number (0-239)
  * @return 1 if enabled, 0 if disabled
  * Reference: Arm(R) Cortex-M4 Devices Generic User Guide, Chapter 4.2 (page 4-3)
+ * Implementation: Delegates to nvic_get_enable_irq() in armv7-m_nvic.c
  */
-uint32_t cm4_nvic_get_enable_irq(uint32_t irq);
+static inline uint32_t cm4_nvic_get_enable_irq(uint32_t irq)
+{
+    return nvic_get_enable_irq((uint8_t)irq);
+}
 
 /**
  * @brief Set interrupt pending status
- * @param irq Interrupt number
+ * @param irq Interrupt number (0-239)
  * Reference: Arm(R) Cortex-M4 Devices Generic User Guide, Chapter 4.2 (page 4-3)
+ * Implementation: Delegates to nvic_set_pending() in armv7-m_nvic.c
  */
-void cm4_nvic_set_pending(uint32_t irq);
+static inline void cm4_nvic_set_pending(uint32_t irq)
+{
+    nvic_set_pending((uint8_t)irq);
+}
 
 /**
  * @brief Clear interrupt pending status
- * @param irq Interrupt number
+ * @param irq Interrupt number (0-239)
  * Reference: Arm(R) Cortex-M4 Devices Generic User Guide, Chapter 4.2 (page 4-3)
+ * Implementation: Delegates to nvic_clear_pending() in armv7-m_nvic.c
  */
-void cm4_nvic_clear_pending(uint32_t irq);
+static inline void cm4_nvic_clear_pending(uint32_t irq)
+{
+    nvic_clear_pending((uint8_t)irq);
+}
 
 /**
  * @brief Get interrupt pending status
- * @param irq Interrupt number
+ * @param irq Interrupt number (0-239)
  * @return 1 if pending, 0 if not pending
  * Reference: Arm(R) Cortex-M4 Devices Generic User Guide, Chapter 4.2 (page 4-3)
+ * Implementation: Delegates to nvic_get_pending() in armv7-m_nvic.c
  */
-uint32_t cm4_nvic_get_pending(uint32_t irq);
+static inline uint32_t cm4_nvic_get_pending(uint32_t irq)
+{
+    return nvic_get_pending((uint8_t)irq);
+}
 
 /**
  * @brief Get active interrupt status
- * @param irq Interrupt number
+ * @param irq Interrupt number (0-239)
  * @return 1 if active, 0 if not active
  * Reference: Arm(R) Cortex-M4 Devices Generic User Guide, Chapter 4.2 (page 4-3)
+ * Implementation: Delegates to nvic_get_active() in armv7-m_nvic.c
  */
-uint32_t cm4_nvic_get_active(uint32_t irq);
+static inline uint32_t cm4_nvic_get_active(uint32_t irq)
+{
+    return nvic_get_active((uint8_t)irq);
+}
 
 /**
  * @brief Set interrupt priority
- * @param irq Interrupt number
+ * @param irq Interrupt number (0-239)
  * @param priority Priority value (0-255, lower is higher priority)
  * Reference: Arm(R) Cortex-M4 Devices Generic User Guide, Chapter 4.2 (page 4-3)
+ * Implementation: Delegates to nvic_set_priority() in armv7-m_nvic.c
  */
-void cm4_nvic_set_priority(uint32_t irq, uint32_t priority);
+static inline void cm4_nvic_set_priority(uint32_t irq, uint32_t priority)
+{
+    nvic_set_priority((uint8_t)irq, (uint8_t)priority);
+}
 
 /**
  * @brief Get interrupt priority
- * @param irq Interrupt number
- * @return Priority value
+ * @param irq Interrupt number (0-239)
+ * @return Priority value (0-255)
  * Reference: Arm(R) Cortex-M4 Devices Generic User Guide, Chapter 4.2 (page 4-3)
+ * Implementation: Delegates to nvic_get_priority() in armv7-m_nvic.c
  */
-uint32_t cm4_nvic_get_priority(uint32_t irq);
+static inline uint32_t cm4_nvic_get_priority(uint32_t irq)
+{
+    return nvic_get_priority((uint8_t)irq);
+}
 
 /**
  * @brief Trigger interrupt by software
- * @param irq Interrupt number
+ * @param irq Interrupt number (0-239)
  * Reference: Arm(R) Cortex-M4 Devices Generic User Guide, Chapter 4.2 (page 4-3)
+ * Implementation: Direct register access using NVIC_STIR from armv7-m_nvic.h
  */
-void cm4_nvic_trigger_irq(uint32_t irq);
+static inline void cm4_nvic_trigger_irq(uint32_t irq)
+{
+    NVIC_STIR = irq & 0x1FF;
+}
 
 #ifdef __cplusplus
 }

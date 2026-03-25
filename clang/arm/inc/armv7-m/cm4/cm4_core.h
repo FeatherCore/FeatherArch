@@ -1,29 +1,30 @@
 /*
- * ARM Architecture - Cortex-M4 Core Registers
+ * ARM Architecture - Cortex-M4 Core Register Access
  *
  * ============================================================================
  * File: cm4_core.h
- * Description: Cortex-M4 core register definitions and inline functions
- * 描述: Cortex-M4 核心寄存器定义和内联函数
+ * Description: Cortex-M4 core register access functions (wrapper for armv7-m_core.h)
+ * 描述: Cortex-M4 核心寄存器访问函数（armv7-m_core.h 的包装层）
+ *
+ * This file provides CM4-specific naming conventions while delegating
+ * all actual definitions to armv7-m_core.h.
  *
  * Reference: Arm(R) Cortex-M4 Devices Generic User Guide (DUI 0553B)
- *   - Chapter 2.1.3 Core registers (page 2-3)
- *   - Table 2-2 Core register set summary (page 2-3)
- *   - Table 2-4 APSR bit assignments (page 2-5)
- *   - Table 2-5 IPSR bit assignments (page 2-6)
- *   - Table 2-6 EPSR bit assignments (page 2-6)
- *   - Table 2-7 PRIMASK register bit assignments (page 2-8)
- *   - Table 2-8 FAULTMASK register bit assignments (page 2-8)
- *   - Table 2-9 BASEPRI register bit assignments (page 2-9)
- *   - Table 2-10 CONTROL register bit assignments (page 2-9)
+ *   - Chapter 2 The Cortex-M4 Processor (page 2-1)
+ *   - Chapter 3 The Cortex-M4 Instruction Set (page 3-1)
+ *
+ * Implementation: All functionality is provided by armv7-m/armv7-m_core.h
  * ============================================================================
  * SPDX-License-Identifier: Apache-2.0
  */
 
-#ifndef __ARCH_ARM_CM4_CORE_H__
-#define __ARCH_ARM_CM4_CORE_H__
+#ifndef __CM4_CORE_H__
+#define __CM4_CORE_H__
 
 #include <stdint.h>
+
+/* Include the underlying ARMv7-M implementation */
+#include "armv7-m/armv7-m_core.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -31,479 +32,295 @@ extern "C" {
 
 /*
  * ============================================================================
- * APSR - Application Program Status Register
- * Reference: Arm(R) Cortex-M4 Devices Generic User Guide, Table 2-4 (page 2-5)
+ * Core Register Aliases - Map CM4 naming to ARMv7-M naming
+ * 核心寄存器别名 - 将 CM4 命名映射到 ARMv7-M 命名
  * ============================================================================
  */
 
-/* APSR bit positions - Reference: Table 2-4 (page 2-5) */
-#define APSR_N_Pos                        31U
-#define APSR_Z_Pos                        30U
-#define APSR_C_Pos                        29U
-#define APSR_V_Pos                        28U
-#define APSR_Q_Pos                        27U
-#define APSR_GE_Pos                       16U
+/* APSR - Application Program Status Register */
+#define CM4_APSR                      APSR
 
-/* APSR bit masks */
-#define APSR_N_Msk                        (1UL << APSR_N_Pos)
-#define APSR_Z_Msk                        (1UL << APSR_Z_Pos)
-#define APSR_C_Msk                        (1UL << APSR_C_Pos)
-#define APSR_V_Msk                        (1UL << APSR_V_Pos)
-#define APSR_Q_Msk                        (1UL << APSR_Q_Pos)
-#define APSR_GE_Msk                       (0xFUL << APSR_GE_Pos)
+/* IPSR - Interrupt Program Status Register */
+#define CM4_IPSR                      IPSR
 
-/*
- * ============================================================================
- * IPSR - Interrupt Program Status Register
- * Reference: Arm(R) Cortex-M4 Devices Generic User Guide, Table 2-5 (page 2-6)
- * ============================================================================
- */
+/* EPSR - Execution Program Status Register */
+#define CM4_EPSR                      EPSR
 
-/* IPSR bit positions - Reference: Table 2-5 (page 2-6) */
-#define IPSR_ISR_Pos                      0U
+/* xPSR - Combined Program Status Register */
+#define CM4_xPSR                      xPSR
 
-/* IPSR bit masks */
-#define IPSR_ISR_Msk                      (0x1FFUL << IPSR_ISR_Pos)
+/* MSP - Main Stack Pointer */
+#define CM4_MSP                       MSP
 
-/* Exception number definitions - Reference: Table 2-5 (page 2-6) */
-#define IPSR_ISR_THREAD                   0U    /* Thread mode */
-#define IPSR_ISR_NMI                      2U    /* NMI */
-#define IPSR_ISR_HARDFAULT                3U    /* HardFault */
-#define IPSR_ISR_MEMMANAGE                4U    /* MemManage */
-#define IPSR_ISR_BUSFAULT                 5U    /* BusFault */
-#define IPSR_ISR_USAGEFAULT               6U    /* UsageFault */
-#define IPSR_ISR_SVCALL                   11U   /* SVCall */
-#define IPSR_ISR_DEBUGMON                 12U   /* Debug Monitor */
-#define IPSR_ISR_PENDSV                   14U   /* PendSV */
-#define IPSR_ISR_SYSTICK                  15U   /* SysTick */
-#define IPSR_ISR_IRQ0                     16U   /* IRQ0 start */
+/* PSP - Process Stack Pointer */
+#define CM4_PSP                       PSP
 
-/*
- * ============================================================================
- * EPSR - Execution Program Status Register
- * Reference: Arm(R) Cortex-M4 Devices Generic User Guide, Table 2-6 (page 2-6)
- * ============================================================================
- */
+/* PRIMASK - Priority Mask Register */
+#define CM4_PRIMASK                   PRIMASK
 
-/* EPSR bit positions - Reference: Table 2-6 (page 2-6) */
-#define EPSR_ICI_IT_Pos                   10U
-#define EPSR_T_Pos                        24U
+/* BASEPRI - Base Priority Mask Register */
+#define CM4_BASEPRI                   BASEPRI
 
-/* EPSR bit masks */
-#define EPSR_ICI_IT_Msk                   (0x3FUL << EPSR_ICI_IT_Pos)
-#define EPSR_T_Msk                        (1UL << EPSR_T_Pos)
+/* FAULTMASK - Fault Mask Register */
+#define CM4_FAULTMASK                 FAULTMASK
 
-/*
- * ============================================================================
- * PRIMASK - Priority Mask Register
- * Reference: Arm(R) Cortex-M4 Devices Generic User Guide, Table 2-7 (page 2-8)
- * ============================================================================
- */
-
-/* PRIMASK bit positions - Reference: Table 2-7 (page 2-8) */
-#define PRIMASK_PRIMASK_Pos               0U
-
-/* PRIMASK bit masks */
-#define PRIMASK_PRIMASK_Msk               (1UL << PRIMASK_PRIMASK_Pos)
-
-/*
- * ============================================================================
- * FAULTMASK - Fault Mask Register
- * Reference: Arm(R) Cortex-M4 Devices Generic User Guide, Table 2-8 (page 2-8)
- * ============================================================================
- */
-
-/* FAULTMASK bit positions - Reference: Table 2-8 (page 2-8) */
-#define FAULTMASK_FAULTMASK_Pos           0U
-
-/* FAULTMASK bit masks */
-#define FAULTMASK_FAULTMASK_Msk           (1UL << FAULTMASK_FAULTMASK_Pos)
-
-/*
- * ============================================================================
- * BASEPRI - Base Priority Mask Register
- * Reference: Arm(R) Cortex-M4 Devices Generic User Guide, Table 2-9 (page 2-9)
- * ============================================================================
- */
-
-/* BASEPRI bit positions - Reference: Table 2-9 (page 2-9) */
-#define BASEPRI_BASEPRI_Pos               0U
-
-/* BASEPRI bit masks */
-#define BASEPRI_BASEPRI_Msk               (0xFFUL << BASEPRI_BASEPRI_Pos)
-
-/*
- * ============================================================================
- * CONTROL - Control Register
- * Reference: Arm(R) Cortex-M4 Devices Generic User Guide, Table 2-10 (page 2-9)
- * ============================================================================
- */
-
-/* CONTROL bit positions - Reference: Table 2-10 (page 2-9) */
-#define CONTROL_nPRIV_Pos                 0U
-#define CONTROL_SPSEL_Pos                 1U
-#define CONTROL_FPCA_Pos                  2U
-
-/* CONTROL bit masks */
-#define CONTROL_nPRIV_Msk                 (1UL << CONTROL_nPRIV_Pos)
-#define CONTROL_SPSEL_Msk                 (1UL << CONTROL_SPSEL_Pos)
-#define CONTROL_FPCA_Msk                  (1UL << CONTROL_FPCA_Pos)
-
-/* CONTROL register values - Reference: Table 2-10 (page 2-9) */
-#define CONTROL_nPRIV_PRIV                0U    /* Privileged level */
-#define CONTROL_nPRIV_UNPRIV              1U    /* Unprivileged level */
-#define CONTROL_SPSEL_MSP                 0U    /* Use MSP */
-#define CONTROL_SPSEL_PSP                 1U    /* Use PSP */
-#define CONTROL_FPCA_NOFP                 0U    /* No floating-point context */
-#define CONTROL_FPCA_FP                   1U    /* Floating-point context active */
+/* CONTROL - Control Register */
+#define CM4_CONTROL                   CONTROL
 
 /*
  * ============================================================================
  * Core Register Access Functions
- * Reference: Arm(R) Cortex-M4 Devices Generic User Guide, Table 2-2 (page 2-3)
+ * 核心寄存器访问函数
+ * Implementation: Delegates to armv7-m_core.h functions
  * ============================================================================
  */
 
 /**
- * @brief Get APSR register value
- * @return APSR value
- * Reference: Arm(R) Cortex-M4 Devices Generic User Guide, Table 2-2 (page 2-3)
+ * @brief Get APSR value
+ * Reference: Arm(R) Cortex-M4 Devices Generic User Guide, Chapter 2.1.2 (page 2-3)
+ * Implementation: Delegates to __get_APSR() in armv7-m_core.h
  */
-static inline uint32_t cm4_get_apsr(void)
+static inline uint32_t cm4_get_APSR(void)
 {
-    uint32_t result;
-    __asm__ volatile ("MRS %0, apsr" : "=r" (result));
-    return result;
+    return __get_APSR();
 }
 
 /**
- * @brief Get IPSR register value
- * @return IPSR value
- * Reference: Arm(R) Cortex-M4 Devices Generic User Guide, Table 2-2 (page 2-3)
+ * @brief Get IPSR value
+ * Reference: Arm(R) Cortex-M4 Devices Generic User Guide, Chapter 2.1.2 (page 2-3)
+ * Implementation: Delegates to __get_IPSR() in armv7-m_core.h
  */
-static inline uint32_t cm4_get_ipsr(void)
+static inline uint32_t cm4_get_IPSR(void)
 {
-    uint32_t result;
-    __asm__ volatile ("MRS %0, ipsr" : "=r" (result));
-    return result;
+    return __get_IPSR();
 }
 
 /**
- * @brief Get PSR register value
- * @return PSR value
- * Reference: Arm(R) Cortex-M4 Devices Generic User Guide, Table 2-2 (page 2-3)
+ * @brief Get xPSR value
+ * Reference: Arm(R) Cortex-M4 Devices Generic User Guide, Chapter 2.1.2 (page 2-3)
+ * Implementation: Delegates to __get_xPSR() in armv7-m_core.h
  */
-static inline uint32_t cm4_get_psr(void)
+static inline uint32_t cm4_get_xPSR(void)
 {
-    uint32_t result;
-    __asm__ volatile ("MRS %0, psr" : "=r" (result));
-    return result;
+    return __get_xPSR();
 }
 
 /**
- * @brief Get PRIMASK register value
- * @return PRIMASK value
- * Reference: Arm(R) Cortex-M4 Devices Generic User Guide, Table 2-2 (page 2-3)
+ * @brief Get MSP value
+ * Reference: Arm(R) Cortex-M4 Devices Generic User Guide, Chapter 2.1.3 (page 2-5)
+ * Implementation: Delegates to __get_MSP() in armv7-m_core.h
  */
-static inline uint32_t cm4_get_primask(void)
+static inline uint32_t cm4_get_MSP(void)
 {
-    uint32_t result;
-    __asm__ volatile ("MRS %0, primask" : "=r" (result));
-    return result;
+    return __get_MSP();
 }
 
 /**
- * @brief Set PRIMASK register value
- * @param primask PRIMASK value to set
- * Reference: Arm(R) Cortex-M4 Devices Generic User Guide, Table 2-2 (page 2-3)
+ * @brief Set MSP value
+ * Reference: Arm(R) Cortex-M4 Devices Generic User Guide, Chapter 2.1.3 (page 2-5)
+ * Implementation: Delegates to __set_MSP() in armv7-m_core.h
  */
-static inline void cm4_set_primask(uint32_t primask)
+static inline void cm4_set_MSP(uint32_t topOfMainStack)
 {
-    __asm__ volatile ("MSR primask, %0" : : "r" (primask) : "memory");
+    __set_MSP(topOfMainStack);
 }
 
 /**
- * @brief Get FAULTMASK register value
- * @return FAULTMASK value
- * Reference: Arm(R) Cortex-M4 Devices Generic User Guide, Table 2-2 (page 2-3)
+ * @brief Get PSP value
+ * Reference: Arm(R) Cortex-M4 Devices Generic User Guide, Chapter 2.1.3 (page 2-5)
+ * Implementation: Delegates to __get_PSP() in armv7-m_core.h
  */
-static inline uint32_t cm4_get_faultmask(void)
+static inline uint32_t cm4_get_PSP(void)
 {
-    uint32_t result;
-    __asm__ volatile ("MRS %0, faultmask" : "=r" (result));
-    return result;
+    return __get_PSP();
 }
 
 /**
- * @brief Set FAULTMASK register value
- * @param faultmask FAULTMASK value to set
- * Reference: Arm(R) Cortex-M4 Devices Generic User Guide, Table 2-2 (page 2-3)
+ * @brief Set PSP value
+ * Reference: Arm(R) Cortex-M4 Devices Generic User Guide, Chapter 2.1.3 (page 2-5)
+ * Implementation: Delegates to __set_PSP() in armv7-m_core.h
  */
-static inline void cm4_set_faultmask(uint32_t faultmask)
+static inline void cm4_set_PSP(uint32_t topOfProcStack)
 {
-    __asm__ volatile ("MSR faultmask, %0" : : "r" (faultmask) : "memory");
+    __set_PSP(topOfProcStack);
 }
 
 /**
- * @brief Get BASEPRI register value
- * @return BASEPRI value
- * Reference: Arm(R) Cortex-M4 Devices Generic User Guide, Table 2-2 (page 2-3)
+ * @brief Get PRIMASK value
+ * Reference: Arm(R) Cortex-M4 Devices Generic User Guide, Chapter 2.1.4 (page 2-6)
+ * Implementation: Delegates to __get_PRIMASK() in armv7-m_core.h
  */
-static inline uint32_t cm4_get_basepri(void)
+static inline uint32_t cm4_get_PRIMASK(void)
 {
-    uint32_t result;
-    __asm__ volatile ("MRS %0, basepri" : "=r" (result));
-    return result;
+    return __get_PRIMASK();
 }
 
 /**
- * @brief Set BASEPRI register value
- * @param basepri BASEPRI value to set
- * Reference: Arm(R) Cortex-M4 Devices Generic User Guide, Table 2-2 (page 2-3)
+ * @brief Set PRIMASK value
+ * Reference: Arm(R) Cortex-M4 Devices Generic User Guide, Chapter 2.1.4 (page 2-6)
+ * Implementation: Delegates to __set_PRIMASK() in armv7-m_core.h
  */
-static inline void cm4_set_basepri(uint32_t basepri)
+static inline void cm4_set_PRIMASK(uint32_t priMask)
 {
-    __asm__ volatile ("MSR basepri, %0" : : "r" (basepri) : "memory");
+    __set_PRIMASK(priMask);
 }
 
 /**
- * @brief Get CONTROL register value
- * @return CONTROL value
- * Reference: Arm(R) Cortex-M4 Devices Generic User Guide, Table 2-2 (page 2-3)
+ * @brief Get BASEPRI value
+ * Reference: Arm(R) Cortex-M4 Devices Generic User Guide, Chapter 2.1.4 (page 2-6)
+ * Implementation: Delegates to __get_BASEPRI() in armv7-m_core.h
  */
-static inline uint32_t cm4_get_control(void)
+static inline uint32_t cm4_get_BASEPRI(void)
 {
-    uint32_t result;
-    __asm__ volatile ("MRS %0, control" : "=r" (result));
-    return result;
+    return __get_BASEPRI();
 }
 
 /**
- * @brief Set CONTROL register value
- * @param control CONTROL value to set
- * Reference: Arm(R) Cortex-M4 Devices Generic User Guide, Table 2-2 (page 2-3)
+ * @brief Set BASEPRI value
+ * Reference: Arm(R) Cortex-M4 Devices Generic User Guide, Chapter 2.1.4 (page 2-6)
+ * Implementation: Delegates to __set_BASEPRI() in armv7-m_core.h
  */
-static inline void cm4_set_control(uint32_t control)
+static inline void cm4_set_BASEPRI(uint32_t basePri)
 {
-    __asm__ volatile ("MSR control, %0" : : "r" (control) : "memory");
+    __set_BASEPRI(basePri);
 }
 
 /**
- * @brief Get Main Stack Pointer (MSP)
- * @return MSP value
- * Reference: Arm(R) Cortex-M4 Devices Generic User Guide, Table 2-2 (page 2-3)
+ * @brief Get FAULTMASK value
+ * Reference: Arm(R) Cortex-M4 Devices Generic User Guide, Chapter 2.1.4 (page 2-6)
+ * Implementation: Delegates to __get_FAULTMASK() in armv7-m_core.h
  */
-static inline uint32_t cm4_get_msp(void)
+static inline uint32_t cm4_get_FAULTMASK(void)
 {
-    uint32_t result;
-    __asm__ volatile ("MRS %0, msp" : "=r" (result));
-    return result;
+    return __get_FAULTMASK();
 }
 
 /**
- * @brief Set Main Stack Pointer (MSP)
- * @param msp MSP value to set
- * Reference: Arm(R) Cortex-M4 Devices Generic User Guide, Table 2-2 (page 2-3)
+ * @brief Set FAULTMASK value
+ * Reference: Arm(R) Cortex-M4 Devices Generic User Guide, Chapter 2.1.4 (page 2-6)
+ * Implementation: Delegates to __set_FAULTMASK() in armv7-m_core.h
  */
-static inline void cm4_set_msp(uint32_t msp)
+static inline void cm4_set_FAULTMASK(uint32_t faultMask)
 {
-    __asm__ volatile ("MSR msp, %0" : : "r" (msp) : "memory");
+    __set_FAULTMASK(faultMask);
 }
 
 /**
- * @brief Get Process Stack Pointer (PSP)
- * @return PSP value
- * Reference: Arm(R) Cortex-M4 Devices Generic User Guide, Table 2-2 (page 2-3)
+ * @brief Get CONTROL value
+ * Reference: Arm(R) Cortex-M4 Devices Generic User Guide, Chapter 2.1.4 (page 2-6)
+ * Implementation: Delegates to __get_CONTROL() in armv7-m_core.h
  */
-static inline uint32_t cm4_get_psp(void)
+static inline uint32_t cm4_get_CONTROL(void)
 {
-    uint32_t result;
-    __asm__ volatile ("MRS %0, psp" : "=r" (result));
-    return result;
+    return __get_CONTROL();
 }
 
 /**
- * @brief Set Process Stack Pointer (PSP)
- * @param psp PSP value to set
- * Reference: Arm(R) Cortex-M4 Devices Generic User Guide, Table 2-2 (page 2-3)
+ * @brief Set CONTROL value
+ * Reference: Arm(R) Cortex-M4 Devices Generic User Guide, Chapter 2.1.4 (page 2-6)
+ * Implementation: Delegates to __set_CONTROL() in armv7-m_core.h
  */
-static inline void cm4_set_psp(uint32_t psp)
+static inline void cm4_set_CONTROL(uint32_t control)
 {
-    __asm__ volatile ("MSR psp, %0" : : "r" (psp) : "memory");
-}
-
-/**
- * @brief Get Link Register (LR)
- * @return LR value
- * Reference: Arm(R) Cortex-M4 Devices Generic User Guide, Table 2-2 (page 2-3)
- */
-static inline uint32_t cm4_get_lr(void)
-{
-    uint32_t result;
-    __asm__ volatile ("MOV %0, lr" : "=r" (result));
-    return result;
-}
-
-/**
- * @brief Get Program Counter (PC)
- * @return PC value
- * Reference: Arm(R) Cortex-M4 Devices Generic User Guide, Table 2-2 (page 2-3)
- */
-static inline uint32_t cm4_get_pc(void)
-{
-    uint32_t result;
-    __asm__ volatile ("MOV %0, pc" : "=r" (result));
-    return result;
+    __set_CONTROL(control);
 }
 
 /*
  * ============================================================================
- * Stack Selection Functions
- * Reference: Arm(R) Cortex-M4 Devices Generic User Guide, Table 2-1 (page 2-2)
+ * Stack Pointer Selection
+ * 堆栈指针选择
  * ============================================================================
  */
 
 /**
- * @brief Select Main Stack Pointer (MSP)
- * Reference: Arm(R) Cortex-M4 Devices Generic User Guide, Table 2-10 (page 2-9)
- * Note: When changing stack pointer, software must use ISB immediately after MSR
- * Reference: Chapter 2.1.3 (page 2-9)
+ * @brief Select main stack pointer
+ * Reference: Arm(R) Cortex-M4 Devices Generic User Guide, Chapter 2.1.3 (page 2-5)
+ * Implementation: Delegates to armv7m_select_msp() in armv7-m_core.h
  */
 static inline void cm4_select_msp(void)
 {
-    uint32_t control = cm4_get_control();
-    control &= ~CONTROL_SPSEL_Msk;
-    cm4_set_control(control);
-    __asm__ volatile ("ISB" ::: "memory");
+    armv7m_select_msp();
 }
 
 /**
- * @brief Select Process Stack Pointer (PSP)
- * Reference: Arm(R) Cortex-M4 Devices Generic User Guide, Table 2-10 (page 2-9)
- * Note: When changing stack pointer, software must use ISB immediately after MSR
- * Reference: Chapter 2.1.3 (page 2-9)
+ * @brief Select process stack pointer
+ * Reference: Arm(R) Cortex-M4 Devices Generic User Guide, Chapter 2.1.3 (page 2-5)
+ * Implementation: Delegates to armv7m_select_psp() in armv7-m_core.h
  */
 static inline void cm4_select_psp(void)
 {
-    uint32_t control = cm4_get_control();
-    control |= CONTROL_SPSEL_Msk;
-    cm4_set_control(control);
-    __asm__ volatile ("ISB" ::: "memory");
+    armv7m_select_psp();
 }
 
 /**
- * @brief Check if using Process Stack Pointer
+ * @brief Check if currently using process stack
  * @return 1 if using PSP, 0 if using MSP
- * Reference: Arm(R) Cortex-M4 Devices Generic User Guide, Table 2-10 (page 2-9)
+ * Reference: Arm(R) Cortex-M4 Devices Generic User Guide, Chapter 2.1.3 (page 2-5)
+ * Implementation: Delegates to armv7m_is_psp_selected() in armv7-m_core.h
  */
 static inline int cm4_is_psp_selected(void)
 {
-    return (cm4_get_control() & CONTROL_SPSEL_Msk) ? 1 : 0;
+    return armv7m_is_psp_selected();
 }
 
 /*
  * ============================================================================
- * Privilege Level Functions
- * Reference: Arm(R) Cortex-M4 Devices Generic User Guide, Chapter 2.1.1 (page 2-2)
+ * Privilege Level Control
+ * 特权级别控制
  * ============================================================================
  */
 
 /**
- * @brief Set Thread mode to privileged level
- * Reference: Arm(R) Cortex-M4 Devices Generic User Guide, Table 2-10 (page 2-9)
+ * @brief Enter unprivileged (user) mode
+ * Reference: Arm(R) Cortex-M4 Devices Generic User Guide, Chapter 2.1.4 (page 2-6)
+ * Implementation: Delegates to armv7m_enter_unprivileged() in armv7-m_core.h
  */
-static inline void cm4_set_privileged(void)
+static inline void cm4_enter_unprivileged(void)
 {
-    uint32_t control = cm4_get_control();
-    control &= ~CONTROL_nPRIV_Msk;
-    cm4_set_control(control);
+    armv7m_enter_unprivileged();
 }
 
 /**
- * @brief Set Thread mode to unprivileged level
- * Reference: Arm(R) Cortex-M4 Devices Generic User Guide, Table 2-10 (page 2-9)
+ * @brief Enter privileged mode
+ * Reference: Arm(R) Cortex-M4 Devices Generic User Guide, Chapter 2.1.4 (page 2-6)
+ * Implementation: Delegates to armv7m_enter_privileged() in armv7-m_core.h
  */
-static inline void cm4_set_unprivileged(void)
+static inline void cm4_enter_privileged(void)
 {
-    uint32_t control = cm4_get_control();
-    control |= CONTROL_nPRIV_Msk;
-    cm4_set_control(control);
+    armv7m_enter_privileged();
 }
 
 /**
- * @brief Check if in privileged mode
- * @return 1 if privileged, 0 if unprivileged
- * Reference: Arm(R) Cortex-M4 Devices Generic User Guide, Table 2-10 (page 2-9)
+ * @brief Check if currently in unprivileged mode
+ * @return 1 if unprivileged, 0 if privileged
+ * Reference: Arm(R) Cortex-M4 Devices Generic User Guide, Chapter 2.1.4 (page 2-6)
+ * Implementation: Delegates to armv7m_is_unprivileged() in armv7-m_core.h
  */
-static inline int cm4_is_privileged(void)
+static inline int cm4_is_unprivileged(void)
 {
-    return (cm4_get_control() & CONTROL_nPRIV_Msk) ? 0 : 1;
+    return armv7m_is_unprivileged();
 }
 
 /*
  * ============================================================================
- * Exception Mask Functions
- * Reference: Arm(R) Cortex-M4 Devices Generic User Guide, Chapter 2.1.3 (page 2-7)
+ * Floating-Point Context Control
+ * 浮点上下文控制
  * ============================================================================
  */
 
 /**
- * @brief Disable all exceptions with configurable priority
- * Reference: Arm(R) Cortex-M4 Devices Generic User Guide, Table 2-7 (page 2-8)
+ * @brief Check if floating-point context is active
+ * @return 1 if FPU context is active, 0 otherwise
+ * Reference: Arm(R) Cortex-M4 Devices Generic User Guide, Chapter 2.1.4 (page 2-6)
+ * Implementation: Delegates to armv7m_is_fp_active() in armv7-m_core.h
  */
-static inline void cm4_disable_irq(void)
+static inline int cm4_is_fp_active(void)
 {
-    __asm__ volatile ("CPSID i" ::: "memory");
-}
-
-/**
- * @brief Enable all exceptions with configurable priority
- * Reference: Arm(R) Cortex-M4 Devices Generic User Guide, Table 2-7 (page 2-8)
- */
-static inline void cm4_enable_irq(void)
-{
-    __asm__ volatile ("CPSIE i" ::: "memory");
-}
-
-/**
- * @brief Disable all exceptions except NMI
- * Reference: Arm(R) Cortex-M4 Devices Generic User Guide, Table 2-8 (page 2-8)
- */
-static inline void cm4_disable_fault(void)
-{
-    __asm__ volatile ("CPSID f" ::: "memory");
-}
-
-/**
- * @brief Enable all exceptions except NMI
- * Reference: Arm(R) Cortex-M4 Devices Generic User Guide, Table 2-8 (page 2-8)
- */
-static inline void cm4_enable_fault(void)
-{
-    __asm__ volatile ("CPSIE f" ::: "memory");
-}
-
-/**
- * @brief Set BASEPRI to mask exceptions with priority lower than specified
- * @param basepri Priority value (0-255), 0 = no effect
- * Reference: Arm(R) Cortex-M4 Devices Generic User Guide, Table 2-9 (page 2-9)
- */
-static inline void cm4_set_basepri_value(uint8_t basepri)
-{
-    cm4_set_basepri(basepri);
-}
-
-/**
- * @brief Clear BASEPRI (enable all exceptions)
- * Reference: Arm(R) Cortex-M4 Devices Generic User Guide, Table 2-9 (page 2-9)
- */
-static inline void cm4_clear_basepri(void)
-{
-    cm4_set_basepri(0U);
+    return armv7m_is_fp_active();
 }
 
 #ifdef __cplusplus
 }
 #endif
 
-#endif /* __ARCH_ARM_CM4_CORE_H__ */
+#endif /* __CM4_CORE_H__ */

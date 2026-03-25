@@ -3,12 +3,17 @@
  *
  * ============================================================================
  * File: cm4_mpu.h
- * Description: Cortex-M4 MPU register definitions
- * 描述: Cortex-M4 MPU 寄存器定义
+ * Description: Cortex-M4 MPU register definitions (wrapper for armv7-m_mpu.h)
+ * 描述: Cortex-M4 MPU 寄存器定义（armv7-m_mpu.h 的包装层）
+ *
+ * This file provides CM4-specific naming conventions while delegating
+ * all actual definitions and implementations to armv7-m_mpu.h.
  *
  * Reference: Arm(R) Cortex-M4 Devices Generic User Guide (DUI 0553B)
  *   - Chapter 4.5 Optional Memory Protection Unit (page 4-37)
  *   - Table 4-38 MPU registers summary (page 4-38)
+ *
+ * Implementation: All functionality is provided by armv7-m/armv7-m_mpu.h
  * ============================================================================
  * SPDX-License-Identifier: Apache-2.0
  */
@@ -19,253 +24,255 @@
 #include <stdint.h>
 #include <stdbool.h>
 
+/* Include the underlying ARMv7-M implementation */
+#include "armv7-m/armv7-m_mpu.h"
+
 #ifdef __cplusplus
 extern "C" {
 #endif
 
 /*
  * ============================================================================
- * MPU Base Address
+ * MPU Base Address Alias
+ * MPU 基地址别名
  * Reference: Arm(R) Cortex-M4 Devices Generic User Guide, Table 4-38 (page 4-38)
  * ============================================================================
  */
 
-#define CM4_MPU_BASE_ADDR             0xE000ED90UL
+#define CM4_MPU_BASE_ADDR             MPU_BASE_ADDR
 
 /*
  * ============================================================================
- * MPU Type Register (MPU_TYPE)
- * Reference: Arm(R) Cortex-M4 Devices Generic User Guide, Table 4-39 (page 4-38)
- * Address: 0xE000ED90
+ * Register Aliases - Map CM4 naming to ARMv7-M naming
+ * 寄存器别名 - 将 CM4 命名映射到 ARMv7-M 命名
  * ============================================================================
  */
 
-#define MPU_TYPE                      (*(volatile uint32_t *)(CM4_MPU_BASE_ADDR + 0x000))
+/* MPU Type Register (MPU_TYPE) */
+#define MPU_TYPE                      MPU_TYPE
 
-/* MPU_TYPE bit definitions - Reference: Table 4-39 (page 4-38) */
-#define MPU_TYPE_SEPARATE_Pos         0U
-#define MPU_TYPE_SEPARATE_Msk         (1UL << MPU_TYPE_SEPARATE_Pos)
+/* MPU Control Register (MPU_CTRL) */
+#define MPU_CTRL                      MPU_CTRL
 
-#define MPU_TYPE_DREGION_Pos          8U
-#define MPU_TYPE_DREGION_Msk          (0xFFUL << MPU_TYPE_DREGION_Pos)
+/* MPU Region Number Register (MPU_RNR) */
+#define MPU_RNR                       MPU_RNR
 
-#define MPU_TYPE_IREGION_Pos          16U
-#define MPU_TYPE_IREGION_Msk          (0xFFUL << MPU_TYPE_IREGION_Pos)
+/* MPU Region Base Address Register (MPU_RBAR) */
+#define MPU_RBAR                      MPU_RBAR
 
-/* Cortex-M4 specific values */
-#define MPU_TYPE_DREGION_8            0x08UL
-#define MPU_TYPE_SEPARATE_UNIFIED     0UL
+/* MPU Region Attribute and Size Register (MPU_RASR) */
+#define MPU_RASR                      MPU_RASR
+
+/* MPU Region Alias Registers */
+#define MPU_RBAR_A1                   MPU_RBAR_A1
+#define MPU_RASR_A1                   MPU_RASR_A1
+#define MPU_RBAR_A2                   MPU_RBAR_A2
+#define MPU_RASR_A2                   MPU_RASR_A2
+#define MPU_RBAR_A3                   MPU_RBAR_A3
+#define MPU_RASR_A3                   MPU_RASR_A3
 
 /*
  * ============================================================================
- * MPU Control Register (MPU_CTRL)
- * Reference: Arm(R) Cortex-M4 Devices Generic User Guide, Table 4-40 (page 4-39)
- * Address: 0xE000ED94
+ * MPU Register Bit Definitions (Aliases)
+ * MPU 寄存器位定义（别名）
  * ============================================================================
  */
 
-#define MPU_CTRL                      (*(volatile uint32_t *)(CM4_MPU_BASE_ADDR + 0x004))
+/* MPU_TYPE Register Bits */
+#define MPU_TYPE_IREGION_Pos          MPU_TYPE_IREGION_Pos
+#define MPU_TYPE_IREGION_Msk          MPU_TYPE_IREGION_Msk
+#define MPU_TYPE_DREGION_Pos          MPU_TYPE_DREGION_Pos
+#define MPU_TYPE_DREGION_Msk          MPU_TYPE_DREGION_Msk
+#define MPU_TYPE_SEPARATE_Pos         MPU_TYPE_SEPARATE_Pos
+#define MPU_TYPE_SEPARATE_Msk         MPU_TYPE_SEPARATE_Msk
 
-/* MPU_CTRL bit definitions - Reference: Table 4-40 (page 4-39) */
-#define MPU_CTRL_ENABLE_Pos           0U
-#define MPU_CTRL_ENABLE_Msk           (1UL << MPU_CTRL_ENABLE_Pos)
+/* MPU_CTRL Register Bits */
+#define MPU_CTRL_ENABLE_Pos           MPU_CTRL_ENABLE_Pos
+#define MPU_CTRL_ENABLE_Msk           MPU_CTRL_ENABLE_Msk
+#define MPU_CTRL_HFNMIENA_Pos         MPU_CTRL_HFNMIENA_Pos
+#define MPU_CTRL_HFNMIENA_Msk         MPU_CTRL_HFNMIENA_Msk
+#define MPU_CTRL_PRIVDEFENA_Pos       MPU_CTRL_PRIVDEFENA_Pos
+#define MPU_CTRL_PRIVDEFENA_Msk       MPU_CTRL_PRIVDEFENA_Msk
 
-#define MPU_CTRL_HFNMIENA_Pos         1U
-#define MPU_CTRL_HFNMIENA_Msk         (1UL << MPU_CTRL_HFNMIENA_Pos)
+/* MPU_RNR Register Bits */
+#define MPU_RNR_REGION_Pos            MPU_RNR_REGION_Pos
+#define MPU_RNR_REGION_Msk            MPU_RNR_REGION_Msk
 
-#define MPU_CTRL_PRIVDEFENA_Pos       2U
-#define MPU_CTRL_PRIVDEFENA_Msk       (1UL << MPU_CTRL_PRIVDEFENA_Pos)
+/* MPU_RBAR Register Bits */
+#define MPU_RBAR_REGION_Pos           MPU_RBAR_REGION_Pos
+#define MPU_RBAR_REGION_Msk           MPU_RBAR_REGION_Msk
+#define MPU_RBAR_VALID_Pos            MPU_RBAR_VALID_Pos
+#define MPU_RBAR_VALID_Msk            MPU_RBAR_VALID_Msk
+#define MPU_RBAR_ADDR_Pos             MPU_RBAR_ADDR_Pos
+#define MPU_RBAR_ADDR_Msk             MPU_RBAR_ADDR_Msk
+
+/* MPU_RASR Register Bits */
+#define MPU_RASR_ENABLE_Pos           MPU_RASR_ENABLE_Pos
+#define MPU_RASR_ENABLE_Msk           MPU_RASR_ENABLE_Msk
+#define MPU_RASR_SIZE_Pos             MPU_RASR_SIZE_Pos
+#define MPU_RASR_SIZE_Msk             MPU_RASR_SIZE_Msk
+#define MPU_RASR_SRD_Pos              MPU_RASR_SRD_Pos
+#define MPU_RASR_SRD_Msk              MPU_RASR_SRD_Msk
+#define MPU_RASR_ATTRS_Pos            MPU_RASR_ATTRS_Pos
+#define MPU_RASR_ATTRS_Msk            MPU_RASR_ATTRS_Msk
+#define MPU_RASR_B_Pos                MPU_RASR_B_Pos
+#define MPU_RASR_B_Msk                MPU_RASR_B_Msk
+#define MPU_RASR_C_Pos                MPU_RASR_C_Pos
+#define MPU_RASR_C_Msk                MPU_RASR_C_Msk
+#define MPU_RASR_S_Pos                MPU_RASR_S_Pos
+#define MPU_RASR_S_Msk                MPU_RASR_S_Msk
+#define MPU_RASR_TEX_Pos              MPU_RASR_TEX_Pos
+#define MPU_RASR_TEX_Msk              MPU_RASR_TEX_Msk
+#define MPU_RASR_AP_Pos               MPU_RASR_AP_Pos
+#define MPU_RASR_AP_Msk               MPU_RASR_AP_Msk
+#define MPU_RASR_XN_Pos               MPU_RASR_XN_Pos
+#define MPU_RASR_XN_Msk               MPU_RASR_XN_Msk
 
 /*
  * ============================================================================
- * MPU Region Number Register (MPU_RNR)
- * Reference: Arm(R) Cortex-M4 Devices Generic User Guide, Table 4-41 (page 4-40)
- * Address: 0xE000ED98
+ * MPU Region Size Definitions (Aliases)
+ * MPU 区域大小定义（别名）
  * ============================================================================
  */
 
-#define MPU_RNR                       (*(volatile uint32_t *)(CM4_MPU_BASE_ADDR + 0x008))
-
-/* MPU_RNR bit definitions - Reference: Table 4-41 (page 4-40) */
-#define MPU_RNR_REGION_Pos            0U
-#define MPU_RNR_REGION_Msk            (0xFFUL << MPU_RNR_REGION_Pos)
+#define MPU_SIZE_32B                  MPU_REGION_SIZE_32B
+#define MPU_SIZE_64B                  MPU_REGION_SIZE_64B
+#define MPU_SIZE_128B                 MPU_REGION_SIZE_128B
+#define MPU_SIZE_256B                 MPU_REGION_SIZE_256B
+#define MPU_SIZE_512B                 MPU_REGION_SIZE_512B
+#define MPU_SIZE_1KB                  MPU_REGION_SIZE_1KB
+#define MPU_SIZE_2KB                  MPU_REGION_SIZE_2KB
+#define MPU_SIZE_4KB                  MPU_REGION_SIZE_4KB
+#define MPU_SIZE_8KB                  MPU_REGION_SIZE_8KB
+#define MPU_SIZE_16KB                 MPU_REGION_SIZE_16KB
+#define MPU_SIZE_32KB                 MPU_REGION_SIZE_32KB
+#define MPU_SIZE_64KB                 MPU_REGION_SIZE_64KB
+#define MPU_SIZE_128KB                MPU_REGION_SIZE_128KB
+#define MPU_SIZE_256KB                MPU_REGION_SIZE_256KB
+#define MPU_SIZE_512KB                MPU_REGION_SIZE_512KB
+#define MPU_SIZE_1MB                  MPU_REGION_SIZE_1MB
+#define MPU_SIZE_2MB                  MPU_REGION_SIZE_2MB
+#define MPU_SIZE_4MB                  MPU_REGION_SIZE_4MB
+#define MPU_SIZE_8MB                  MPU_REGION_SIZE_8MB
+#define MPU_SIZE_16MB                 MPU_REGION_SIZE_16MB
+#define MPU_SIZE_32MB                 MPU_REGION_SIZE_32MB
+#define MPU_SIZE_64MB                 MPU_REGION_SIZE_64MB
+#define MPU_SIZE_128MB                MPU_REGION_SIZE_128MB
+#define MPU_SIZE_256MB                MPU_REGION_SIZE_256MB
+#define MPU_SIZE_512MB                MPU_REGION_SIZE_512MB
+#define MPU_SIZE_1GB                  MPU_REGION_SIZE_1GB
+#define MPU_SIZE_2GB                  MPU_REGION_SIZE_2GB
+#define MPU_SIZE_4GB                  MPU_REGION_SIZE_4GB
 
 /*
  * ============================================================================
- * MPU Region Base Address Register (MPU_RBAR)
- * Reference: Arm(R) Cortex-M4 Devices Generic User Guide, Table 4-42 (page 4-40)
- * Address: 0xE000ED9C
+ * MPU Access Permission Definitions (Aliases)
+ * MPU 访问权限定义（别名）
  * ============================================================================
  */
 
-#define MPU_RBAR                      (*(volatile uint32_t *)(CM4_MPU_BASE_ADDR + 0x00C))
-
-/* MPU_RBAR bit definitions - Reference: Table 4-42 (page 4-40) */
-#define MPU_RBAR_REGION_Pos           0U
-#define MPU_RBAR_REGION_Msk           (0xFUL << MPU_RBAR_REGION_Pos)
-
-#define MPU_RBAR_VALID_Pos            4U
-#define MPU_RBAR_VALID_Msk            (1UL << MPU_RBAR_VALID_Pos)
-
-#define MPU_RBAR_ADDR_Pos             5U
-#define MPU_RBAR_ADDR_Msk             (0x7FFFFFFUL << MPU_RBAR_ADDR_Pos)
+#define MPU_AP_NO_ACCESS              MPU_AP_NO_ACCESS
+#define MPU_AP_PRIV_RW                MPU_AP_PRIV_RW
+#define MPU_AP_PRIV_RW_USER_RO        MPU_AP_PRIV_RW_USER_RO
+#define MPU_AP_PRIV_RW_USER_RW        MPU_AP_PRIV_RW_USER_RW
+#define MPU_AP_RESERVED               MPU_AP_RESERVED
+#define MPU_AP_PRIV_RO                MPU_AP_PRIV_RO
+#define MPU_AP_PRIV_RO_USER_RO        MPU_AP_PRIV_RO_USER_RO
+#define MPU_AP_RO                     MPU_AP_RO
 
 /*
  * ============================================================================
- * MPU Region Attribute and Size Register (MPU_RASR)
- * Reference: Arm(R) Cortex-M4 Devices Generic User Guide, Table 4-43 (page 4-41)
- * Address: 0xE000EDA0
+ * MPU Memory Attributes (Aliases)
+ * MPU 内存属性（别名）
  * ============================================================================
  */
 
-#define MPU_RASR                      (*(volatile uint32_t *)(CM4_MPU_BASE_ADDR + 0x010))
+/* Strongly-ordered */
+#define MPU_ATTR_STRONGLY_ORDERED     MPU_ATTR_STRONGLY_ORDERED
 
-/* MPU_RASR bit definitions - Reference: Table 4-43 (page 4-41) */
-#define MPU_RASR_ENABLE_Pos           0U
-#define MPU_RASR_ENABLE_Msk           (1UL << MPU_RASR_ENABLE_Pos)
+/* Device memory */
+#define MPU_ATTR_DEVICE_SHARED        MPU_ATTR_DEVICE_SHARED
+#define MPU_ATTR_DEVICE_NONSHARED     MPU_ATTR_DEVICE_NONSHARED
 
-#define MPU_RASR_SIZE_Pos             1U
-#define MPU_RASR_SIZE_Msk             (0x1FUL << MPU_RASR_SIZE_Pos)
+/* Normal memory, Non-cacheable */
+#define MPU_ATTR_NORMAL_NONCACHE      MPU_ATTR_NORMAL_NONCACHE
 
-#define MPU_RASR_SRD_Pos              8U
-#define MPU_RASR_SRD_Msk              (0xFFUL << MPU_RASR_SRD_Pos)
+/* Normal memory, Write-Through */
+#define MPU_ATTR_NORMAL_WT            MPU_ATTR_NORMAL_WT
 
-#define MPU_RASR_B_Pos                16U
-#define MPU_RASR_B_Msk                (1UL << MPU_RASR_B_Pos)
+/* Normal memory, Write-Back */
+#define MPU_ATTR_NORMAL_WB            MPU_ATTR_NORMAL_WB
 
-#define MPU_RASR_C_Pos                17U
-#define MPU_RASR_C_Msk                (1UL << MPU_RASR_C_Pos)
+/* Normal memory, Write-Back with allocate */
+#define MPU_ATTR_NORMAL_WB_ALLOC      MPU_ATTR_NORMAL_WB_ALLOC
 
-#define MPU_RASR_S_Pos                18U
-#define MPU_RASR_S_Msk                (1UL << MPU_RASR_S_Pos)
+/* Shareable attribute */
+#define MPU_ATTR_SHAREABLE            MPU_ATTR_SHAREABLE
+#define MPU_ATTR_NON_SHAREABLE        MPU_ATTR_NON_SHAREABLE
 
-#define MPU_RASR_TEX_Pos              19U
-#define MPU_RASR_TEX_Msk              (7UL << MPU_RASR_TEX_Pos)
-
-#define MPU_RASR_AP_Pos               24U
-#define MPU_RASR_AP_Msk               (7UL << MPU_RASR_AP_Pos)
-
-#define MPU_RASR_XN_Pos               28U
-#define MPU_RASR_XN_Msk               (1UL << MPU_RASR_XN_Pos)
+/* Execute Never attribute */
+#define MPU_ATTR_XN                   MPU_ATTR_XN
+#define MPU_ATTR_EXEC_OK              MPU_ATTR_EXEC_OK
 
 /*
  * ============================================================================
- * MPU Region Alias Registers
- * Reference: Arm(R) Cortex-M4 Devices Generic User Guide, Table 4-38 (page 4-38)
- * ============================================================================
- */
-
-#define MPU_RBAR_A1                   (*(volatile uint32_t *)(CM4_MPU_BASE_ADDR + 0x014))
-#define MPU_RASR_A1                   (*(volatile uint32_t *)(CM4_MPU_BASE_ADDR + 0x018))
-#define MPU_RBAR_A2                   (*(volatile uint32_t *)(CM4_MPU_BASE_ADDR + 0x01C))
-#define MPU_RASR_A2                   (*(volatile uint32_t *)(CM4_MPU_BASE_ADDR + 0x020))
-#define MPU_RBAR_A3                   (*(volatile uint32_t *)(CM4_MPU_BASE_ADDR + 0x024))
-#define MPU_RASR_A3                   (*(volatile uint32_t *)(CM4_MPU_BASE_ADDR + 0x028))
-
-/*
- * ============================================================================
- * MPU Access Permission Attributes
- * Reference: Arm(R) Cortex-M4 Devices Generic User Guide, Table 4-47 (page 4-44)
- * ============================================================================
- */
-
-/* AP field values - Reference: Table 4-47 (page 4-44) */
-#define MPU_AP_NO_ACCESS              0x0UL
-#define MPU_AP_PRIV_RW                0x1UL
-#define MPU_AP_RW                     0x3UL
-#define MPU_AP_PRIV_RO                0x5UL
-#define MPU_AP_RO                     0x6UL
-
-/*
- * ============================================================================
- * MPU Memory Attributes (TEX, C, B, S)
- * Reference: Arm(R) Cortex-M4 Devices Generic User Guide, Table 4-45 (page 4-43)
- * ============================================================================
- */
-
-/* Memory type encodings - Reference: Table 4-45 (page 4-43) */
-#define MPU_ATTR_STRONGLY_ORDERED     0x00UL
-#define MPU_ATTR_SHARED_DEVICE        0x01UL
-#define MPU_ATTR_NORMAL_WT            0x02UL
-#define MPU_ATTR_NORMAL_WB            0x03UL
-#define MPU_ATTR_NORMAL_NONCACHE      0x04UL
-#define MPU_ATTR_NONSHARED_DEVICE     0x10UL
-
-/*
- * ============================================================================
- * MPU Size Values
- * Reference: Arm(R) Cortex-M4 Devices Generic User Guide, Table 4-44 (page 4-42)
- * ============================================================================
- */
-
-/* SIZE field values - Reference: Table 4-44 (page 4-42) */
-#define MPU_SIZE_32B                  4UL
-#define MPU_SIZE_64B                  5UL
-#define MPU_SIZE_128B                 6UL
-#define MPU_SIZE_256B                 7UL
-#define MPU_SIZE_512B                 8UL
-#define MPU_SIZE_1KB                  9UL
-#define MPU_SIZE_2KB                  10UL
-#define MPU_SIZE_4KB                  11UL
-#define MPU_SIZE_8KB                  12UL
-#define MPU_SIZE_16KB                 13UL
-#define MPU_SIZE_32KB                 14UL
-#define MPU_SIZE_64KB                 15UL
-#define MPU_SIZE_128KB                16UL
-#define MPU_SIZE_256KB                17UL
-#define MPU_SIZE_512KB                18UL
-#define MPU_SIZE_1MB                  19UL
-#define MPU_SIZE_2MB                  20UL
-#define MPU_SIZE_4MB                  21UL
-#define MPU_SIZE_8MB                  22UL
-#define MPU_SIZE_16MB                 23UL
-#define MPU_SIZE_32MB                 24UL
-#define MPU_SIZE_64MB                 25UL
-#define MPU_SIZE_128MB                26UL
-#define MPU_SIZE_256MB                27UL
-#define MPU_SIZE_512MB                28UL
-#define MPU_SIZE_1GB                  29UL
-#define MPU_SIZE_2GB                  30UL
-#define MPU_SIZE_4GB                  31UL
-
-/*
- * ============================================================================
- * MPU Function Declarations
- * Reference: Arm(R) Cortex-M4 Devices Generic User Guide, Chapter 4.5 (page 4-37)
+ * MPU Function Wrapper Declarations
+ * MPU 函数包装器声明
+ * Implementation: Delegates to functions in armv7-m_mpu.c
  * ============================================================================
  */
 
 /**
  * @brief Enable MPU
  * Reference: Arm(R) Cortex-M4 Devices Generic User Guide, Chapter 4.5.2 (page 4-39)
+ * Implementation: Delegates to mpu_enable() in armv7-m_mpu.c
  */
-void cm4_mpu_enable(void);
+static inline void cm4_mpu_enable(void)
+{
+    mpu_enable();
+}
 
 /**
  * @brief Disable MPU
  * Reference: Arm(R) Cortex-M4 Devices Generic User Guide, Chapter 4.5.2 (page 4-39)
+ * Implementation: Delegates to mpu_disable() in armv7-m_mpu.c
  */
-void cm4_mpu_disable(void);
+static inline void cm4_mpu_disable(void)
+{
+    mpu_disable();
+}
 
 /**
  * @brief Enable MPU with default memory map for privileged access
  * Reference: Arm(R) Cortex-M4 Devices Generic User Guide, Chapter 4.5.2 (page 4-39)
+ * Implementation: Delegates to mpu_enable_with_default_map() in armv7-m_mpu.c
  */
-void cm4_mpu_enable_with_default_map(void);
+static inline void cm4_mpu_enable_with_default_map(void)
+{
+    mpu_enable_with_default_map();
+}
 
 /**
  * @brief Select MPU region
  * @param region Region number (0-7)
  * Reference: Arm(R) Cortex-M4 Devices Generic User Guide, Chapter 4.5.3 (page 4-40)
+ * Implementation: Delegates to mpu_select_region() in armv7-m_mpu.c
  */
-void cm4_mpu_select_region(uint32_t region);
+static inline void cm4_mpu_select_region(uint32_t region)
+{
+    mpu_select_region(region);
+}
 
 /**
  * @brief Set region base address
  * @param addr Base address (must be aligned to region size)
  * Reference: Arm(R) Cortex-M4 Devices Generic User Guide, Chapter 4.5.4 (page 4-40)
+ * Implementation: Delegates to mpu_set_region_base() in armv7-m_mpu.c
  */
-void cm4_mpu_set_region_base(uint32_t addr);
+static inline void cm4_mpu_set_region_base(uint32_t addr)
+{
+    mpu_set_region_base(addr);
+}
 
 /**
  * @brief Set region size and attributes
@@ -276,42 +283,60 @@ void cm4_mpu_set_region_base(uint32_t addr);
  * @param xn Execute never bit
  * @param enable Enable region
  * Reference: Arm(R) Cortex-M4 Devices Generic User Guide, Chapter 4.5.5 (page 4-41)
+ * Implementation: Delegates to mpu_set_region_attr() in armv7-m_mpu.c
  */
-void cm4_mpu_set_region_attr(uint32_t size, uint32_t srd, uint32_t attr, uint32_t ap, uint32_t xn, uint32_t enable);
+static inline void cm4_mpu_set_region_attr(uint32_t size, uint32_t srd, uint32_t attr, uint32_t ap, uint32_t xn, uint32_t enable)
+{
+    mpu_set_region_attr(size, srd, attr, ap, xn, enable);
+}
 
 /**
  * @brief Configure a complete MPU region
  * @param region Region number (0-7)
  * @param base Base address
  * @param size Region size
- * @param srd Subregion disable bits
  * @param attr Memory attributes
- * @param ap Access permissions
- * @param xn Execute never
+ * @param srd Subregion disable bits
  * Reference: Arm(R) Cortex-M4 Devices Generic User Guide, Chapter 4.5 (page 4-37)
+ * Implementation: Delegates to mpu_configure_region() in armv7-m_mpu.c
  */
-void cm4_mpu_configure_region(uint32_t region, uint32_t base, uint32_t size, uint32_t srd, uint32_t attr, uint32_t ap, uint32_t xn);
+static inline void cm4_mpu_configure_region(uint32_t region, uint32_t base, uint32_t size, uint32_t attr, uint32_t srd)
+{
+    mpu_configure_region(region, base, size, attr, srd);
+}
 
 /**
  * @brief Disable a region
  * @param region Region number (0-7)
  * Reference: Arm(R) Cortex-M4 Devices Generic User Guide, Chapter 4.5.5 (page 4-41)
+ * Implementation: Delegates to mpu_disable_region() in armv7-m_mpu.c
  */
-void cm4_mpu_disable_region(uint32_t region);
+static inline void cm4_mpu_disable_region(uint32_t region)
+{
+    mpu_disable_region(region);
+}
 
 /**
  * @brief Get number of supported regions
  * @return Number of regions (should be 8 for Cortex-M4)
  * Reference: Arm(R) Cortex-M4 Devices Generic User Guide, Chapter 4.5.1 (page 4-38)
+ * Implementation: Delegates to mpu_get_num_regions() in armv7-m_mpu.c
  */
-uint32_t cm4_mpu_get_region_count(void);
+static inline uint32_t cm4_mpu_get_region_count(void)
+{
+    return mpu_get_num_regions();
+}
 
 /**
  * @brief Check if MPU is present
  * @return 1 if present, 0 if not
  * Reference: Arm(R) Cortex-M4 Devices Generic User Guide, Chapter 4.5.1 (page 4-38)
+ * Implementation: Delegates to mpu_is_present() in armv7-m_mpu.c
  */
-int cm4_mpu_is_present(void);
+static inline int cm4_mpu_is_present(void)
+{
+    return mpu_is_present();
+}
 
 #ifdef __cplusplus
 }

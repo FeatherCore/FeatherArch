@@ -3,63 +3,58 @@
  *
  * ============================================================================
  * File: cm4_tpiu.c
- * Description: Cortex-M4 TPIU function implementations
- * 描述: Cortex-M4 TPIU 函数实现
+ * Description: Cortex-M4 TPIU function implementations (wrapper for armv7-m_tpiu.c)
+ * 描述: Cortex-M4 TPIU 函数实现（armv7-m_tpiu.c 的包装层）
  *
- * Reference: Arm(R) Cortex-M4 Processor Technical Reference Manual (100166_0001_04_en)
- *   - Chapter 11 Trace Port Interface Unit (page 11-91)
- *   - Table 11-1 TPIU registers (page 11-95)
+ * This file is a placeholder. All TPIU functionality is provided by:
+ * - armv7-m/armv7-m_tpiu.h (register definitions)
+ * - armv7-m/armv7-m_tpiu.c (function implementations)
+ *
+ * The CM4-specific functions (cm4_tpiu_*) are implemented as static inline
+ * wrappers in cm4_tpiu.h, which delegate to the ARMv7-M implementations.
+ *
+ * Reference: Arm(R) Cortex-M4 Devices Generic User Guide (DUI 0553B)
+ *   - Chapter 4.9 Trace Port Interface Unit (page 4-65)
+ *   - Table 4-61 TPIU registers summary (page 4-65)
+ *
+ * Implementation Location:
+ *   - Header: armv7-m/armv7-m_tpiu.h
+ *   - Source: armv7-m/armv7-m_tpiu.c
  * ============================================================================
  * SPDX-License-Identifier: Apache-2.0
  */
 
-#include <stdint.h>
 #include "armv7-m/cm4/cm4_tpiu.h"
 
-/**
- * @brief Set SWO baud rate prescaler
- * @param prescaler Prescaler value (0-8191)
- * Reference: Arm(R) Cortex-M4 Processor Technical Reference Manual, Table 11-2 (page 11-96)
+/*
+ * All TPIU functions are implemented as static inline wrappers in cm4_tpiu.h.
+ * They delegate to the corresponding functions in armv7-m_tpiu.c:
+ *
+ * cm4_tpiu_init()                         -> tpiu_init()
+ * cm4_tpiu_set_port_size(size)            -> tpiu_set_port_size(size)
+ * cm4_tpiu_get_port_size()                -> tpiu_get_port_size()
+ * cm4_tpiu_set_acpr(prescaler)            -> tpiu_set_acpr(prescaler)
+ * cm4_tpiu_get_acpr()                     -> tpiu_get_acpr()
+ * cm4_tpiu_set_pin_protocol(protocol)     -> tpiu_set_pin_protocol(protocol)
+ * cm4_tpiu_get_pin_protocol()             -> tpiu_get_pin_protocol()
+ * cm4_tpiu_enable_formatter()             -> tpiu_enable_formatter()
+ * cm4_tpiu_disable_formatter()            -> tpiu_disable_formatter()
+ * cm4_tpiu_enable_flush_on_trigger()      -> tpiu_enable_flush_on_trigger()
+ * cm4_tpiu_disable_flush_on_trigger()     -> tpiu_disable_flush_on_trigger()
+ * cm4_tpiu_get_device_id()                -> tpiu_get_device_id()
+ * cm4_tpiu_is_present()                   -> tpiu_is_present()
+ *
+ * Additional functions available in armv7-m_tpiu.c:
+ * - tpiu_get_sspsr()
+ * - tpiu_get_cspsr()
+ * - tpiu_set_cspsr(cspsr)
+ * - tpiu_get_ffcr()
+ * - tpiu_set_ffcr(ffcr)
+ * - tpiu_get_fscr()
+ * - tpiu_set_fscr(fscr)
+ * - tpiu_get_claimset()
+ * - tpiu_set_claimset(claim)
+ * - tpiu_get_claimclr()
+ * - tpiu_set_claimclr(claim)
+ * - tpiu_get_devtype()
  */
-void cm4_tpiu_set_prescaler(uint32_t prescaler)
-{
-    TPIU_ACPR = prescaler & TPIU_ACPR_PRESCALER_Msk;
-}
-
-/**
- * @brief Set pin protocol
- * @param protocol Protocol (0=sync, 1=Manchester, 2=NRZ)
- * Reference: Arm(R) Cortex-M4 Processor Technical Reference Manual, Table 11-1 (page 11-95)
- */
-void cm4_tpiu_set_pin_protocol(uint32_t protocol)
-{
-    TPIU_SPPR = protocol & 0x3;
-}
-
-/**
- * @brief Enable formatter
- * Reference: Arm(R) Cortex-M4 Processor Technical Reference Manual, Table 11-1 (page 11-95)
- */
-void cm4_tpiu_enable_formatter(void)
-{
-    TPIU_FFCR |= TPIU_FFCR_EnFCont_Msk;
-}
-
-/**
- * @brief Disable formatter
- * Reference: Arm(R) Cortex-M4 Processor Technical Reference Manual, Table 11-1 (page 11-95)
- */
-void cm4_tpiu_disable_formatter(void)
-{
-    TPIU_FFCR &= ~TPIU_FFCR_EnFCont_Msk;
-}
-
-/**
- * @brief Get TPIU device ID
- * @return Device ID value
- * Reference: Arm(R) Cortex-M4 Processor Technical Reference Manual, Table 11-1 (page 11-95)
- */
-uint32_t cm4_tpiu_get_devid(void)
-{
-    return TPIU_DEVID;
-}

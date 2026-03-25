@@ -1,15 +1,24 @@
 /*
- * ARM Architecture - Cortex-M4 Initialization Header
+ * ARM Architecture - Cortex-M4 Initialization
  *
  * ============================================================================
  * File: cm4_init.h
- * Description: Cortex-M4 initialization and system control function declarations
- * 描述: Cortex-M4 初始化和系统控制函数声明
+ * Description: Cortex-M4 specific initialization and utility functions
+ *              (wrapper for armv7-m functions where applicable)
+ * 描述: Cortex-M4 特定初始化和工具函数（在适用情况下包装 armv7-m 函数）
+ *
+ * This file provides CM4-specific functionality while delegating
+ * common ARMv7-M features to armv7-m headers.
  *
  * Reference: Arm(R) Cortex-M4 Devices Generic User Guide (DUI 0553B)
  *   - Chapter 2.1 Programmers model (page 2-2)
  *   - Chapter 2.2 Memory model (page 2-10)
+ *   - Chapter 2.4 Fault handling (page 2-29)
  *   - Chapter 2.5 Power management (page 2-32)
+ *
+ * Implementation:
+ *   - CM4-specific features: Bit-banding, system init
+ *   - Common ARMv7-M features: Delegated to armv7-m headers
  * ============================================================================
  * SPDX-License-Identifier: Apache-2.0
  */
@@ -19,6 +28,12 @@
 
 #include <stdint.h>
 #include <stdbool.h>
+
+/* Include ARMv7-M core functionality */
+#include "armv7-m/armv7-m_core.h"
+#include "armv7-m/armv7-m_scb.h"
+#include "armv7-m/armv7-m_dwt.h"
+#include "armv7-m/armv7-m_debug.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -33,6 +48,12 @@ extern "C" {
 /**
  * @brief Initialize Cortex-M4 system
  * 初始化 Cortex-M4 系统
+ *
+ * This function performs Cortex-M4 specific initialization:
+ * 1. Enable FPU if present
+ * 2. Configure lazy stacking
+ * 3. Initialize DSP features
+ * 4. Configure bit-banding if needed
  * Reference: Arm(R) Cortex-M4 Devices Generic User Guide, Chapter 2.1 (page 2-2)
  */
 void cm4_system_init(void);
@@ -40,13 +61,16 @@ void cm4_system_init(void);
 /**
  * @brief Pre-main initialization hook
  * Pre-main 初始化钩子
+ *
+ * This function is called before main() by the startup code.
+ * It performs essential Cortex-M4 initialization.
  */
 void cm4_pre_main_init(void);
 
 /* ============================================================================
- * Cortex-M4 Cycle Counter
- * Cortex-M4 周期计数器
- * Reference: Arm(R) Cortex-M4 Devices Generic User Guide, Chapter 2.1 (page 2-2)
+ * Cortex-M4 Cycle Counter (DWT)
+ * Cortex-M4 周期计数器 (DWT)
+ * Reference: Arm(R) Cortex-M4 Devices Generic User Guide, Chapter 4.8 (page 4-59)
  * ============================================================================ */
 
 /**
@@ -175,6 +199,16 @@ uint32_t cm4_fault_get_busfault_addr(void);
  * ============================================================================ */
 
 #if (__BITBAND_PRESENT == 1)
+
+/* Bit-band base addresses */
+#define CM4_BITBAND_SRAM_BASE      (0x20000000UL)
+#define CM4_BITBAND_SRAM_ALIAS     (0x22000000UL)
+#define CM4_BITBAND_PERIPH_BASE    (0x40000000UL)
+#define CM4_BITBAND_PERIPH_ALIAS   (0x42000000UL)
+
+/* Bit-band address calculation macros */
+#define CM4_BITBAND_SRAM_ADDR(addr, bit)  ((volatile uint32_t *)((CM4_BITBAND_SRAM_ALIAS + (((uint32_t)(addr) - CM4_BITBAND_SRAM_BASE) * 32) + ((bit) * 4))))
+#define CM4_BITBAND_PERIPH_ADDR(addr, bit) ((volatile uint32_t *)((CM4_BITBAND_PERIPH_ALIAS + (((uint32_t)(addr) - CM4_BITBAND_PERIPH_BASE) * 32) + ((bit) * 4))))
 
 /**
  * @brief Set bit using bit-banding (SRAM region)
@@ -330,7 +364,6 @@ void cm4_clrex(void);
  * @brief Get CPUID
  * 获取 CPUID
  * @return CPUID register value
- * Reference: Arm(R) Cortex-M4 Devices Generic User Guide, Table 2-2 (page 2-3)
  */
 uint32_t cm4_get_cpuid(void);
 
@@ -364,28 +397,24 @@ int cm4_is_cortex_m4(void);
 /**
  * @brief Disable all interrupts (except NMI and HardFault)
  * 禁用所有中断 (除了 NMI 和 HardFault)
- * Reference: Arm(R) Cortex-M4 Devices Generic User Guide, Table 2-7 (page 2-8)
  */
 void cm4_disable_interrupts(void);
 
 /**
  * @brief Enable all interrupts
  * 启用所有中断
- * Reference: Arm(R) Cortex-M4 Devices Generic User Guide, Table 2-7 (page 2-8)
  */
 void cm4_enable_interrupts(void);
 
 /**
  * @brief Disable all faults
  * 禁用所有故障
- * Reference: Arm(R) Cortex-M4 Devices Generic User Guide, Table 2-8 (page 2-8)
  */
 void cm4_disable_faults(void);
 
 /**
  * @brief Enable all faults
  * 启用所有故障
- * Reference: Arm(R) Cortex-M4 Devices Generic User Guide, Table 2-8 (page 2-8)
  */
 void cm4_enable_faults(void);
 

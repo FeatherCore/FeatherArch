@@ -207,46 +207,6 @@ static inline uint32_t cm4_peripheral_bitband_read(uint32_t addr, uint32_t bit)
 
 /*
  * ============================================================================
- * Memory Barrier Instructions
- * Reference: Arm(R) Cortex-M4 Devices Generic User Guide, Chapter 2.2.4 (page 2-15)
- * ============================================================================
- */
-
-/**
- * @brief Data Memory Barrier
- * Ensures that outstanding memory transactions complete before subsequent
- * memory transactions.
- * Reference: Arm(R) Cortex-M4 Devices Generic User Guide, Chapter 2.2.4 (page 2-15)
- */
-static inline void cm4_dmb(void)
-{
-    __asm__ volatile ("DMB" ::: "memory");
-}
-
-/**
- * @brief Data Synchronization Barrier
- * Ensures that outstanding memory transactions complete before subsequent
- * instructions execute.
- * Reference: Arm(R) Cortex-M4 Devices Generic User Guide, Chapter 2.2.4 (page 2-15)
- */
-static inline void cm4_dsb(void)
-{
-    __asm__ volatile ("DSB" ::: "memory");
-}
-
-/**
- * @brief Instruction Synchronization Barrier
- * Ensures that the effect of all completed memory transactions is recognizable
- * by subsequent instructions.
- * Reference: Arm(R) Cortex-M4 Devices Generic User Guide, Chapter 2.2.4 (page 2-15)
- */
-static inline void cm4_isb(void)
-{
-    __asm__ volatile ("ISB" ::: "memory");
-}
-
-/*
- * ============================================================================
  * Memory Type Definitions
  * Reference: Arm(R) Cortex-M4 Devices Generic User Guide, Chapter 2.2.1 (page 2-12)
  * ============================================================================
