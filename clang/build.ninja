@@ -5,104 +5,68 @@
 #   Source Code → Clang Frontend → LLVM IR → LLVM Optimizer →
 #   LLVM Backend → Assembly → Object Code
 #
-# Usage:
-#   ninja -f build.ninja                    # Build all (default: cm4)
-#   ninja -f build.ninja clean              # Clean build artifacts
-#   ninja -f build.ninja TARGET=cm7         # Build for Cortex-M7
-#   ninja -f build.ninja TARGET=cm33        # Build for Cortex-M33
-#   ninja -f build.ninja TARGET=cm55        # Build for Cortex-M55
-#   ninja -f build.ninja TARGET=cm85        # Build for Cortex-M85
+# Usage (via PowerShell script):
+#   .\build.ps1 -Target cm4 -CC clang -AR llvm-ar -CFLAGS "..."
+#   .\build.ps1 -Target cm7 -CC clang -AR llvm-ar -CFLAGS "..."
+#   .\build.ps1 -Target cm33 -CC clang -AR llvm-ar -CFLAGS "..."
+#   .\build.ps1 -Target cm55 -CC clang -AR llvm-ar -CFLAGS "..."
+#   .\build.ps1 -Target cm85 -CC clang -AR llvm-ar -CFLAGS "..."
+#
+# Or via environment variables:
+#   $env:TARGET="cm4"; $env:CC="clang"; $env:AR="llvm-ar"; $env:CFLAGS="..."; ninja -f build.ninja cm4
+#
+# Required environment variables:
+#   TARGET    - Target architecture: cm4, cm7, cm33, cm55, cm85
+#   CC        - C compiler (e.g., clang, /path/to/clang)
+#   AR        - Archiver (e.g., llvm-ar, /path/to/llvm-ar)
+#   CFLAGS    - C compiler flags (e.g., --target=arm-none-eabi -mcpu=cortex-m4 ...)
+#
+# Optional environment variables:
+#   INCLUDES  - Additional include paths
+#   BUILD_DIR - Build output directory (default: build)
 
 #==============================================================================
-# Configuration
+# Configuration (from environment variables)
 #==============================================================================
 
-# Target selection (default: cm4)
-TARGET = cm4
+# Target architecture
+TARGET = $ENV{TARGET}
 
-# Build type (debug/release)
-BUILD_TYPE = release
+# Tools
+CC = $ENV{CC}
+AR = $ENV{AR}
 
-# Directories
-BUILD_DIR = build/$TARGET
+# Compiler flags
+CFLAGS = $ENV{CFLAGS}
 
-#==============================================================================
-# Toolchain Configuration
-#==============================================================================
+# Additional includes
+INCLUDES = $ENV{INCLUDES}
 
-# Clang compiler driver
-CC = clang
-
-# LLVM tools
-OPT = opt
-LLC = llc
-LLVM_DIS = llvm-dis
-LLVM_AS = llvm-as
-
-# Archiver
-AR = llvm-ar
+# Build directory
+BUILD_DIR = $ENV{BUILD_DIR}
 
 #==============================================================================
-# Target-specific Flags
+# Include Paths
 #==============================================================================
 
-# Cortex-M4 (ARMv7-M + FPU)
-CFLAGS_cm4 = --target=arm-none-eabi -mcpu=cortex-m4 -mthumb -mfpu=fpv4-sp-d16 -mfloat-abi=hard -DARMV7M -DCORTEX_M4
-
-# Cortex-M7 (ARMv7-M + DP FPU)
-CFLAGS_cm7 = --target=arm-none-eabi -mcpu=cortex-m7 -mthumb -mfpu=fpv5-d16 -mfloat-abi=hard -DARMV7M -DCORTEX_M7
-
-# Cortex-M33 (ARMv8-M Mainline + TrustZone + FPU)
-CFLAGS_cm33 = --target=arm-none-eabi -mcpu=cortex-m33 -mthumb -mfpu=fpv5-sp-d16 -mfloat-abi=hard -DARMV8M -DCORTEX_M33 -mcmse
-
-# Cortex-M55 (ARMv8.1-M Mainline + MVE + Helium)
-CFLAGS_cm55 = --target=arm-none-eabi -mcpu=cortex-m55 -mthumb -mfpu=full -mfloat-abi=hard -DARMV8M -DCORTEX_M55 -mcmse
-
-# Cortex-M85 (ARMv8.1-M Mainline + MVE + Helium + PACBTI)
-CFLAGS_cm85 = --target=arm-none-eabi -mcpu=cortex-m85 -mthumb -mfpu=full -mfloat-abi=hard -DARMV8M -DCORTEX_M85 -mcmse
-
-# Common flags
-CFLAGS_common = -std=c11 -Wall -Wextra -Wpedantic -ffunction-sections -fdata-sections -fomit-frame-pointer -fno-strict-aliasing
-
-# Release flags
-CFLAGS_release = -O3 -DNDEBUG -ffast-math
-
-# Debug flags
-CFLAGS_debug = -O0 -g3 -DDEBUG
-
-# Include paths
-INCLUDES = -Iarm/cm/v7m -Iarm/cm/v8m
+ARMV7M_INCLUDES = -Iarm/cm/v7m -Iarm/cm/v7m/cm4 -Iarm/cm/v7m/cm7
+ARMV8M_INCLUDES = -Iarm/cm/v8m -Iarm/cm/v8m/cm33 -Iarm/cm/v8m/cm55 -Iarm/cm/v8m/cm85
 
 #==============================================================================
 # Build Rules
 #==============================================================================
 
-# Rule: C source → LLVM IR (.ll)
-rule cc_to_llvm
-  command = $CC $target_flags $common_flags $build_type_flags $INCLUDES -S -emit-llvm $in -o $out
-  description = CC [LLVM IR] $out
-
-# Rule: LLVM IR → Optimized LLVM IR
-rule opt_llvm
-  command = $OPT -O3 -S $in -o $out
-  description = OPT [LLVM] $out
-
-# Rule: LLVM IR → Assembly
-rule llvm_to_asm
-  command = $LLC -mcpu=cortex-m4 -o $out $in
-  description = LLC [ASM] $out
-
-# Rule: C source → Object (direct)
+# Rule: C source → Object (direct compilation)
 rule cc_to_obj
-  command = $CC $target_flags $common_flags $build_type_flags $INCLUDES -c $in -o $out
-  description = CC [OBJ] $out
+  command = $CC $CFLAGS $includes $INCLUDES -c $in -o $out
+  description = CC [$TARGET] $out
   depfile = $out.d
   deps = gcc
 
 # Rule: Create static library
 rule create_lib
   command = $AR rcs $out $in
-  description = AR [LIB] $out
+  description = AR [$TARGET] $out
 
 # Rule: Clean build artifacts
 rule do_clean
@@ -110,92 +74,113 @@ rule do_clean
   description = CLEAN build artifacts
 
 #==============================================================================
-# Source Files - ARMv7-M Common
+# Source File Rules - ARMv7-M Common
 #==============================================================================
 
-build $BUILD_DIR/armv7m_core.o: cc_to_obj arm/cm/v7m/armv7m_core.c
-  target_flags = $CFLAGS_cm4
-  common_flags = $CFLAGS_common
-  build_type_flags = $CFLAGS_release
+build $BUILD_DIR/arm_v7m_core.o: cc_to_obj arm/cm/v7m/arm_v7m_core.c
+  includes = $ARMV7M_INCLUDES
 
-build $BUILD_DIR/armv7m.o: cc_to_obj arm/cm/v7m/armv7m.c
-  target_flags = $CFLAGS_cm4
-  common_flags = $CFLAGS_common
-  build_type_flags = $CFLAGS_release
+build $BUILD_DIR/arm_v7m.o: cc_to_obj arm/cm/v7m/arm_v7m.c
+  includes = $ARMV7M_INCLUDES
 
-build $BUILD_DIR/armv7m_nvic.o: cc_to_obj arm/cm/v7m/armv7m_nvic.c
-  target_flags = $CFLAGS_cm4
-  common_flags = $CFLAGS_common
-  build_type_flags = $CFLAGS_release
+build $BUILD_DIR/arm_v7m_nvic.o: cc_to_obj arm/cm/v7m/arm_v7m_nvic.c
+  includes = $ARMV7M_INCLUDES
 
-build $BUILD_DIR/armv7m_systick.o: cc_to_obj arm/cm/v7m/armv7m_systick.c
-  target_flags = $CFLAGS_cm4
-  common_flags = $CFLAGS_common
-  build_type_flags = $CFLAGS_release
+build $BUILD_DIR/arm_v7m_systick.o: cc_to_obj arm/cm/v7m/arm_v7m_systick.c
+  includes = $ARMV7M_INCLUDES
 
-build $BUILD_DIR/armv7m_scb.o: cc_to_obj arm/cm/v7m/armv7m_scb.c
-  target_flags = $CFLAGS_cm4
-  common_flags = $CFLAGS_common
-  build_type_flags = $CFLAGS_release
+build $BUILD_DIR/arm_v7m_scb.o: cc_to_obj arm/cm/v7m/arm_v7m_scb.c
+  includes = $ARMV7M_INCLUDES
 
-build $BUILD_DIR/armv7m_mpu.o: cc_to_obj arm/cm/v7m/armv7m_mpu.c
-  target_flags = $CFLAGS_cm4
-  common_flags = $CFLAGS_common
-  build_type_flags = $CFLAGS_release
+build $BUILD_DIR/arm_v7m_mpu.o: cc_to_obj arm/cm/v7m/arm_v7m_mpu.c
+  includes = $ARMV7M_INCLUDES
 
-build $BUILD_DIR/armv7m_fpu.o: cc_to_obj arm/cm/v7m/armv7m_fpu.c
-  target_flags = $CFLAGS_cm4
-  common_flags = $CFLAGS_common
-  build_type_flags = $CFLAGS_release
+build $BUILD_DIR/arm_v7m_fpu.o: cc_to_obj arm/cm/v7m/arm_v7m_fpu.c
+  includes = $ARMV7M_INCLUDES
 
-build $BUILD_DIR/armv7m_debug.o: cc_to_obj arm/cm/v7m/armv7m_debug.c
-  target_flags = $CFLAGS_cm4
-  common_flags = $CFLAGS_common
-  build_type_flags = $CFLAGS_release
+build $BUILD_DIR/arm_v7m_debug.o: cc_to_obj arm/cm/v7m/arm_v7m_debug.c
+  includes = $ARMV7M_INCLUDES
 
 #==============================================================================
-# Source Files - Cortex-M4 Specific
+# Source File Rules - ARMv8-M Common
 #==============================================================================
 
-build $BUILD_DIR/cm4/cm4.o: cc_to_obj arm/cm/v7m/cm4/cm4.c
-  target_flags = $CFLAGS_cm4
-  common_flags = $CFLAGS_common
-  build_type_flags = $CFLAGS_release
+build $BUILD_DIR/arm_v8m_core.o: cc_to_obj arm/cm/v8m/arm_v8m_core.c
+  includes = $ARMV8M_INCLUDES
 
-build $BUILD_DIR/cm4/cm4_core.o: cc_to_obj arm/cm/v7m/cm4/cm4_core.c
-  target_flags = $CFLAGS_cm4
-  common_flags = $CFLAGS_common
-  build_type_flags = $CFLAGS_release
+build $BUILD_DIR/arm_v8m.o: cc_to_obj arm/cm/v8m/arm_v8m.c
+  includes = $ARMV8M_INCLUDES
 
-build $BUILD_DIR/cm4/cm4_nvic.o: cc_to_obj arm/cm/v7m/cm4/cm4_nvic.c
-  target_flags = $CFLAGS_cm4
-  common_flags = $CFLAGS_common
-  build_type_flags = $CFLAGS_release
+build $BUILD_DIR/arm_v8m_nvic.o: cc_to_obj arm/cm/v8m/arm_v8m_nvic.c
+  includes = $ARMV8M_INCLUDES
 
-build $BUILD_DIR/cm4/cm4_systick.o: cc_to_obj arm/cm/v7m/cm4/cm4_systick.c
-  target_flags = $CFLAGS_cm4
-  common_flags = $CFLAGS_common
-  build_type_flags = $CFLAGS_release
+build $BUILD_DIR/arm_v8m_systick.o: cc_to_obj arm/cm/v8m/arm_v8m_systick.c
+  includes = $ARMV8M_INCLUDES
 
-build $BUILD_DIR/cm4/cm4_scb.o: cc_to_obj arm/cm/v7m/cm4/cm4_scb.c
-  target_flags = $CFLAGS_cm4
-  common_flags = $CFLAGS_common
-  build_type_flags = $CFLAGS_release
+build $BUILD_DIR/arm_v8m_scb.o: cc_to_obj arm/cm/v8m/arm_v8m_scb.c
+  includes = $ARMV8M_INCLUDES
 
-build $BUILD_DIR/cm4/cm4_mpu.o: cc_to_obj arm/cm/v7m/cm4/cm4_mpu.c
-  target_flags = $CFLAGS_cm4
-  common_flags = $CFLAGS_common
-  build_type_flags = $CFLAGS_release
+build $BUILD_DIR/arm_v8m_mpu.o: cc_to_obj arm/cm/v8m/arm_v8m_mpu.c
+  includes = $ARMV8M_INCLUDES
 
-build $BUILD_DIR/cm4/cm4_fpu.o: cc_to_obj arm/cm/v7m/cm4/cm4_fpu.c
-  target_flags = $CFLAGS_cm4
-  common_flags = $CFLAGS_common
-  build_type_flags = $CFLAGS_release
+build $BUILD_DIR/arm_v8m_sau.o: cc_to_obj arm/cm/v8m/arm_v8m_sau.c
+  includes = $ARMV8M_INCLUDES
 
-build $BUILD_DIR/cm4/cm4_debug.o: cc_to_obj arm/cm/v7m/cm4/cm4_debug.c
-  target_flags = $CFLAGS_cm4
-  common_flags = $CFLAGS_common
-  build_type_flags = $CFLAGS_release
+build $BUILD_DIR/arm_v8m_cache.o: cc_to_obj arm/cm/v8m/arm_v8m_cache.c
+  includes = $ARMV8M_INCLUDES
+
+build $BUILD_DIR/arm_v8m_fpu.o: cc_to_obj arm/cm/v8m/arm_v8m_fpu.c
+  includes = $ARMV8M_INCLUDES
+
+build $BUILD_DIR/arm_v8m_mve.o: cc_to_obj arm/cm/v8m/arm_v8m_mve.c
+  includes = $ARMV8M_INCLUDES
+
+build $BUILD_DIR/arm_v8m_pacbti.o: cc_to_obj arm/cm/v8m/arm_v8m_pacbti.c
+  includes = $ARMV8M_INCLUDES
+
+build $BUILD_DIR/arm_v8m_pmu.o: cc_to_obj arm/cm/v8m/arm_v8m_pmu.c
+  includes = $ARMV8M_INCLUDES
+
+build $BUILD_DIR/arm_v8m_ras.o: cc_to_obj arm/cm/v8m/arm_v8m_ras.c
+  includes = $ARMV8M_INCLUDES
+
+build $BUILD_DIR/arm_v8m_debug.o: cc_to_obj arm/cm/v8m/arm_v8m_debug.c
+  includes = $ARMV8M_INCLUDES
+
+#==============================================================================
+# Source File Rules - Cortex-M4 Specific
+#==============================================================================
+
+build $BUILD_DIR/cm4/arm_v7m_cm4.o: cc_to_obj arm/cm/v7m/cm4/arm_v7m_cm4.c
+  includes = $ARMV7M_INCLUDES
+
+#==============================================================================
+# Source File Rules - Cortex-M7 Specific
+#==============================================================================
+
+build $BUILD_DIR/cm7/arm_v7m_cm7.o: cc_to_obj arm/cm/v7m/cm7/arm_v7m_cm7.c
+  includes = $ARMV7M_INCLUDES
+
+#==============================================================================
+# Source File Rules - Cortex-M33 Specific
+#==============================================================================
+
+build $BUILD_DIR/cm33/arm_v8m_cm33.o: cc_to_obj arm/cm/v8m/cm33/arm_v8m_cm33.c
+  includes = $ARMV8M_INCLUDES
+
+#==============================================================================
+# Source File Rules - Cortex-M55 Specific
+#==============================================================================
+
+build $BUILD_DIR/cm55/arm_v8m_cm55.o: cc_to_obj arm/cm/v8m/cm55/arm_v8m_cm55.c
+  includes = $ARMV8M_INCLUDES
+
+#==============================================================================
+# Source File Rules - Cortex-M85 Specific
+#==============================================================================
+
+build $BUILD_DIR/cm85/arm_v8m_cm85.o: cc_to_obj arm/cm/v8m/cm85/arm_v8m_cm85.c
+  includes = $ARMV8M_INCLUDES
 
 #==============================================================================
 # Library Targets
@@ -203,32 +188,91 @@ build $BUILD_DIR/cm4/cm4_debug.o: cc_to_obj arm/cm/v7m/cm4/cm4_debug.c
 
 # Cortex-M4 Library
 build $BUILD_DIR/libfeatherarch_cm4.a: create_lib $
-    $BUILD_DIR/armv7m_core.o $
-    $BUILD_DIR/armv7m.o $
-    $BUILD_DIR/armv7m_nvic.o $
-    $BUILD_DIR/armv7m_systick.o $
-    $BUILD_DIR/armv7m_scb.o $
-    $BUILD_DIR/armv7m_mpu.o $
-    $BUILD_DIR/armv7m_fpu.o $
-    $BUILD_DIR/armv7m_debug.o $
-    $BUILD_DIR/cm4/cm4.o $
-    $BUILD_DIR/cm4/cm4_core.o $
-    $BUILD_DIR/cm4/cm4_nvic.o $
-    $BUILD_DIR/cm4/cm4_systick.o $
-    $BUILD_DIR/cm4/cm4_scb.o $
-    $BUILD_DIR/cm4/cm4_mpu.o $
-    $BUILD_DIR/cm4/cm4_fpu.o $
-    $BUILD_DIR/cm4/cm4_debug.o
+    $BUILD_DIR/arm_v7m_core.o $
+    $BUILD_DIR/arm_v7m.o $
+    $BUILD_DIR/arm_v7m_nvic.o $
+    $BUILD_DIR/arm_v7m_systick.o $
+    $BUILD_DIR/arm_v7m_scb.o $
+    $BUILD_DIR/arm_v7m_mpu.o $
+    $BUILD_DIR/arm_v7m_fpu.o $
+    $BUILD_DIR/arm_v7m_debug.o $
+    $BUILD_DIR/cm4/arm_v7m_cm4.o
+
+# Cortex-M7 Library
+build $BUILD_DIR/libfeatherarch_cm7.a: create_lib $
+    $BUILD_DIR/arm_v7m_core.o $
+    $BUILD_DIR/arm_v7m.o $
+    $BUILD_DIR/arm_v7m_nvic.o $
+    $BUILD_DIR/arm_v7m_systick.o $
+    $BUILD_DIR/arm_v7m_scb.o $
+    $BUILD_DIR/arm_v7m_mpu.o $
+    $BUILD_DIR/arm_v7m_fpu.o $
+    $BUILD_DIR/arm_v7m_debug.o $
+    $BUILD_DIR/cm7/arm_v7m_cm7.o
+
+# Cortex-M33 Library
+build $BUILD_DIR/libfeatherarch_cm33.a: create_lib $
+    $BUILD_DIR/arm_v8m_core.o $
+    $BUILD_DIR/arm_v8m.o $
+    $BUILD_DIR/arm_v8m_nvic.o $
+    $BUILD_DIR/arm_v8m_systick.o $
+    $BUILD_DIR/arm_v8m_scb.o $
+    $BUILD_DIR/arm_v8m_mpu.o $
+    $BUILD_DIR/arm_v8m_sau.o $
+    $BUILD_DIR/arm_v8m_cache.o $
+    $BUILD_DIR/arm_v8m_fpu.o $
+    $BUILD_DIR/arm_v8m_mve.o $
+    $BUILD_DIR/arm_v8m_pacbti.o $
+    $BUILD_DIR/arm_v8m_pmu.o $
+    $BUILD_DIR/arm_v8m_ras.o $
+    $BUILD_DIR/arm_v8m_debug.o $
+    $BUILD_DIR/cm33/arm_v8m_cm33.o
+
+# Cortex-M55 Library
+build $BUILD_DIR/libfeatherarch_cm55.a: create_lib $
+    $BUILD_DIR/arm_v8m_core.o $
+    $BUILD_DIR/arm_v8m.o $
+    $BUILD_DIR/arm_v8m_nvic.o $
+    $BUILD_DIR/arm_v8m_systick.o $
+    $BUILD_DIR/arm_v8m_scb.o $
+    $BUILD_DIR/arm_v8m_mpu.o $
+    $BUILD_DIR/arm_v8m_sau.o $
+    $BUILD_DIR/arm_v8m_cache.o $
+    $BUILD_DIR/arm_v8m_fpu.o $
+    $BUILD_DIR/arm_v8m_mve.o $
+    $BUILD_DIR/arm_v8m_pacbti.o $
+    $BUILD_DIR/arm_v8m_pmu.o $
+    $BUILD_DIR/arm_v8m_ras.o $
+    $BUILD_DIR/arm_v8m_debug.o $
+    $BUILD_DIR/cm55/arm_v8m_cm55.o
+
+# Cortex-M85 Library
+build $BUILD_DIR/libfeatherarch_cm85.a: create_lib $
+    $BUILD_DIR/arm_v8m_core.o $
+    $BUILD_DIR/arm_v8m.o $
+    $BUILD_DIR/arm_v8m_nvic.o $
+    $BUILD_DIR/arm_v8m_systick.o $
+    $BUILD_DIR/arm_v8m_scb.o $
+    $BUILD_DIR/arm_v8m_mpu.o $
+    $BUILD_DIR/arm_v8m_sau.o $
+    $BUILD_DIR/arm_v8m_cache.o $
+    $BUILD_DIR/arm_v8m_fpu.o $
+    $BUILD_DIR/arm_v8m_mve.o $
+    $BUILD_DIR/arm_v8m_pacbti.o $
+    $BUILD_DIR/arm_v8m_pmu.o $
+    $BUILD_DIR/arm_v8m_ras.o $
+    $BUILD_DIR/arm_v8m_debug.o $
+    $BUILD_DIR/cm85/arm_v8m_cm85.o
 
 #==============================================================================
-# Default Target
+# Aliases for each target
 #==============================================================================
 
-# Default: build library for selected target
-build lib: phony $BUILD_DIR/libfeatherarch_cm4.a
-
-# Default target
-default lib
+build cm4: phony $BUILD_DIR/libfeatherarch_cm4.a
+build cm7: phony $BUILD_DIR/libfeatherarch_cm7.a
+build cm33: phony $BUILD_DIR/libfeatherarch_cm33.a
+build cm55: phony $BUILD_DIR/libfeatherarch_cm55.a
+build cm85: phony $BUILD_DIR/libfeatherarch_cm85.a
 
 #==============================================================================
 # Utility Targets
@@ -241,7 +285,9 @@ build clean: do_clean
 build info: phony
   command = echo "FeatherArch Clang Build System"
   command = echo "=============================="
-  command = echo "Target: $TARGET"
-  command = echo "Build Type: $BUILD_TYPE"
-  command = echo "Compiler: $CC"
-  command = echo "Build Dir: $BUILD_DIR"
+  command = echo "TARGET: $TARGET"
+  command = echo "CC: $CC"
+  command = echo "AR: $AR"
+  command = echo "CFLAGS: $CFLAGS"
+  command = echo "INCLUDES: $INCLUDES"
+  command = echo "BUILD_DIR: $BUILD_DIR"
