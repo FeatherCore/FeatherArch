@@ -1,5 +1,5 @@
 /**
- * @file cm7_start.S
+ * @file arm_v7m_cm7_start.S
  * @brief Cortex-M7 specific startup code
  *
  * Cortex-M7 features:
@@ -10,8 +10,8 @@
  * - Tightly Coupled Memory (TCM)
  */
 
-#ifndef CM7_START_S
-#define CM7_START_S
+#ifndef ARM_V7M_CM7_START_S
+#define ARM_V7M_CM7_START_S
 
 /* ============================================================================
  * Cortex-M7 Specific Initialization
@@ -54,23 +54,23 @@
  * ============================================================================
  */
 
-    .section .text.cm7_init
+    .section .text.arm_v7m_cm7_init
     .align 2
-    .globl CM7_Init
-    .type CM7_Init, %function
+    .globl ARM_V7M_CM7_Init
+    .type ARM_V7M_CM7_Init, %function
 
-CM7_Init:
+ARM_V7M_CM7_Init:
     /* Push link register */
     push {lr}
 
     /* Enable FPU if present */
-    bl CM7_EnableFPU
+    bl ARM_V7M_CM7_EnableFPU
 
     /* Initialize Cache */
-    bl CM7_InitCache
+    bl ARM_V7M_CM7_InitCache
 
     /* Initialize TCM */
-    bl CM7_InitTCM
+    bl ARM_V7M_CM7_InitTCM
 
     /* Configure NVIC priority grouping */
     ldr r0, =0xE000ED0C       /* SCB->AIRCR address */
@@ -87,18 +87,18 @@ CM7_Init:
     /* Pop link register and return */
     pop {pc}
 
-    .size CM7_Init, . - CM7_Init
+    .size ARM_V7M_CM7_Init, . - ARM_V7M_CM7_Init
 
 /* ============================================================================
  * CM7 FPU Initialization
  * ============================================================================
  */
 
-    .section .text.cm7_fpu
+    .section .text.arm_v7m_cm7_fpu
     .align 2
-    .type CM7_EnableFPU, %function
+    .type ARM_V7M_CM7_EnableFPU, %function
 
-CM7_EnableFPU:
+ARM_V7M_CM7_EnableFPU:
     /* Enable CP10 and CP11 (FPU coprocessors) */
     ldr r0, =0xE000ED88       /* CPACR address */
     ldr r1, [r0]
@@ -111,18 +111,18 @@ CM7_EnableFPU:
 
     bx lr
 
-    .size CM7_EnableFPU, . - CM7_EnableFPU
+    .size ARM_V7M_CM7_EnableFPU, . - ARM_V7M_CM7_EnableFPU
 
 /* ============================================================================
  * CM7 Cache Initialization
  * ============================================================================
  */
 
-    .section .text.cm7_cache
+    .section .text.arm_v7m_cm7_cache
     .align 2
-    .type CM7_InitCache, %function
+    .type ARM_V7M_CM7_InitCache, %function
 
-CM7_InitCache:
+ARM_V7M_CM7_InitCache:
     /* Enable I-Cache */
     ldr r0, =0xE000ED14       /* SCB->CCR address */
     ldr r1, [r0]
@@ -140,18 +140,18 @@ CM7_InitCache:
 
     bx lr
 
-    .size CM7_InitCache, . - CM7_InitCache
+    .size ARM_V7M_CM7_InitCache, . - ARM_V7M_CM7_InitCache
 
 /* ============================================================================
  * CM7 TCM Initialization
  * ============================================================================
  */
 
-    .section .text.cm7_tcm
+    .section .text.arm_v7m_cm7_tcm
     .align 2
-    .type CM7_InitTCM, %function
+    .type ARM_V7M_CM7_InitTCM, %function
 
-CM7_InitTCM:
+ARM_V7M_CM7_InitTCM:
     /* Enable ITCM and DTCM */
     ldr r0, =0xE000EF90       /* ITCMCR address */
     movs r1, #0x01            /* Enable ITCM */
@@ -167,14 +167,14 @@ CM7_InitTCM:
 
     bx lr
 
-    .size CM7_InitTCM, . - CM7_InitTCM
+    .size ARM_V7M_CM7_InitTCM, . - ARM_V7M_CM7_InitTCM
 
 /* ============================================================================
  * CM7 Default Interrupt Handlers
  * ============================================================================
  */
 
-    .section .text.cm7_handlers, "ax"
+    .section .text.arm_v7m_cm7_handlers, "ax"
     .align 2
 
     .weak WWDG_IRQHandler
@@ -257,4 +257,4 @@ DMA1_Stream3_IRQHandler:
 DMA1_Stream4_IRQHandler:
     b DMA1_Stream4_IRQHandler
 
-#endif /* CM7_START_S */
+#endif /* ARM_V7M_CM7_START_S */

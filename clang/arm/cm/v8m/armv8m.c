@@ -10,7 +10,7 @@
  * Global Initialization
  *============================================================================*/
 
-void armv8m_init(void)
+void arm_v8m_init(void)
 {
     /* TODO: Initialize core components */
     /* - Configure vector table */
@@ -30,12 +30,12 @@ void armv8m_init(void)
  * Interrupt Control
  *============================================================================*/
 
-void armv8m_enable_irq(void)
+void arm_v8m_enable_irq(void)
 {
     /* TODO: Clear PRIMASK using CPSIE i */
 }
 
-void armv8m_disable_irq(void)
+void arm_v8m_disable_irq(void)
 {
     /* TODO: Set PRIMASK using CPSID i */
 }
@@ -44,17 +44,17 @@ void armv8m_disable_irq(void)
  * Power Management
  *============================================================================*/
 
-void armv8m_wait_for_interrupt(void)
+void arm_v8m_wait_for_interrupt(void)
 {
     /* TODO: Execute WFI instruction */
 }
 
-void armv8m_wait_for_event(void)
+void arm_v8m_wait_for_event(void)
 {
     /* TODO: Execute WFE instruction */
 }
 
-void armv8m_send_event(void)
+void arm_v8m_send_event(void)
 {
     /* TODO: Execute SEV instruction */
 }
@@ -63,17 +63,17 @@ void armv8m_send_event(void)
  * Memory Barriers
  *============================================================================*/
 
-void armv8m_data_memory_barrier(void)
+void arm_v8m_data_memory_barrier(void)
 {
     /* TODO: Execute DMB instruction */
 }
 
-void armv8m_data_synchronization_barrier(void)
+void arm_v8m_data_synchronization_barrier(void)
 {
     /* TODO: Execute DSB instruction */
 }
 
-void armv8m_instruction_synchronization_barrier(void)
+void arm_v8m_instruction_synchronization_barrier(void)
 {
     /* TODO: Execute ISB instruction */
 }
@@ -82,17 +82,17 @@ void armv8m_instruction_synchronization_barrier(void)
  * New Memory Barriers (Armv8-M)
  *============================================================================*/
 
-void armv8m_consumption_of_speculative_data_barrier(void)
+void arm_v8m_consumption_of_speculative_data_barrier(void)
 {
     /* TODO: Execute CSDB instruction */
 }
 
-void armv8m_physical_speculative_store_bypass_barrier(void)
+void arm_v8m_physical_speculative_store_bypass_barrier(void)
 {
     /* TODO: Execute PSSBB instruction */
 }
 
-void armv8m_speculative_store_bypass_barrier(void)
+void arm_v8m_speculative_store_bypass_barrier(void)
 {
     /* TODO: Execute SSBB instruction */
 }
@@ -101,14 +101,14 @@ void armv8m_speculative_store_bypass_barrier(void)
  * Exclusive Access (LDREX/STREX)
  *============================================================================*/
 
-uint32_t armv8m_ldrex(uint32_t *addr)
+uint32_t arm_v8m_ldrex(uint32_t *addr)
 {
     /* TODO: Execute LDREX instruction */
     (void)addr;
     return 0;
 }
 
-uint32_t armv8m_strex(uint32_t value, uint32_t *addr)
+uint32_t arm_v8m_strex(uint32_t value, uint32_t *addr)
 {
     /* TODO: Execute STREX instruction */
     (void)value;
@@ -116,7 +116,7 @@ uint32_t armv8m_strex(uint32_t value, uint32_t *addr)
     return 1; /* Return 1 to indicate failure (lock not acquired) */
 }
 
-void armv8m_clrex(void)
+void arm_v8m_clrex(void)
 {
     /* TODO: Execute CLREX instruction */
 }
@@ -125,28 +125,28 @@ void armv8m_clrex(void)
  * Load-Acquire/Store-Release (Armv8-M)
  *============================================================================*/
 
-uint32_t armv8m_lda(uint32_t *addr)
+uint32_t arm_v8m_lda(uint32_t *addr)
 {
     /* TODO: Execute LDA instruction */
     (void)addr;
     return 0;
 }
 
-void armv8m_stl(uint32_t value, uint32_t *addr)
+void arm_v8m_stl(uint32_t value, uint32_t *addr)
 {
     /* TODO: Execute STL instruction */
     (void)value;
     (void)addr;
 }
 
-uint32_t armv8m_ldaex(uint32_t *addr)
+uint32_t arm_v8m_ldaex(uint32_t *addr)
 {
     /* TODO: Execute LDAEX instruction */
     (void)addr;
     return 0;
 }
 
-uint32_t armv8m_stlex(uint32_t value, uint32_t *addr)
+uint32_t arm_v8m_stlex(uint32_t value, uint32_t *addr)
 {
     /* TODO: Execute STLEX instruction */
     (void)value;
@@ -158,21 +158,21 @@ uint32_t armv8m_stlex(uint32_t value, uint32_t *addr)
  * Bit-Band Operations
  *============================================================================*/
 
-void armv8m_bitband_set(volatile uint32_t *addr, uint32_t bit)
+void arm_v8m_bitband_set(volatile uint32_t *addr, uint32_t bit)
 {
     /* TODO: Calculate bit-band alias address and set bit */
     (void)addr;
     (void)bit;
 }
 
-void armv8m_bitband_clear(volatile uint32_t *addr, uint32_t bit)
+void arm_v8m_bitband_clear(volatile uint32_t *addr, uint32_t bit)
 {
     /* TODO: Calculate bit-band alias address and clear bit */
     (void)addr;
     (void)bit;
 }
 
-uint32_t armv8m_bitband_read(volatile uint32_t *addr, uint32_t bit)
+uint32_t arm_v8m_bitband_read(volatile uint32_t *addr, uint32_t bit)
 {
     /* TODO: Calculate bit-band alias address and read bit */
     (void)addr;
@@ -184,25 +184,25 @@ uint32_t armv8m_bitband_read(volatile uint32_t *addr, uint32_t bit)
  * Stack Limit Check (Armv8-M)
  *============================================================================*/
 
-void armv8m_set_psplim(uint32_t limit)
+void arm_v8m_set_psplim(uint32_t limit)
 {
     /* TODO: Execute MSR PSPLIM instruction */
     (void)limit;
 }
 
-uint32_t armv8m_get_psplim(void)
+uint32_t arm_v8m_get_psplim(void)
 {
     /* TODO: Execute MRS PSPLIM instruction */
     return 0;
 }
 
-void armv8m_set_msplim(uint32_t limit)
+void arm_v8m_set_msplim(uint32_t limit)
 {
     /* TODO: Execute MSR MSPLIM instruction */
     (void)limit;
 }
 
-uint32_t armv8m_get_msplim(void)
+uint32_t arm_v8m_get_msplim(void)
 {
     /* TODO: Execute MRS MSPLIM instruction */
     return 0;
@@ -212,19 +212,19 @@ uint32_t armv8m_get_msplim(void)
  * Low Overhead Loop (Armv8-M MVE)
  *============================================================================*/
 
-void armv8m_loop_start(uint32_t loop_addr)
+void arm_v8m_loop_start(uint32_t loop_addr)
 {
     /* TODO: Execute LETP or set LPSTART register */
     (void)loop_addr;
 }
 
-void armv8m_loop_end(uint32_t end_addr)
+void arm_v8m_loop_end(uint32_t end_addr)
 {
     /* TODO: Set LPEND register */
     (void)end_addr;
 }
 
-void armv8m_loop_count(uint32_t count)
+void arm_v8m_loop_count(uint32_t count)
 {
     /* TODO: Set LPCNT register or use WLS instruction */
     (void)count;
@@ -234,18 +234,18 @@ void armv8m_loop_count(uint32_t count)
  * Security State Transition (Armv8-M TrustZone)
  *============================================================================*/
 
-void armv8m_sg(void)
+void arm_v8m_sg(void)
 {
     /* TODO: Execute SG instruction for secure gateway */
 }
 
-void armv8m_bxns(uint32_t addr)
+void arm_v8m_bxns(uint32_t addr)
 {
     /* TODO: Execute BXNS instruction for branch to Non-secure */
     (void)addr;
 }
 
-void armv8m_blxns(uint32_t addr)
+void arm_v8m_blxns(uint32_t addr)
 {
     /* TODO: Execute BLXNS instruction for branch with link to Non-secure */
     (void)addr;

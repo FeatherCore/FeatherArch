@@ -1,5 +1,5 @@
 /**
- * @file cm33_start.S
+ * @file arm_v8m_cm33_start.S
  * @brief Cortex-M33 specific startup code
  *
  * Cortex-M33 features:
@@ -10,8 +10,8 @@
  * - Stack limit checking (PSPLIM/MSPLIM)
  */
 
-#ifndef CM33_START_S
-#define CM33_START_S
+#ifndef ARM_V8M_CM33_START_S
+#define ARM_V8M_CM33_START_S
 
 /* ============================================================================
  * Cortex-M33 Specific Initialization
@@ -53,12 +53,12 @@
  * ============================================================================
  */
 
-    .section .text.cm33_init
+    .section .text.arm_v8m_cm33_init
     .align 2
-    .globl CM33_Init
-    .type CM33_Init, %function
+    .globl ARM_V8M_CM33_Init
+    .type ARM_V8M_CM33_Init, %function
 
-CM33_Init:
+ARM_V8M_CM33_Init:
     /* Push link register */
     push {lr}
 
@@ -68,7 +68,7 @@ CM33_Init:
     msr msplim, r0
 
     /* Enable FPU if present */
-    bl CM33_EnableFPU
+    bl ARM_V8M_CM33_EnableFPU
 
     /* Configure NVIC priority grouping */
     ldr r0, =0xE000ED0C       /* SCB->AIRCR address */
@@ -83,23 +83,23 @@ CM33_Init:
     str r1, [r0]
 
     /* Initialize TrustZone if in secure state */
-    bl CM33_InitTrustZone
+    bl ARM_V8M_CM33_InitTrustZone
 
     /* Pop link register and return */
     pop {pc}
 
-    .size CM33_Init, . - CM33_Init
+    .size ARM_V8M_CM33_Init, . - ARM_V8M_CM33_Init
 
 /* ============================================================================
  * CM33 FPU Initialization
  * ============================================================================
  */
 
-    .section .text.cm33_fpu
+    .section .text.arm_v8m_cm33_fpu
     .align 2
-    .type CM33_EnableFPU, %function
+    .type ARM_V8M_CM33_EnableFPU, %function
 
-CM33_EnableFPU:
+ARM_V8M_CM33_EnableFPU:
     /* Enable CP10 and CP11 (FPU coprocessors) */
     ldr r0, =0xE000ED88       /* CPACR address */
     ldr r1, [r0]
@@ -112,18 +112,18 @@ CM33_EnableFPU:
 
     bx lr
 
-    .size CM33_EnableFPU, . - CM33_EnableFPU
+    .size ARM_V8M_CM33_EnableFPU, . - ARM_V8M_CM33_EnableFPU
 
 /* ============================================================================
  * CM33 TrustZone Initialization
  * ============================================================================
  */
 
-    .section .text.cm33_tz
+    .section .text.arm_v8m_cm33_tz
     .align 2
-    .type CM33_InitTrustZone, %function
+    .type ARM_V8M_CM33_InitTrustZone, %function
 
-CM33_InitTrustZone:
+ARM_V8M_CM33_InitTrustZone:
     /* Check if running in secure state */
     mrs r0, control
     tst r0, #0x02
@@ -147,14 +147,14 @@ CM33_InitTrustZone:
 .L_tz_done:
     bx lr
 
-    .size CM33_InitTrustZone, . - CM33_InitTrustZone
+    .size ARM_V8M_CM33_InitTrustZone, . - ARM_V8M_CM33_InitTrustZone
 
 /* ============================================================================
  * CM33 Default Interrupt Handlers
  * ============================================================================
  */
 
-    .section .text.cm33_handlers, "ax"
+    .section .text.arm_v8m_cm33_handlers, "ax"
     .align 2
 
     .weak WWDG_IRQHandler
@@ -237,4 +237,4 @@ DMA1_Channel3_IRQHandler:
 DMA1_Channel4_IRQHandler:
     b DMA1_Channel4_IRQHandler
 
-#endif /* CM33_START_S */
+#endif /* ARM_V8M_CM33_START_S */

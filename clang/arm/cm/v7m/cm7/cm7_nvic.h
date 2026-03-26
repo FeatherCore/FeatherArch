@@ -1,55 +1,69 @@
 /*
- * cm7_nvic.h
+ * arm_v7m_cm7_nvic.h
  * Cortex-M7 Nested Vectored Interrupt Controller (NVIC) Definitions
  * Reference: Cortex-M7 Devices Generic User Guide, Chapter 4.2
- *            Cortex-M7 Technical Reference Manual, Chapter 7
+ *
+ * @note This file reuses Armv7-M generic NVIC definitions.
  */
 
-#ifndef CM7_NVIC_H
-#define CM7_NVIC_H
+#ifndef ARM_V7M_CM7_NVIC_H
+#define ARM_V7M_CM7_NVIC_H
 
 #include <stdint.h>
+#include "../armv7m_nvic.h"
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
 /*============================================================================*
- * NVIC Type Definitions
+ * Type Aliases
  *============================================================================*/
 
-typedef struct {
-    volatile uint32_t ISER[16];
-    uint32_t RESERVED0[16];
-    volatile uint32_t ICER[16];
-    uint32_t RSERVED1[16];
-    volatile uint32_t ISPR[16];
-    uint32_t RESERVED2[16];
-    volatile uint32_t ICPR[16];
-    uint32_t RESERVED3[16];
-    volatile uint32_t IABR[16];
-    uint32_t RESERVED4[16];
-    volatile uint8_t  IP[496];
-    uint32_t RESERVED5[580];
-    volatile uint32_t STIR;
-} cm7_nvic_regs_t;
+typedef arm_v7m_nvic_regs_t     arm_v7m_cm7_nvic_regs_t;
 
 /*============================================================================*
- * NVIC API Functions (Template)
+ * Inline Function Wrappers - NVIC Operations
  *============================================================================*/
 
-void cm7_nvic_enable_irq(uint32_t irqn);
-void cm7_nvic_disable_irq(uint32_t irqn);
-uint32_t cm7_nvic_get_pending_irq(uint32_t irqn);
-void cm7_nvic_set_pending_irq(uint32_t irqn);
-void cm7_nvic_clear_pending_irq(uint32_t irqn);
-uint32_t cm7_nvic_get_active_irq(uint32_t irqn);
-void cm7_nvic_set_priority(uint32_t irqn, uint32_t priority);
-uint32_t cm7_nvic_get_priority(uint32_t irqn);
-void cm7_nvic_trigger_irq(uint32_t irqn);
+static inline void arm_v7m_cm7_nvic_enable_irq(uint32_t irqn) {
+    arm_v7m_nvic_enable_irq(irqn);
+}
+
+static inline void arm_v7m_cm7_nvic_disable_irq(uint32_t irqn) {
+    arm_v7m_nvic_disable_irq(irqn);
+}
+
+static inline uint32_t arm_v7m_cm7_nvic_get_pending_irq(uint32_t irqn) {
+    return arm_v7m_nvic_get_pending_irq(irqn);
+}
+
+static inline void arm_v7m_cm7_nvic_set_pending_irq(uint32_t irqn) {
+    arm_v7m_nvic_set_pending_irq(irqn);
+}
+
+static inline void arm_v7m_cm7_nvic_clear_pending_irq(uint32_t irqn) {
+    arm_v7m_nvic_clear_pending_irq(irqn);
+}
+
+static inline uint32_t arm_v7m_cm7_nvic_get_active_irq(uint32_t irqn) {
+    return arm_v7m_nvic_get_active_irq(irqn);
+}
+
+static inline void arm_v7m_cm7_nvic_set_priority(uint32_t irqn, uint32_t priority) {
+    arm_v7m_nvic_set_priority(irqn, priority);
+}
+
+static inline uint32_t arm_v7m_cm7_nvic_get_priority(uint32_t irqn) {
+    return arm_v7m_nvic_get_priority(irqn);
+}
+
+static inline void arm_v7m_cm7_nvic_system_reset(void) {
+    arm_v7m_nvic_system_reset();
+}
 
 #ifdef __cplusplus
 }
 #endif
 
-#endif /* CM7_NVIC_H */
+#endif /* ARM_V7M_CM7_NVIC_H */

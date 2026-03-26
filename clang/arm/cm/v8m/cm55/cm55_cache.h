@@ -1,11 +1,14 @@
 /*
- * cm55_cache.h
- * Cortex-M55 Cache Maintenance Operations Definitions
- * Reference: Cortex-M55 Technical Reference Manual, Chapter 5, 10
+ * arm_v8m_cm55_cache.h
+ * Cortex-M55 Cache Control Definitions
+ * Reference: Cortex-M55 Technical Reference Manual, Chapter 4
+ *
+ * @note Cortex-M55 has I-Cache and optional D-Cache.
+ *       This is CM55 specific, not part of generic Armv8-M.
  */
 
-#ifndef CM55_CACHE_H
-#define CM55_CACHE_H
+#ifndef ARM_V8M_CM55_CACHE_H
+#define ARM_V8M_CM55_CACHE_H
 
 #include <stdint.h>
 
@@ -14,70 +17,53 @@ extern "C" {
 #endif
 
 /*============================================================================*
- * Cache Type Definitions
+ * Cache Type Register (CTR) Definitions
  *============================================================================*/
 
-typedef struct {
-    volatile uint32_t ICIALLU;
-    volatile uint32_t ICIMVAU;
-    volatile uint32_t DCIMVAC;
-    volatile uint32_t DCISW;
-    volatile uint32_t DCCMVAU;
-    volatile uint32_t DCCMVAC;
-    volatile uint32_t DCCSW;
-    volatile uint32_t DCCIMVAC;
-    volatile uint32_t DCCISW;
-} cm55_cache_regs_t;
+#define ARM_V8M_CM55_CTR_DMINLINE_Pos       16U
+#define ARM_V8M_CM55_CTR_DMINLINE_Msk       (0xFUL << ARM_V8M_CM55_CTR_DMINLINE_Pos)
+
+#define ARM_V8M_CM55_CTR_IMINLINE_Pos       0U
+#define ARM_V8M_CM55_CTR_IMINLINE_Msk       (0xFUL << ARM_V8M_CM55_CTR_IMINLINE_Pos)
 
 /*============================================================================*
- * Cache Size ID Register Type
+ * Cache Control Register (CCR) Definitions
  *============================================================================*/
 
-typedef struct {
-    volatile const uint32_t CCSIDR;
-    volatile uint32_t CSSELR;
-} cm55_cache_id_regs_t;
+#define ARM_V8M_CM55_CCR_DC_Pos             16U
+#define ARM_V8M_CM55_CCR_DC_Msk             (1UL << ARM_V8M_CM55_CCR_DC_Pos)
+
+#define ARM_V8M_CM55_CCR_IC_Pos             0U
+#define ARM_V8M_CM55_CCR_IC_Msk             (1UL << ARM_V8M_CM55_CCR_IC_Pos)
 
 /*============================================================================*
- * Cache API Functions (Template)
+ * Cache Maintenance Operations
  *============================================================================*/
 
-/* I-Cache Operations */
-void cm55_iciallu(void);
-void cm55_icimvau(uint32_t addr);
-void cm55_icache_enable(void);
-void cm55_icache_disable(void);
-void cm55_icache_invalidate_all(void);
-void cm55_icache_invalidate_line(uint32_t addr);
+void arm_v8m_cm55_icache_enable(void);
+void arm_v8m_cm55_icache_disable(void);
+void arm_v8m_cm55_icache_invalidate_all(void);
+void arm_v8m_cm55_icache_invalidate_range(uint32_t start_addr, uint32_t size);
 
-/* D-Cache Operations */
-void cm55_dcimvac(uint32_t addr);
-void cm55_dcisw(uint32_t set_way);
-void cm55_dccmvau(uint32_t addr);
-void cm55_dccmvac(uint32_t addr);
-void cm55_dccsw(uint32_t set_way);
-void cm55_dccimvac(uint32_t addr);
-void cm55_dccisw(uint32_t set_way);
-void cm55_dcache_enable(void);
-void cm55_dcache_disable(void);
-void cm55_dcache_invalidate_all(void);
-void cm55_dcache_clean_all(void);
-void cm55_dcache_clean_invalidate_all(void);
-void cm55_dcache_invalidate_line(uint32_t addr);
-void cm55_dcache_clean_line(uint32_t addr);
-void cm55_dcache_clean_invalidate_line(uint32_t addr);
+void arm_v8m_cm55_dcache_enable(void);
+void arm_v8m_cm55_dcache_disable(void);
+void arm_v8m_cm55_dcache_invalidate_all(void);
+void arm_v8m_cm55_dcache_invalidate_range(uint32_t start_addr, uint32_t size);
+void arm_v8m_cm55_dcache_clean_all(void);
+void arm_v8m_cm55_dcache_clean_range(uint32_t start_addr, uint32_t size);
+void arm_v8m_cm55_dcache_clean_invalidate_all(void);
+void arm_v8m_cm55_dcache_clean_invalidate_range(uint32_t start_addr, uint32_t size);
 
-/* Cache ID Functions */
-uint32_t cm55_cache_get_ccsidr(void);
-void cm55_cache_set_csselr(uint32_t level);
-uint32_t cm55_cache_get_csselr(void);
+/*============================================================================*
+ * Cache Information
+ *============================================================================*/
 
-/* Branch Cache Operations */
-void cm55_bpiall(void);
-void cm55_bpimva(uint32_t addr);
+uint32_t arm_v8m_cm55_cache_get_icache_line_size(void);
+uint32_t arm_v8m_cm55_cache_get_dcache_line_size(void);
+uint32_t arm_v8m_cm55_cache_has_dcache(void);
 
 #ifdef __cplusplus
 }
 #endif
 
-#endif /* CM55_CACHE_H */
+#endif /* ARM_V8M_CM55_CACHE_H */

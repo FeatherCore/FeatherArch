@@ -1,5 +1,5 @@
 /**
- * @file cm4_start.S
+ * @file arm_v7m_cm4_start.S
  * @brief Cortex-M4 specific startup code
  *
  * Cortex-M4 features:
@@ -8,8 +8,8 @@
  * - Optional single-precision FPU
  */
 
-#ifndef CM4_START_S
-#define CM4_START_S
+#ifndef ARM_V7M_CM4_START_S
+#define ARM_V7M_CM4_START_S
 
 /* ============================================================================
  * Cortex-M4 Specific Initialization
@@ -53,17 +53,17 @@
  * ============================================================================
  */
 
-    .section .text.cm4_init
+    .section .text.arm_v7m_cm4_init
     .align 2
-    .globl CM4_Init
-    .type CM4_Init, %function
+    .globl ARM_V7M_CM4_Init
+    .type ARM_V7M_CM4_Init, %function
 
-CM4_Init:
+ARM_V7M_CM4_Init:
     /* Push link register */
     push {lr}
 
     /* Enable FPU if present */
-    bl CM4_EnableFPU
+    bl ARM_V7M_CM4_EnableFPU
 
     /* Configure NVIC priority grouping */
     /* Default: 4 bits for preemption, 0 bits for subpriority */
@@ -81,18 +81,18 @@ CM4_Init:
     /* Pop link register and return */
     pop {pc}
 
-    .size CM4_Init, . - CM4_Init
+    .size ARM_V7M_CM4_Init, . - ARM_V7M_CM4_Init
 
 /* ============================================================================
  * CM4 FPU Initialization
  * ============================================================================
  */
 
-    .section .text.cm4_fpu
+    .section .text.arm_v7m_cm4_fpu
     .align 2
-    .type CM4_EnableFPU, %function
+    .type ARM_V7M_CM4_EnableFPU, %function
 
-CM4_EnableFPU:
+ARM_V7M_CM4_EnableFPU:
     /* Check if FPU is present by reading CPACR */
     ldr r0, =0xE000ED88       /* CPACR address */
     ldr r1, [r0]
@@ -107,14 +107,14 @@ CM4_EnableFPU:
 
     bx lr
 
-    .size CM4_EnableFPU, . - CM4_EnableFPU
+    .size ARM_V7M_CM4_EnableFPU, . - ARM_V7M_CM4_EnableFPU
 
 /* ============================================================================
  * CM4 Default Interrupt Handlers
  * ============================================================================
  */
 
-    .section .text.cm4_handlers, "ax"
+    .section .text.arm_v7m_cm4_handlers, "ax"
     .align 2
 
     .weak WWDG_IRQHandler
@@ -197,4 +197,4 @@ DMA1_Stream3_IRQHandler:
 DMA1_Stream4_IRQHandler:
     b DMA1_Stream4_IRQHandler
 
-#endif /* CM4_START_S */
+#endif /* ARM_V7M_CM4_START_S */

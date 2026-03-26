@@ -1,58 +1,82 @@
 /*
- * cm33_sau.h
+ * arm_v8m_cm33_sau.h
  * Cortex-M33 Security Attribution Unit (SAU) Definitions
  * Reference: Cortex-M33 Technical Reference Manual, Chapter 4
+ *
+ * @note This file reuses Armv8-M generic SAU definitions.
  */
 
-#ifndef CM33_SAU_H
-#define CM33_SAU_H
+#ifndef ARM_V8M_CM33_SAU_H
+#define ARM_V8M_CM33_SAU_H
 
 #include <stdint.h>
+#include "../armv8m_sau.h"
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
 /*============================================================================*
- * SAU Type Definitions
+ * Type Aliases
  *============================================================================*/
 
-typedef struct {
-    volatile uint32_t CTRL;
-    volatile uint32_t TYPE;
-    volatile uint32_t RNR;
-    volatile uint32_t RBAR;
-    volatile uint32_t RLAR;
-    volatile uint32_t SFSR;
-    volatile uint32_t SFAR;
-} cm33_sau_regs_t;
+typedef arm_v8m_sau_regs_t      arm_v8m_cm33_sau_regs_t;
 
 /*============================================================================*
- * SAU Control Register Bit Definitions
+ * Constant Aliases - Control Register Bits
  *============================================================================*/
 
-#define CM33_SAU_CTRL_ENABLE_Pos        0
-#define CM33_SAU_CTRL_ENABLE_Msk        (1UL << CM33_SAU_CTRL_ENABLE_Pos)
-#define CM33_SAU_CTRL_ALLNS_Pos         1
-#define CM33_SAU_CTRL_ALLNS_Msk         (1UL << CM33_SAU_CTRL_ALLNS_Pos)
+#define ARM_V8M_CM33_SAU_CTRL_ENABLE_Pos        ARM_V8M_SAU_CTRL_ENABLE_Pos
+#define ARM_V8M_CM33_SAU_CTRL_ENABLE_Msk        ARM_V8M_SAU_CTRL_ENABLE_Msk
+#define ARM_V8M_CM33_SAU_CTRL_ALLNS_Pos         ARM_V8M_SAU_CTRL_ALLNS_Pos
+#define ARM_V8M_CM33_SAU_CTRL_ALLNS_Msk         ARM_V8M_SAU_CTRL_ALLNS_Msk
 
 /*============================================================================*
- * SAU API Functions (Template)
+ * Inline Function Wrappers - SAU Operations
  *============================================================================*/
 
-void cm33_sau_enable(void);
-void cm33_sau_disable(void);
-uint32_t cm33_sau_get_region_count(void);
-void cm33_sau_select_region(uint32_t region_num);
-void cm33_sau_set_region(uint32_t base_addr, uint32_t limit_addr, uint32_t attrs);
-void cm33_sau_disable_region(uint32_t region_num);
-void cm33_sau_set_all_ns(uint32_t enable);
-uint32_t cm33_sau_get_sfsr(void);
-void cm33_sau_clear_sfsr(void);
-uint32_t cm33_sau_get_sfar(void);
+static inline void arm_v8m_cm33_sau_enable(void) {
+    arm_v8m_sau_enable();
+}
+
+static inline void arm_v8m_cm33_sau_disable(void) {
+    arm_v8m_sau_disable();
+}
+
+static inline uint32_t arm_v8m_cm33_sau_get_region_count(void) {
+    return arm_v8m_sau_get_region_count();
+}
+
+static inline void arm_v8m_cm33_sau_select_region(uint32_t region_num) {
+    arm_v8m_sau_select_region(region_num);
+}
+
+static inline void arm_v8m_cm33_sau_set_region(uint32_t base_addr, uint32_t limit_addr, uint32_t attrs) {
+    arm_v8m_sau_set_region(base_addr, limit_addr, attrs);
+}
+
+static inline void arm_v8m_cm33_sau_disable_region(uint32_t region_num) {
+    arm_v8m_sau_disable_region(region_num);
+}
+
+static inline void arm_v8m_cm33_sau_set_all_ns(uint32_t enable) {
+    arm_v8m_sau_set_all_ns(enable);
+}
+
+static inline uint32_t arm_v8m_cm33_sau_get_sfsr(void) {
+    return arm_v8m_sau_get_sfsr();
+}
+
+static inline void arm_v8m_cm33_sau_clear_sfsr(void) {
+    arm_v8m_sau_clear_sfsr();
+}
+
+static inline uint32_t arm_v8m_cm33_sau_get_sfar(void) {
+    return arm_v8m_sau_get_sfar();
+}
 
 #ifdef __cplusplus
 }
 #endif
 
-#endif /* CM33_SAU_H */
+#endif /* ARM_V8M_CM33_SAU_H */

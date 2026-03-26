@@ -1,64 +1,86 @@
 /*
- * cm55_mve.h
+ * arm_v8m_cm55_mve.h
  * Cortex-M55 M-Profile Vector Extension (MVE) Definitions
- * Reference: Cortex-M55 Devices Generic User Guide, Chapter 3.7
- *            Cortex-M55 Technical Reference Manual, Chapter 16
+ * Reference: Cortex-M55 Technical Reference Manual, Chapter 4
+ *
+ * @note This file reuses Armv8-M generic MVE definitions.
  */
 
-#ifndef CM55_MVE_H
-#define CM55_MVE_H
+#ifndef ARM_V8M_CM55_MVE_H
+#define ARM_V8M_CM55_MVE_H
 
 #include <stdint.h>
+#include "../armv8m_mve.h"
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
 /*============================================================================*
- * MVE Type Definitions
+ * Type Aliases
  *============================================================================*/
 
-typedef struct {
-    volatile const uint32_t MVFR0;
-    volatile const uint32_t MVFR1;
-    volatile const uint32_t MVFR2;
-} cm55_mve_regs_t;
+typedef arm_v8m_mve_regs_t      arm_v8m_cm55_mve_regs_t;
 
 /*============================================================================*
- * Vector Register File (Q0-Q7 for MVE)
+ * Constant Aliases
  *============================================================================*/
 
-typedef struct {
-    uint32_t q[4];
-} cm55_vec128_t;
+#define ARM_V8M_CM55_MVE_ENABLE_Pos         ARM_V8M_MVE_ENABLE_Pos
+#define ARM_V8M_CM55_MVE_ENABLE_Msk         ARM_V8M_MVE_ENABLE_Msk
+#define ARM_V8M_CM55_MVE_RETENTION_Pos      ARM_V8M_MVE_RETENTION_Pos
+#define ARM_V8M_CM55_MVE_RETENTION_Msk      ARM_V8M_MVE_RETENTION_Msk
 
 /*============================================================================*
- * MVE API Functions (Template)
+ * Inline Function Wrappers - MVE Operations
  *============================================================================*/
 
-uint32_t cm55_mve_is_present(void);
-uint32_t cm55_mve_has_int(void);
-uint32_t cm55_mve_has_fp(void);
-void cm55_mve_enable(void);
-void cm55_mve_disable(void);
+static inline void arm_v8m_cm55_mve_enable(void) {
+    arm_v8m_mve_enable();
+}
 
-/* Vector Load/Store */
-void cm55_mve_vldm(uint32_t *addr, uint32_t num_regs);
-void cm55_mve_vstm(uint32_t *addr, uint32_t num_regs);
+static inline void arm_v8m_cm55_mve_disable(void) {
+    arm_v8m_mve_disable();
+}
 
-/* Predication */
-void cm55_mve_set_vpr(uint32_t value);
-uint32_t cm55_mve_get_vpr(void);
-void cm55_mve_set_fpscr(uint32_t value);
-uint32_t cm55_mve_get_fpscr(void);
+static inline uint32_t arm_v8m_cm55_mve_is_present(void) {
+    return arm_v8m_mve_is_present();
+}
 
-/* Low Overhead Loop */
-void cm55_mve_set_lpstart(uint32_t addr);
-void cm55_mve_set_lpend(uint32_t addr);
-void cm55_mve_set_lpcnt(uint32_t count);
+static inline uint32_t arm_v8m_cm55_mve_has_fp(void) {
+    return arm_v8m_mve_has_fp();
+}
+
+static inline uint32_t arm_v8m_cm55_mve_has_int(void) {
+    return arm_v8m_mve_has_int();
+}
+
+static inline void arm_v8m_cm55_mve_set_retention(uint32_t enable) {
+    arm_v8m_mve_set_retention(enable);
+}
+
+static inline void arm_v8m_cm55_mve_vldm(uint32_t *addr, uint32_t num_regs) {
+    arm_v8m_mve_vldm(addr, num_regs);
+}
+
+static inline void arm_v8m_cm55_mve_vstm(uint32_t *addr, uint32_t num_regs) {
+    arm_v8m_mve_vstm(addr, num_regs);
+}
+
+static inline void arm_v8m_cm55_mve_set_lpstart(uint32_t addr) {
+    arm_v8m_mve_set_lpstart(addr);
+}
+
+static inline void arm_v8m_cm55_mve_set_lpend(uint32_t addr) {
+    arm_v8m_mve_set_lpend(addr);
+}
+
+static inline void arm_v8m_cm55_mve_set_lpcnt(uint32_t count) {
+    arm_v8m_mve_set_lpcnt(count);
+}
 
 #ifdef __cplusplus
 }
 #endif
 
-#endif /* CM55_MVE_H */
+#endif /* ARM_V8M_CM55_MVE_H */

@@ -1,11 +1,11 @@
 /*
- * armv7m_fpu.h
+ * arm_v7m_fpu.h
  * Floating-Point Unit (FPU) Definitions
  * Reference: ARMv7-M Architecture Reference Manual, Section A2.5
  */
 
-#ifndef ARMV7M_FPU_H
-#define ARMV7M_FPU_H
+#ifndef ARM_V7M_FPU_H
+#define ARM_V7M_FPU_H
 
 #include <stdint.h>
 
@@ -24,32 +24,32 @@ typedef struct {
     volatile const uint32_t MVFR0;
     volatile const uint32_t MVFR1;
     volatile const uint32_t MVFR2;
-} armv7m_fpu_regs_t;
+} arm_v7m_fpu_regs_t;
 
 /*============================================================================*
  * FPU Control Register Bit Definitions
  *============================================================================*/
 
-#define ARMV7M_FPU_FPCCR_ASPNET_Pos     31
-#define ARMV7M_FPU_FPCCR_ASPNET_Msk     (1UL << ARMV7M_FPU_FPCCR_ASPNET_Pos)
-#define ARMV7M_FPU_FPCCR_LSPACT_Pos     0
-#define ARMV7M_FPU_FPCCR_LSPACT_Msk     (1UL << ARMV7M_FPU_FPCCR_LSPACT_Pos)
-#define ARMV7M_FPU_FPCCR_USER_Pos       1
-#define ARMV7M_FPU_FPCCR_USER_Msk       (1UL << ARMV7M_FPU_FPCCR_USER_Pos)
+#define ARM_V7M_FPU_FPCCR_ASPNET_Pos     31
+#define ARM_V7M_FPU_FPCCR_ASPNET_Msk     (1UL << ARM_V7M_FPU_FPCCR_ASPNET_Pos)
+#define ARM_V7M_FPU_FPCCR_LSPACT_Pos     0
+#define ARM_V7M_FPU_FPCCR_LSPACT_Msk     (1UL << ARM_V7M_FPU_FPCCR_LSPACT_Pos)
+#define ARM_V7M_FPU_FPCCR_USER_Pos       1
+#define ARM_V7M_FPU_FPCCR_USER_Msk       (1UL << ARM_V7M_FPU_FPCCR_USER_Pos)
 
 /*============================================================================*
  * FPU API Functions (Template)
  *============================================================================*/
 
-void armv7m_fpu_enable(void);
-void armv7m_fpu_disable(void);
-uint32_t armv7m_fpu_is_present(void);
-void armv7m_fpu_set_auto_save(uint32_t enable);
-void armv7m_fpu_lazy_stacking_enable(void);
-void armv7m_fpu_lazy_stacking_disable(void);
+void arm_v7m_fpu_enable(void);
+void arm_v7m_fpu_disable(void);
+uint32_t arm_v7m_fpu_is_present(void);
+void arm_v7m_fpu_set_auto_save(uint32_t enable);
+void arm_v7m_fpu_lazy_stacking_enable(void);
+void arm_v7m_fpu_lazy_stacking_disable(void);
 
 #ifdef __cplusplus
 }
 #endif
 
-#endif /* ARMV7M_FPU_H */
+#endif /* ARM_V7M_FPU_H */

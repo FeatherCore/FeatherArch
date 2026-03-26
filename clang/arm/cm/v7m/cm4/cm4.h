@@ -3,20 +3,28 @@
  * Cortex-M4 Architecture Abstraction Layer - Master Header
  * Reference: Cortex-M4 Devices Generic User Guide
  *            Cortex-M4 Technical Reference Manual
+ *
+ * @note Cortex-M4 is a standard Armv7-M implementation.
+ *       All generic Armv7-M features are reused through type aliases
+ *       and inline wrapper functions.
  */
 
-#ifndef CM4_H
-#define CM4_H
+#ifndef ARM_V7M_CM4_H
+#define ARM_V7M_CM4_H
 
 #include <stdint.h>
 
-#include "cm4_core.h"
-#include "cm4_nvic.h"
-#include "cm4_systick.h"
-#include "cm4_scb.h"
-#include "cm4_mpu.h"
-#include "cm4_fpu.h"
-#include "cm4_debug.h"
+/* Include generic Armv7-M definitions */
+#include "../armv7m.h"
+
+/* Include CM4-specific wrappers */
+#include "arm_v7m_cm4_core.h"
+#include "arm_v7m_cm4_nvic.h"
+#include "arm_v7m_cm4_systick.h"
+#include "arm_v7m_cm4_scb.h"
+#include "arm_v7m_cm4_mpu.h"
+#include "arm_v7m_cm4_fpu.h"
+#include "arm_v7m_cm4_debug.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -26,48 +34,73 @@ extern "C" {
  * Processor Version Information
  *============================================================================*/
 
-#define CM4_PROCESSOR_VERSION       0x410FC241  /* r0p1 */
-#define CM4_IMPLEMENTER_ARM         0x41
-#define CM4_VARIANT                 0x0
-#define CM4_REVISION                0x1
+#define ARM_V7M_CM4_PROCESSOR_VERSION      0x410FC240  /* r0p0 */
+#define ARM_V7M_CM4_IMPLEMENTER_ARM        0x41
+#define ARM_V7M_CM4_VARIANT                0x0
+#define ARM_V7M_CM4_REVISION               0x0
 
 /*============================================================================*
- * Global Initialization and Control
+ * Global Initialization and Control (reuse generic)
  *============================================================================*/
 
-void cm4_init(void);
-void cm4_enable_irq(void);
-void cm4_disable_irq(void);
-void cm4_wait_for_interrupt(void);
-void cm4_wait_for_event(void);
-void cm4_send_event(void);
+static inline void arm_v7m_cm4_init(void) {
+    arm_v7m_init();
+}
+
+static inline void arm_v7m_cm4_enable_irq(void) {
+    arm_v7m_enable_irq();
+}
+
+static inline void arm_v7m_cm4_disable_irq(void) {
+    arm_v7m_disable_irq();
+}
+
+static inline void arm_v7m_cm4_wait_for_interrupt(void) {
+    arm_v7m_wait_for_interrupt();
+}
+
+static inline void arm_v7m_cm4_wait_for_event(void) {
+    arm_v7m_wait_for_event();
+}
+
+static inline void arm_v7m_cm4_send_event(void) {
+    arm_v7m_send_event();
+}
 
 /*============================================================================*
- * Memory Barriers
+ * Memory Barriers (reuse generic)
  *============================================================================*/
 
-void cm4_data_memory_barrier(void);
-void cm4_data_synchronization_barrier(void);
-void cm4_instruction_synchronization_barrier(void);
+static inline void arm_v7m_cm4_data_memory_barrier(void) {
+    arm_v7m_data_memory_barrier();
+}
+
+static inline void arm_v7m_cm4_data_synchronization_barrier(void) {
+    arm_v7m_data_synchronization_barrier();
+}
+
+static inline void arm_v7m_cm4_instruction_synchronization_barrier(void) {
+    arm_v7m_instruction_synchronization_barrier();
+}
 
 /*============================================================================*
- * Exclusive Access (LDREX/STREX)
+ * Exclusive Access (reuse generic)
  *============================================================================*/
 
-uint32_t cm4_ldrex(uint32_t *addr);
-uint32_t cm4_strex(uint32_t value, uint32_t *addr);
-void cm4_clrex(void);
+static inline uint32_t arm_v7m_cm4_ldrex(uint32_t *addr) {
+    return arm_v7m_ldrex(addr);
+}
 
-/*============================================================================*
- * Bit-Band Operations
- *============================================================================*/
+static inline uint32_t arm_v7m_cm4_strex(uint32_t value, uint32_t *addr) {
+    return arm_v7m_strex(value, addr);
+}
 
-void cm4_bitband_set(volatile uint32_t *addr, uint32_t bit);
-void cm4_bitband_clear(volatile uint32_t *addr, uint32_t bit);
-uint32_t cm4_bitband_read(volatile uint32_t *addr, uint32_t bit);
+static inline void arm_v7m_cm4_clrex(void) {
+    arm_v7m_clrex();
+}
 
 #ifdef __cplusplus
 }
 #endif
 
-#endif /* CM4_H */
+#endif /* ARM_V7M_CM4_H */

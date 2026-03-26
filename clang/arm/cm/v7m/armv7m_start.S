@@ -1,5 +1,5 @@
 /**
- * @file armv7m_start.S
+ * @file arm_v7m_start.S
  * @brief ARMv7-M Architecture startup code
  *
  * This file contains the common ARMv7-M startup code and selects
@@ -8,8 +8,8 @@
  * ARMv7-M includes: Cortex-M3, Cortex-M4, Cortex-M7
  */
 
-#ifndef ARMV7M_START_S
-#define ARMV7M_START_S
+#ifndef ARM_V7M_START_S
+#define ARM_V7M_START_S
 
 /* ============================================================================
  * ARMv7-M Common Startup Code
@@ -189,4 +189,4 @@ SysTick_Handler:
     /* Specific processor initialization should be done in SystemInit */
 #endif
 
-#endif /* ARMV7M_START_S */
+#endif /* ARM_V7M_START_S */

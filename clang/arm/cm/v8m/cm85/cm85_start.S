@@ -1,5 +1,5 @@
 /**
- * @file cm85_start.S
+ * @file arm_v8m_cm85_start.S
  * @brief Cortex-M85 specific startup code
  *
  * Cortex-M85 features:
@@ -16,8 +16,8 @@
  * - External Coprocessor Interface
  */
 
-#ifndef CM85_START_S
-#define CM85_START_S
+#ifndef ARM_V8M_CM85_START_S
+#define ARM_V8M_CM85_START_S
 
 /* ============================================================================
  * Cortex-M85 Specific Initialization
@@ -59,12 +59,12 @@
  * ============================================================================
  */
 
-    .section .text.cm85_init
+    .section .text.arm_v8m_cm85_init
     .align 2
-    .globl CM85_Init
-    .type CM85_Init, %function
+    .globl ARM_V8M_CM85_Init
+    .type ARM_V8M_CM85_Init, %function
 
-CM85_Init:
+ARM_V8M_CM85_Init:
     /* Push link register */
     push {lr}
 
@@ -74,19 +74,19 @@ CM85_Init:
     msr msplim, r0
 
     /* Enable FPU if present */
-    bl CM85_EnableFPU
+    bl ARM_V8M_CM85_EnableFPU
 
     /* Initialize MVE (Helium) - enhanced for CM85 */
-    bl CM85_InitMVE
+    bl ARM_V8M_CM85_InitMVE
 
     /* Initialize Cache - with direct cache access */
-    bl CM85_InitCache
+    bl ARM_V8M_CM85_InitCache
 
     /* Initialize TCM */
-    bl CM85_InitTCM
+    bl ARM_V8M_CM85_InitTCM
 
     /* Initialize Enhanced EPU */
-    bl CM85_InitEPU
+    bl ARM_V8M_CM85_InitEPU
 
     /* Configure NVIC priority grouping */
     ldr r0, =0xE000ED0C       /* SCB->AIRCR address */
@@ -101,35 +101,35 @@ CM85_Init:
     str r1, [r0]
 
     /* Initialize TrustZone */
-    bl CM85_InitTrustZone
+    bl ARM_V8M_CM85_InitTrustZone
 
     /* Initialize RAS - enhanced for CM85 */
-    bl CM85_InitRAS
+    bl ARM_V8M_CM85_InitRAS
 
     /* Initialize PMU - enhanced for CM85 */
-    bl CM85_InitPMU
+    bl ARM_V8M_CM85_InitPMU
 
     /* Initialize PACBTI */
-    bl CM85_InitPACBTI
+    bl ARM_V8M_CM85_InitPACBTI
 
     /* Initialize Coprocessor Interface */
-    bl CM85_InitCoproc
+    bl ARM_V8M_CM85_InitCoproc
 
     /* Pop link register and return */
     pop {pc}
 
-    .size CM85_Init, . - CM85_Init
+    .size ARM_V8M_CM85_Init, . - ARM_V8M_CM85_Init
 
 /* ============================================================================
  * CM85 FPU Initialization
  * ============================================================================
  */
 
-    .section .text.cm85_fpu
+    .section .text.arm_v8m_cm85_fpu
     .align 2
-    .type CM85_EnableFPU, %function
+    .type ARM_V8M_CM85_EnableFPU, %function
 
-CM85_EnableFPU:
+ARM_V8M_CM85_EnableFPU:
     /* Enable CP10 and CP11 (FPU coprocessors) */
     ldr r0, =0xE000ED88       /* CPACR address */
     ldr r1, [r0]
@@ -148,18 +148,18 @@ CM85_EnableFPU:
 
     bx lr
 
-    .size CM85_EnableFPU, . - CM85_EnableFPU
+    .size ARM_V8M_CM85_EnableFPU, . - ARM_V8M_CM85_EnableFPU
 
 /* ============================================================================
  * CM85 MVE (Helium) Initialization - Enhanced
  * ============================================================================
  */
 
-    .section .text.cm85_mve
+    .section .text.arm_v8m_cm85_mve
     .align 2
-    .type CM85_InitMVE, %function
+    .type ARM_V8M_CM85_InitMVE, %function
 
-CM85_InitMVE:
+ARM_V8M_CM85_InitMVE:
     /* Enable MVE in CPACR */
     ldr r0, =0xE000ED88       /* CPACR address */
     ldr r1, [r0]
@@ -181,18 +181,18 @@ CM85_InitMVE:
 
     bx lr
 
-    .size CM85_InitMVE, . - CM85_InitMVE
+    .size ARM_V8M_CM85_InitMVE, . - ARM_V8M_CM85_InitMVE
 
 /* ============================================================================
  * CM85 Cache Initialization - with Direct Cache Access
  * ============================================================================
  */
 
-    .section .text.cm85_cache
+    .section .text.arm_v8m_cm85_cache
     .align 2
-    .type CM85_InitCache, %function
+    .type ARM_V8M_CM85_InitCache, %function
 
-CM85_InitCache:
+ARM_V8M_CM85_InitCache:
     /* Invalidate I-Cache before enabling */
     ldr r0, =0xE000EF50       /* ICIALLU address */
     movs r1, #0
@@ -224,18 +224,18 @@ CM85_InitCache:
 
     bx lr
 
-    .size CM85_InitCache, . - CM85_InitCache
+    .size ARM_V8M_CM85_InitCache, . - ARM_V8M_CM85_InitCache
 
 /* ============================================================================
  * CM85 TCM Initialization
  * ============================================================================
  */
 
-    .section .text.cm85_tcm
+    .section .text.arm_v8m_cm85_tcm
     .align 2
-    .type CM85_InitTCM, %function
+    .type ARM_V8M_CM85_InitTCM, %function
 
-CM85_InitTCM:
+ARM_V8M_CM85_InitTCM:
     /* Enable ITCM with RMW (Read-Modify-Write) and retention */
     ldr r0, =0xE001E010       /* ITCMCR address */
     movs r1, #0x07            /* Enable ITCM, RMW, Retention */
@@ -252,18 +252,18 @@ CM85_InitTCM:
 
     bx lr
 
-    .size CM85_InitTCM, . - CM85_InitTCM
+    .size ARM_V8M_CM85_InitTCM, . - ARM_V8M_CM85_InitTCM
 
 /* ============================================================================
  * CM85 Enhanced EPU Initialization
  * ============================================================================
  */
 
-    .section .text.cm85_epu
+    .section .text.arm_v8m_cm85_epu
     .align 2
-    .type CM85_InitEPU, %function
+    .type ARM_V8M_CM85_InitEPU, %function
 
-CM85_InitEPU:
+ARM_V8M_CM85_InitEPU:
     /* Enable EPU with FP and MVE support */
     ldr r0, =0xE000E300       /* EPUCR address */
     movs r1, #0x01            /* Enable EPU */
@@ -275,18 +275,18 @@ CM85_InitEPU:
 
     bx lr
 
-    .size CM85_InitEPU, . - CM85_InitEPU
+    .size ARM_V8M_CM85_InitEPU, . - ARM_V8M_CM85_InitEPU
 
 /* ============================================================================
  * CM85 TrustZone Initialization
  * ============================================================================
  */
 
-    .section .text.cm85_tz
+    .section .text.arm_v8m_cm85_tz
     .align 2
-    .type CM85_InitTrustZone, %function
+    .type ARM_V8M_CM85_InitTrustZone, %function
 
-CM85_InitTrustZone:
+ARM_V8M_CM85_InitTrustZone:
     /* Check if running in secure state */
     mrs r0, control
     tst r0, #0x02
@@ -315,18 +315,18 @@ CM85_InitTrustZone:
 .L_tz_done:
     bx lr
 
-    .size CM85_InitTrustZone, . - CM85_InitTrustZone
+    .size ARM_V8M_CM85_InitTrustZone, . - ARM_V8M_CM85_InitTrustZone
 
 /* ============================================================================
  * CM85 RAS Initialization - Enhanced
  * ============================================================================
  */
 
-    .section .text.cm85_ras
+    .section .text.arm_v8m_cm85_ras
     .align 2
-    .type CM85_InitRAS, %function
+    .type ARM_V8M_CM85_InitRAS, %function
 
-CM85_InitRAS:
+ARM_V8M_CM85_InitRAS:
     /* Enable RAS error detection and correction */
     ldr r0, =0xE0005000       /* ERRCTRL address */
     movs r1, #0x03            /* Enable error recording and correction */
@@ -345,18 +345,18 @@ CM85_InitRAS:
 
     bx lr
 
-    .size CM85_InitRAS, . - CM85_InitRAS
+    .size ARM_V8M_CM85_InitRAS, . - ARM_V8M_CM85_InitRAS
 
 /* ============================================================================
  * CM85 PMU Initialization - Enhanced
  * ============================================================================
  */
 
-    .section .text.cm85_pmu
+    .section .text.arm_v8m_cm85_pmu
     .align 2
-    .type CM85_InitPMU, %function
+    .type ARM_V8M_CM85_InitPMU, %function
 
-CM85_InitPMU:
+ARM_V8M_CM85_InitPMU:
     /* Enable PMU */
     ldr r0, =0xE0003000       /* PMUCTRL address */
     movs r1, #0x01            /* Enable PMU */
@@ -380,18 +380,18 @@ CM85_InitPMU:
 
     bx lr
 
-    .size CM85_InitPMU, . - CM85_InitPMU
+    .size ARM_V8M_CM85_InitPMU, . - ARM_V8M_CM85_InitPMU
 
 /* ============================================================================
  * CM85 PACBTI Initialization
  * ============================================================================
  */
 
-    .section .text.cm85_pacbti
+    .section .text.arm_v8m_cm85_pacbti
     .align 2
-    .type CM85_InitPACBTI, %function
+    .type ARM_V8M_CM85_InitPACBTI, %function
 
-CM85_InitPACBTI:
+ARM_V8M_CM85_InitPACBTI:
     /* Check if PACBTI is implemented */
     ldr r0, =0xE000ED90       /* ID_PFR0 address */
     ldr r1, [r0]
@@ -419,18 +419,18 @@ CM85_InitPACBTI:
 .L_pacbti_done:
     bx lr
 
-    .size CM85_InitPACBTI, . - CM85_InitPACBTI
+    .size ARM_V8M_CM85_InitPACBTI, . - ARM_V8M_CM85_InitPACBTI
 
 /* ============================================================================
  * CM85 Coprocessor Interface Initialization
  * ============================================================================
  */
 
-    .section .text.cm85_coproc
+    .section .text.arm_v8m_cm85_coproc
     .align 2
-    .type CM85_InitCoproc, %function
+    .type ARM_V8M_CM85_InitCoproc, %function
 
-CM85_InitCoproc:
+ARM_V8M_CM85_InitCoproc:
     /* Enable coprocessor access in CPACR */
     ldr r0, =0xE000ED88       /* CPACR address */
     ldr r1, [r0]
@@ -453,14 +453,14 @@ CM85_InitCoproc:
 
     bx lr
 
-    .size CM85_InitCoproc, . - CM85_InitCoproc
+    .size ARM_V8M_CM85_InitCoproc, . - ARM_V8M_CM85_InitCoproc
 
 /* ============================================================================
  * CM85 Default Interrupt Handlers
  * ============================================================================
  */
 
-    .section .text.cm85_handlers, "ax"
+    .section .text.arm_v8m_cm85_handlers, "ax"
     .align 2
 
     .weak WWDG_IRQHandler
@@ -543,4 +543,4 @@ DMA1_Channel3_IRQHandler:
 DMA1_Channel4_IRQHandler:
     b DMA1_Channel4_IRQHandler
 
-#endif /* CM85_START_S */
+#endif /* ARM_V8M_CM85_START_S */

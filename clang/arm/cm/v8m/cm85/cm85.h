@@ -1,97 +1,165 @@
-/**
- * @file cm85.h
- * @brief Cortex-M85 processor abstraction layer main header
+/*
+ * cm85.h
+ * Cortex-M85 Architecture Abstraction Layer - Master Header
+ * Reference: Cortex-M85 Devices Generic User Guide
+ *            Cortex-M85 Technical Reference Manual
  *
- * @note Reference: Arm Cortex-M85 Devices Generic User Guide (101928_0101_07_en)
- * @note Reference: Arm Cortex-M85 Processor Technical Reference Manual (101924_0101_07_en)
- * @note Architecture: Armv8.1-M with MVE (Helium), RAS, PMU, PACBTI extensions
+ * @note Cortex-M85 extends CM55 with PACBTI and coprocessor support.
+ *       Common features reuse generic Armv8-M definitions.
+ *       Extended features have CM85-specific implementations.
  */
 
-#ifndef CM85_H
-#define CM85_H
+#ifndef ARM_V8M_CM85_H
+#define ARM_V8M_CM85_H
 
 #include <stdint.h>
-#include <stdbool.h>
 
-/* Core component headers */
-#include "cm85_core.h"
-#include "cm85_nvic.h"
-#include "cm85_systick.h"
-#include "cm85_scb.h"
-#include "cm85_mpu.h"
-#include "cm85_sau.h"
-#include "cm85_cache.h"
-#include "cm85_tcm.h"
-#include "cm85_fpu.h"
-#include "cm85_epu.h"
-#include "cm85_mve.h"
-#include "cm85_ras.h"
-#include "cm85_pmu.h"
-#include "cm85_pacbti.h"
-#include "cm85_pwr.h"
-#include "cm85_debug.h"
-#include "cm85_coproc.h"
+/* Include generic Armv8-M definitions */
+#include "../armv8m.h"
+
+/* Include CM85-specific wrappers for common features */
+#include "arm_v8m_cm85_core.h"
+#include "arm_v8m_cm85_nvic.h"
+#include "arm_v8m_cm85_systick.h"
+#include "arm_v8m_cm85_scb.h"
+#include "arm_v8m_cm85_mpu.h"
+#include "arm_v8m_cm85_sau.h"
+#include "arm_v8m_cm85_fpu.h"
+#include "arm_v8m_cm85_debug.h"
+
+/* Include CM85-specific extended features (reuse CM55 wrappers) */
+#include "arm_v8m_cm85_mve.h"
+#include "arm_v8m_cm85_cache.h"
+#include "arm_v8m_cm85_tcm.h"
+#include "arm_v8m_cm85_pmu.h"
+#include "arm_v8m_cm85_ras.h"
+
+/* Include CM85-specific unique features */
+#include "arm_v8m_cm85_pacbti.h"
+#include "arm_v8m_cm85_coproc.h"
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-/* Cortex-M85 processor initialization */
-int cm85_init(void);
+/*============================================================================*
+ * Processor Version Information
+ *============================================================================*/
 
-/* Processor feature detection */
-bool cm85_has_mve(void);
-bool cm85_has_mve_fp(void);
-bool cm85_has_mve_int(void);
-bool cm85_has_fpu(void);
-bool cm85_has_ras(void);
-bool cm85_has_pmu(void);
-bool cm85_has_pacbti(void);
-bool cm85_has_cache(void);
-bool cm85_has_itcm(void);
-bool cm85_has_dtcm(void);
+#define ARM_V8M_CM85_PROCESSOR_VERSION      0x410FD280  /* r0p0 */
+#define ARM_V8M_CM85_IMPLEMENTER_ARM        0x41
+#define ARM_V8M_CM85_VARIANT                0x0
+#define ARM_V8M_CM85_REVISION               0x0
 
-/* Security state management */
-typedef enum {
-    CM85_SECURITY_NON_SECURE = 0,
-    CM85_SECURITY_SECURE = 1
-} cm85_security_state_t;
+/*============================================================================*
+ * Global Initialization and Control (reuse generic)
+ *============================================================================*/
 
-cm85_security_state_t cm85_get_security_state(void);
-bool cm85_is_secure(void);
+static inline void arm_v8m_cm85_init(void) {
+    arm_v8m_init();
+}
 
-/* Processor reset and system control */
-void cm85_system_reset(void);
-void cm85_system_reset_secure(void);
+static inline void arm_v8m_cm85_enable_irq(void) {
+    arm_v8m_enable_irq();
+}
 
-/* Wait for interrupt/event */
-void cm85_wfi(void);
-void cm85_wfe(void);
-void cm85_sev(void);
+static inline void arm_v8m_cm85_disable_irq(void) {
+    arm_v8m_disable_irq();
+}
 
-/* Data and instruction barriers */
-void cm85_dmb(void);
-void cm85_dsb(void);
-void cm85_isb(void);
+static inline void arm_v8m_cm85_wait_for_interrupt(void) {
+    arm_v8m_wait_for_interrupt();
+}
 
-/* Memory attribute helpers */
-#define CM85_MEMORY_DEVICE        0x00
-#define CM85_MEMORY_NORMAL        0x01
-#define CM85_MEMORY_NORMAL_WT     0x02
-#define CM85_MEMORY_NORMAL_WB     0x03
+static inline void arm_v8m_cm85_wait_for_event(void) {
+    arm_v8m_wait_for_event();
+}
 
-/* Cacheability attributes */
-#define CM85_CACHE_NON_CACHEABLE  0x00
-#define CM85_CACHE_WT             0x01
-#define CM85_CACHE_WB             0x02
+static inline void arm_v8m_cm85_send_event(void) {
+    arm_v8m_send_event();
+}
 
-/* Shareability attributes */
-#define CM85_SHARE_NON_SHAREABLE  0x00
-#define CM85_SHARE_OUTER          0x01
-#define CM85_SHARE_INNER          0x02
+/*============================================================================*
+ * Memory Barriers (reuse generic)
+ *============================================================================*/
+
+static inline void arm_v8m_cm85_data_memory_barrier(void) {
+    arm_v8m_data_memory_barrier();
+}
+
+static inline void arm_v8m_cm85_data_synchronization_barrier(void) {
+    arm_v8m_data_synchronization_barrier();
+}
+
+static inline void arm_v8m_cm85_instruction_synchronization_barrier(void) {
+    arm_v8m_instruction_synchronization_barrier();
+}
+
+/*============================================================================*
+ * Exclusive Access (reuse generic)
+ *============================================================================*/
+
+static inline uint32_t arm_v8m_cm85_ldrex(uint32_t *addr) {
+    return arm_v8m_ldrex(addr);
+}
+
+static inline uint32_t arm_v8m_cm85_strex(uint32_t value, uint32_t *addr) {
+    return arm_v8m_strex(value, addr);
+}
+
+static inline void arm_v8m_cm85_clrex(void) {
+    arm_v8m_clrex();
+}
+
+/*============================================================================*
+ * Load-Acquire/Store-Release (reuse generic)
+ *============================================================================*/
+
+static inline uint32_t arm_v8m_cm85_lda(uint32_t *addr) {
+    return arm_v8m_lda(addr);
+}
+
+static inline void arm_v8m_cm85_stl(uint32_t value, uint32_t *addr) {
+    arm_v8m_stl(value, addr);
+}
+
+static inline uint32_t arm_v8m_cm85_ldaex(uint32_t *addr) {
+    return arm_v8m_ldaex(addr);
+}
+
+static inline uint32_t arm_v8m_cm85_stlex(uint32_t value, uint32_t *addr) {
+    return arm_v8m_stlex(value, addr);
+}
+
+/*============================================================================*
+ * Security State Transition (reuse generic)
+ *============================================================================*/
+
+static inline void arm_v8m_cm85_sg(void) {
+    arm_v8m_sg();
+}
+
+static inline void arm_v8m_cm85_bxns(uint32_t addr) {
+    arm_v8m_bxns(addr);
+}
+
+static inline void arm_v8m_cm85_blxns(uint32_t addr) {
+    arm_v8m_blxns(addr);
+}
+
+/*============================================================================*
+ * CM85 Extended Initialization
+ *============================================================================*/
+
+void arm_v8m_cm85_init_extended(void);
+void arm_v8m_cm85_cache_init(void);
+void arm_v8m_cm85_tcm_init(void);
+void arm_v8m_cm85_mve_init(void);
+void arm_v8m_cm85_pacbti_init(void);
+void arm_v8m_cm85_coproc_init(void);
 
 #ifdef __cplusplus
 }
 #endif
 
-#endif /* CM85_H */
+#endif /* ARM_V8M_CM85_H */

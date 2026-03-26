@@ -1,11 +1,11 @@
 /*
- * armv8m_scb.h
+ * arm_v8m_scb.h
  * Armv8-M System Control Block (SCB) Definitions
  * Reference: Armv8-M Architecture Reference Manual, Chapter B3
  */
 
-#ifndef ARMV8M_SCB_H
-#define ARMV8M_SCB_H
+#ifndef ARM_V8M_SCB_H
+#define ARM_V8M_SCB_H
 
 #include <stdint.h>
 
@@ -39,34 +39,34 @@ typedef struct {
     volatile const uint32_t ID_ISAR[5];
     uint32_t RESERVED0[5];
     volatile uint32_t CPACR;
-} armv8m_scb_regs_t;
+} arm_v8m_scb_regs_t;
 
 /*============================================================================*
  * SCB API Functions (Template)
  *============================================================================*/
 
-void armv8m_scb_set_vector_table(uint32_t offset);
-uint32_t armv8m_scb_get_vector_table(void);
-void armv8m_scb_system_reset(void);
-void armv8m_scb_set_priority_grouping(uint32_t priority_group);
-uint32_t armv8m_scb_get_priority_grouping(void);
-void armv8m_scb_enable_fault(uint32_t fault);
-void armv8m_scb_disable_fault(uint32_t fault);
-uint32_t armv8m_scb_get_fault_status(void);
-void armv8m_scb_clear_fault_status(void);
+void arm_v8m_scb_set_vector_table(uint32_t offset);
+uint32_t arm_v8m_scb_get_vector_table(void);
+void arm_v8m_scb_system_reset(void);
+void arm_v8m_scb_set_priority_grouping(uint32_t priority_group);
+uint32_t arm_v8m_scb_get_priority_grouping(void);
+void arm_v8m_scb_enable_fault(uint32_t fault);
+void arm_v8m_scb_disable_fault(uint32_t fault);
+uint32_t arm_v8m_scb_get_fault_status(void);
+void arm_v8m_scb_clear_fault_status(void);
 
 /*============================================================================*
  * SCB Security Functions (Template) - Armv8-M TrustZone
  *============================================================================*/
 
-void armv8m_scb_set_vector_table_s(uint32_t offset);
-uint32_t armv8m_scb_get_vector_table_s(void);
-void armv8m_scb_system_reset_s(void);
-void armv8m_scb_set_aircr_s(uint32_t value);
-uint32_t armv8m_scb_get_aircr_s(void);
+void arm_v8m_scb_set_vector_table_s(uint32_t offset);
+uint32_t arm_v8m_scb_get_vector_table_s(void);
+void arm_v8m_scb_system_reset_s(void);
+void arm_v8m_scb_set_aircr_s(uint32_t value);
+uint32_t arm_v8m_scb_get_aircr_s(void);
 
 #ifdef __cplusplus
 }
 #endif
 
-#endif /* ARMV8M_SCB_H */
+#endif /* ARM_V8M_SCB_H */

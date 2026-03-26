@@ -1,5 +1,5 @@
 /**
- * @file armv8m_start.S
+ * @file arm_v8m_start.S
  * @brief ARMv8-M Architecture startup code
  *
  * This file contains the common ARMv8-M startup code and selects
@@ -8,8 +8,8 @@
  * ARMv8-M includes: Cortex-M23, Cortex-M33, Cortex-M55, Cortex-M85
  */
 
-#ifndef ARMV8M_START_S
-#define ARMV8M_START_S
+#ifndef ARM_V8M_START_S
+#define ARM_V8M_START_S
 
 /* ============================================================================
  * ARMv8-M Common Startup Code
@@ -215,4 +215,4 @@ SysTick_Handler:
     /* Specific processor initialization should be done in SystemInit */
 #endif
 
-#endif /* ARMV8M_START_S */
+#endif /* ARM_V8M_START_S */

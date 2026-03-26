@@ -1,64 +1,88 @@
 /*
- * cm55_ras.h
+ * arm_v8m_cm55_ras.h
  * Cortex-M55 Reliability, Availability, and Serviceability (RAS) Definitions
- * Reference: Cortex-M55 Technical Reference Manual, Chapter 12
+ * Reference: Cortex-M55 Technical Reference Manual, Chapter 4
+ *
+ * @note This file reuses Armv8-M generic RAS definitions.
  */
 
-#ifndef CM55_RAS_H
-#define CM55_RAS_H
+#ifndef ARM_V8M_CM55_RAS_H
+#define ARM_V8M_CM55_RAS_H
 
 #include <stdint.h>
+#include "../armv8m_ras.h"
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
 /*============================================================================*
- * RAS Type Definitions
+ * Type Aliases
  *============================================================================*/
 
-typedef struct {
-    volatile uint32_t ESB;
-    volatile uint32_t IESB;
-} cm55_ras_regs_t;
+typedef arm_v8m_ras_regs_t      arm_v8m_cm55_ras_regs_t;
+typedef arm_v8m_ras_error_t     arm_v8m_cm55_ras_error_t;
 
 /*============================================================================*
- * Error Bank Register Type Definitions
+ * Constant Aliases - Error Record IDs
  *============================================================================*/
 
-typedef struct {
-    volatile uint32_t IEBR0;
-    volatile uint32_t IEBR1;
-    volatile uint32_t DEBR0;
-    volatile uint32_t DEBR1;
-    volatile uint32_t TEBR0;
-    volatile uint32_t TEBR1;
-} cm55_error_bank_regs_t;
+#define ARM_V8M_CM55_RAS_ERROR_CPU    ARM_V8M_RAS_ERROR_CPU
 
 /*============================================================================*
- * RAS API Functions (Template)
+ * Inline Function Wrappers - RAS Operations
  *============================================================================*/
 
-uint32_t cm55_ras_is_present(void);
-void cm55_ras_enable(void);
-void cm55_ras_disable(void);
+static inline void arm_v8m_cm55_ras_enable(void) {
+    arm_v8m_ras_enable();
+}
 
-/* Error Synchronization Barrier */
-void cm55_ras_esb(void);
-void cm55_ras_implicit_esb_enable(void);
-void cm55_ras_implicit_esb_disable(void);
+static inline void arm_v8m_cm55_ras_disable(void) {
+    arm_v8m_ras_disable();
+}
 
-/* Error Bank Functions */
-uint32_t cm55_ras_get_iebr0(void);
-uint32_t cm55_ras_get_iebr1(void);
-uint32_t cm55_ras_get_debr0(void);
-uint32_t cm55_ras_get_debr1(void);
-uint32_t cm55_ras_get_tebr0(void);
-uint32_t cm55_ras_get_tebr1(void);
-void cm55_ras_clear_error_banks(void);
+static inline void arm_v8m_cm55_ras_select_error_record(uint32_t record_id) {
+    arm_v8m_ras_select_error_record(record_id);
+}
+
+static inline uint32_t arm_v8m_cm55_ras_get_error_status(void) {
+    return arm_v8m_ras_get_error_status();
+}
+
+static inline void arm_v8m_cm55_ras_clear_error_status(void) {
+    arm_v8m_ras_clear_error_status();
+}
+
+static inline uint64_t arm_v8m_cm55_ras_get_error_address(void) {
+    return arm_v8m_ras_get_error_address();
+}
+
+static inline uint32_t arm_v8m_cm55_ras_get_error_misc0(void) {
+    return arm_v8m_ras_get_error_misc0();
+}
+
+static inline uint32_t arm_v8m_cm55_ras_get_error_misc1(void) {
+    return arm_v8m_ras_get_error_misc1();
+}
+
+static inline void arm_v8m_cm55_ras_inject_error(arm_v8m_cm55_ras_error_t *error) {
+    arm_v8m_ras_inject_error((arm_v8m_ras_error_t *)error);
+}
+
+static inline uint32_t arm_v8m_cm55_ras_get_fault_status(void) {
+    return arm_v8m_ras_get_fault_status();
+}
+
+static inline void arm_v8m_cm55_ras_clear_fault_status(void) {
+    arm_v8m_ras_clear_fault_status();
+}
+
+static inline uint32_t arm_v8m_cm55_ras_get_fault_address(void) {
+    return arm_v8m_ras_get_fault_address();
+}
 
 #ifdef __cplusplus
 }
 #endif
 
-#endif /* CM55_RAS_H */
+#endif /* ARM_V8M_CM55_RAS_H */

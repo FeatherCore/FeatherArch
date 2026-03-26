@@ -1,11 +1,11 @@
 /*
- * armv7m_scb.h
+ * arm_v7m_scb.h
  * System Control Block (SCB) Definitions
  * Reference: ARMv7-M Architecture Reference Manual, Section B3.2
  */
 
-#ifndef ARMV7M_SCB_H
-#define ARMV7M_SCB_H
+#ifndef ARM_V7M_SCB_H
+#define ARM_V7M_SCB_H
 
 #include <stdint.h>
 
@@ -43,23 +43,23 @@ typedef struct {
     volatile const uint32_t CCSIDR;
     volatile uint32_t CSSELR;
     volatile uint32_t CPACR;
-} armv7m_scb_regs_t;
+} arm_v7m_scb_regs_t;
 
 /*============================================================================*
  * SCB API Functions (Template)
  *============================================================================*/
 
-void armv7m_scb_set_vector_table(uint32_t offset);
-uint32_t armv7m_scb_get_vector_table(void);
-void armv7m_scb_system_reset(void);
-void armv7m_scb_set_priority_grouping(uint32_t priority_group);
-uint32_t armv7m_scb_get_priority_grouping(void);
-void armv7m_scb_enable_fault_irq(void);
-void armv7m_scb_disable_fault_irq(void);
-void armv7m_scb_clear_fault_status(void);
+void arm_v7m_scb_set_vector_table(uint32_t offset);
+uint32_t arm_v7m_scb_get_vector_table(void);
+void arm_v7m_scb_system_reset(void);
+void arm_v7m_scb_set_priority_grouping(uint32_t priority_group);
+uint32_t arm_v7m_scb_get_priority_grouping(void);
+void arm_v7m_scb_enable_fault_irq(void);
+void arm_v7m_scb_disable_fault_irq(void);
+void arm_v7m_scb_clear_fault_status(void);
 
 #ifdef __cplusplus
 }
 #endif
 
-#endif /* ARMV7M_SCB_H */
+#endif /* ARM_V7M_SCB_H */

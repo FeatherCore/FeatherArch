@@ -11,7 +11,7 @@
  * Global Initialization
  *============================================================================*/
 
-void cm4_init(void)
+void arm_v7m_cm4_init(void)
 {
     /* TODO: Initialize core components */
     /* - Configure vector table */
@@ -25,12 +25,12 @@ void cm4_init(void)
  * Interrupt Control
  *============================================================================*/
 
-void cm4_enable_irq(void)
+void arm_v7m_cm4_enable_irq(void)
 {
     /* TODO: Clear PRIMASK using CPSIE i */
 }
 
-void cm4_disable_irq(void)
+void arm_v7m_cm4_disable_irq(void)
 {
     /* TODO: Set PRIMASK using CPSID i */
 }
@@ -39,17 +39,17 @@ void cm4_disable_irq(void)
  * Power Management
  *============================================================================*/
 
-void cm4_wait_for_interrupt(void)
+void arm_v7m_cm4_wait_for_interrupt(void)
 {
     /* TODO: Execute WFI instruction */
 }
 
-void cm4_wait_for_event(void)
+void arm_v7m_cm4_wait_for_event(void)
 {
     /* TODO: Execute WFE instruction */
 }
 
-void cm4_send_event(void)
+void arm_v7m_cm4_send_event(void)
 {
     /* TODO: Execute SEV instruction */
 }
@@ -58,17 +58,17 @@ void cm4_send_event(void)
  * Memory Barriers
  *============================================================================*/
 
-void cm4_data_memory_barrier(void)
+void arm_v7m_cm4_data_memory_barrier(void)
 {
     /* TODO: Execute DMB instruction */
 }
 
-void cm4_data_synchronization_barrier(void)
+void arm_v7m_cm4_data_synchronization_barrier(void)
 {
     /* TODO: Execute DSB instruction */
 }
 
-void cm4_instruction_synchronization_barrier(void)
+void arm_v7m_cm4_instruction_synchronization_barrier(void)
 {
     /* TODO: Execute ISB instruction */
 }
@@ -77,14 +77,14 @@ void cm4_instruction_synchronization_barrier(void)
  * Exclusive Access (LDREX/STREX)
  *============================================================================*/
 
-uint32_t cm4_ldrex(uint32_t *addr)
+uint32_t arm_v7m_cm4_ldrex(uint32_t *addr)
 {
     /* TODO: Execute LDREX instruction */
     (void)addr;
     return 0;
 }
 
-uint32_t cm4_strex(uint32_t value, uint32_t *addr)
+uint32_t arm_v7m_cm4_strex(uint32_t value, uint32_t *addr)
 {
     /* TODO: Execute STREX instruction */
     (void)value;
@@ -92,7 +92,7 @@ uint32_t cm4_strex(uint32_t value, uint32_t *addr)
     return 1; /* Return 1 to indicate failure (lock not acquired) */
 }
 
-void cm4_clrex(void)
+void arm_v7m_cm4_clrex(void)
 {
     /* TODO: Execute CLREX instruction */
 }
@@ -101,21 +101,21 @@ void cm4_clrex(void)
  * Bit-Band Operations
  *============================================================================*/
 
-void cm4_bitband_set(volatile uint32_t *addr, uint32_t bit)
+void arm_v7m_cm4_bitband_set(volatile uint32_t *addr, uint32_t bit)
 {
     /* TODO: Calculate bit-band alias address and set bit */
     (void)addr;
     (void)bit;
 }
 
-void cm4_bitband_clear(volatile uint32_t *addr, uint32_t bit)
+void arm_v7m_cm4_bitband_clear(volatile uint32_t *addr, uint32_t bit)
 {
     /* TODO: Calculate bit-band alias address and clear bit */
     (void)addr;
     (void)bit;
 }
 
-uint32_t cm4_bitband_read(volatile uint32_t *addr, uint32_t bit)
+uint32_t arm_v7m_cm4_bitband_read(volatile uint32_t *addr, uint32_t bit)
 {
     /* TODO: Calculate bit-band alias address and read bit */
     (void)addr;

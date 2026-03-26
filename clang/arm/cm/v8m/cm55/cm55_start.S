@@ -1,5 +1,5 @@
 /**
- * @file cm55_start.S
+ * @file arm_v8m_cm55_start.S
  * @brief Cortex-M55 specific startup code
  *
  * Cortex-M55 features:
@@ -14,8 +14,8 @@
  * - PMU (Performance Monitoring Unit)
  */
 
-#ifndef CM55_START_S
-#define CM55_START_S
+#ifndef ARM_V8M_CM55_START_S
+#define ARM_V8M_CM55_START_S
 
 /* ============================================================================
  * Cortex-M55 Specific Initialization
@@ -57,12 +57,12 @@
  * ============================================================================
  */
 
-    .section .text.cm55_init
+    .section .text.arm_v8m_cm55_init
     .align 2
-    .globl CM55_Init
-    .type CM55_Init, %function
+    .globl ARM_V8M_CM55_Init
+    .type ARM_V8M_CM55_Init, %function
 
-CM55_Init:
+ARM_V8M_CM55_Init:
     /* Push link register */
     push {lr}
 
@@ -72,19 +72,19 @@ CM55_Init:
     msr msplim, r0
 
     /* Enable FPU if present */
-    bl CM55_EnableFPU
+    bl ARM_V8M_CM55_EnableFPU
 
     /* Initialize MVE (Helium) */
-    bl CM55_InitMVE
+    bl ARM_V8M_CM55_InitMVE
 
     /* Initialize Cache */
-    bl CM55_InitCache
+    bl ARM_V8M_CM55_InitCache
 
     /* Initialize TCM */
-    bl CM55_InitTCM
+    bl ARM_V8M_CM55_InitTCM
 
     /* Initialize EPU */
-    bl CM55_InitEPU
+    bl ARM_V8M_CM55_InitEPU
 
     /* Configure NVIC priority grouping */
     ldr r0, =0xE000ED0C       /* SCB->AIRCR address */
@@ -99,29 +99,29 @@ CM55_Init:
     str r1, [r0]
 
     /* Initialize TrustZone */
-    bl CM55_InitTrustZone
+    bl ARM_V8M_CM55_InitTrustZone
 
     /* Initialize RAS */
-    bl CM55_InitRAS
+    bl ARM_V8M_CM55_InitRAS
 
     /* Initialize PMU */
-    bl CM55_InitPMU
+    bl ARM_V8M_CM55_InitPMU
 
     /* Pop link register and return */
     pop {pc}
 
-    .size CM55_Init, . - CM55_Init
+    .size ARM_V8M_CM55_Init, . - ARM_V8M_CM55_Init
 
 /* ============================================================================
  * CM55 FPU Initialization
  * ============================================================================
  */
 
-    .section .text.cm55_fpu
+    .section .text.arm_v8m_cm55_fpu
     .align 2
-    .type CM55_EnableFPU, %function
+    .type ARM_V8M_CM55_EnableFPU, %function
 
-CM55_EnableFPU:
+ARM_V8M_CM55_EnableFPU:
     /* Enable CP10 and CP11 (FPU coprocessors) */
     ldr r0, =0xE000ED88       /* CPACR address */
     ldr r1, [r0]
@@ -134,18 +134,18 @@ CM55_EnableFPU:
 
     bx lr
 
-    .size CM55_EnableFPU, . - CM55_EnableFPU
+    .size ARM_V8M_CM55_EnableFPU, . - ARM_V8M_CM55_EnableFPU
 
 /* ============================================================================
  * CM55 MVE (Helium) Initialization
  * ============================================================================
  */
 
-    .section .text.cm55_mve
+    .section .text.arm_v8m_cm55_mve
     .align 2
-    .type CM55_InitMVE, %function
+    .type ARM_V8M_CM55_InitMVE, %function
 
-CM55_InitMVE:
+ARM_V8M_CM55_InitMVE:
     /* Enable MVE in CPACR */
     ldr r0, =0xE000ED88       /* CPACR address */
     ldr r1, [r0]
@@ -162,18 +162,18 @@ CM55_InitMVE:
 
     bx lr
 
-    .size CM55_InitMVE, . - CM55_InitMVE
+    .size ARM_V8M_CM55_InitMVE, . - ARM_V8M_CM55_InitMVE
 
 /* ============================================================================
  * CM55 Cache Initialization
  * ============================================================================
  */
 
-    .section .text.cm55_cache
+    .section .text.arm_v8m_cm55_cache
     .align 2
-    .type CM55_InitCache, %function
+    .type ARM_V8M_CM55_InitCache, %function
 
-CM55_InitCache:
+ARM_V8M_CM55_InitCache:
     /* Enable I-Cache */
     ldr r0, =0xE000ED14       /* SCB->CCR address */
     ldr r1, [r0]
@@ -191,18 +191,18 @@ CM55_InitCache:
 
     bx lr
 
-    .size CM55_InitCache, . - CM55_InitCache
+    .size ARM_V8M_CM55_InitCache, . - ARM_V8M_CM55_InitCache
 
 /* ============================================================================
  * CM55 TCM Initialization
  * ============================================================================
  */
 
-    .section .text.cm55_tcm
+    .section .text.arm_v8m_cm55_tcm
     .align 2
-    .type CM55_InitTCM, %function
+    .type ARM_V8M_CM55_InitTCM, %function
 
-CM55_InitTCM:
+ARM_V8M_CM55_InitTCM:
     /* Enable ITCM and DTCM */
     ldr r0, =0xE001E010       /* ITCMCR address */
     movs r1, #0x01            /* Enable ITCM */
@@ -218,18 +218,18 @@ CM55_InitTCM:
 
     bx lr
 
-    .size CM55_InitTCM, . - CM55_InitTCM
+    .size ARM_V8M_CM55_InitTCM, . - ARM_V8M_CM55_InitTCM
 
 /* ============================================================================
  * CM55 EPU Initialization
  * ============================================================================
  */
 
-    .section .text.cm55_epu
+    .section .text.arm_v8m_cm55_epu
     .align 2
-    .type CM55_InitEPU, %function
+    .type ARM_V8M_CM55_InitEPU, %function
 
-CM55_InitEPU:
+ARM_V8M_CM55_InitEPU:
     /* Enable EPU */
     ldr r0, =0xE000E300       /* EPUCR address */
     movs r1, #0x01            /* Enable EPU */
@@ -241,18 +241,18 @@ CM55_InitEPU:
 
     bx lr
 
-    .size CM55_InitEPU, . - CM55_InitEPU
+    .size ARM_V8M_CM55_InitEPU, . - ARM_V8M_CM55_InitEPU
 
 /* ============================================================================
  * CM55 TrustZone Initialization
  * ============================================================================
  */
 
-    .section .text.cm55_tz
+    .section .text.arm_v8m_cm55_tz
     .align 2
-    .type CM55_InitTrustZone, %function
+    .type ARM_V8M_CM55_InitTrustZone, %function
 
-CM55_InitTrustZone:
+ARM_V8M_CM55_InitTrustZone:
     /* Check if running in secure state */
     mrs r0, control
     tst r0, #0x02
@@ -281,18 +281,18 @@ CM55_InitTrustZone:
 .L_tz_done:
     bx lr
 
-    .size CM55_InitTrustZone, . - CM55_InitTrustZone
+    .size ARM_V8M_CM55_InitTrustZone, . - ARM_V8M_CM55_InitTrustZone
 
 /* ============================================================================
  * CM55 RAS Initialization
  * ============================================================================
  */
 
-    .section .text.cm55_ras
+    .section .text.arm_v8m_cm55_ras
     .align 2
-    .type CM55_InitRAS, %function
+    .type ARM_V8M_CM55_InitRAS, %function
 
-CM55_InitRAS:
+ARM_V8M_CM55_InitRAS:
     /* Enable RAS error detection */
     ldr r0, =0xE0005000       /* ERRCTRL address */
     movs r1, #0x01            /* Enable error recording */
@@ -300,18 +300,18 @@ CM55_InitRAS:
 
     bx lr
 
-    .size CM55_InitRAS, . - CM55_InitRAS
+    .size ARM_V8M_CM55_InitRAS, . - ARM_V8M_CM55_InitRAS
 
 /* ============================================================================
  * CM55 PMU Initialization
  * ============================================================================
  */
 
-    .section .text.cm55_pmu
+    .section .text.arm_v8m_cm55_pmu
     .align 2
-    .type CM55_InitPMU, %function
+    .type ARM_V8M_CM55_InitPMU, %function
 
-CM55_InitPMU:
+ARM_V8M_CM55_InitPMU:
     /* Enable PMU */
     ldr r0, =0xE0003000       /* PMUCTRL address */
     movs r1, #0x01            /* Enable PMU */
@@ -324,14 +324,14 @@ CM55_InitPMU:
 
     bx lr
 
-    .size CM55_InitPMU, . - CM55_InitPMU
+    .size ARM_V8M_CM55_InitPMU, . - ARM_V8M_CM55_InitPMU
 
 /* ============================================================================
  * CM55 Default Interrupt Handlers
  * ============================================================================
  */
 
-    .section .text.cm55_handlers, "ax"
+    .section .text.arm_v8m_cm55_handlers, "ax"
     .align 2
 
     .weak WWDG_IRQHandler
@@ -414,4 +414,4 @@ DMA1_Channel3_IRQHandler:
 DMA1_Channel4_IRQHandler:
     b DMA1_Channel4_IRQHandler
 
-#endif /* CM55_START_S */
+#endif /* ARM_V8M_CM55_START_S */
