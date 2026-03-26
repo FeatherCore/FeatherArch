@@ -630,21 +630,15 @@ static inline void arm_v7m_scb_disable_sleep_on_exit(void)
     SCB->SCR &= ~SCB_SCR_SLEEPONEXIT_Msk;
 }
 
-/**
- * @brief Enable fault IRQ (set FAULTMASK)
+/*
+ * Note: Fault IRQ control functions are provided by arm_v7m_core.h:
+ * - arm_v7m_enable_fault()  - Enable fault IRQ (clear FAULTMASK)
+ * - arm_v7m_disable_fault() - Disable fault IRQ (set FAULTMASK)
+ * 
+ * The following aliases are provided for compatibility:
  */
-static inline void arm_v7m_scb_enable_fault_irq(void)
-{
-    __asm__ volatile ("cpsid f" ::: "memory");
-}
-
-/**
- * @brief Disable fault IRQ (clear FAULTMASK)
- */
-static inline void arm_v7m_scb_disable_fault_irq(void)
-{
-    __asm__ volatile ("cpsie f" ::: "memory");
-}
+#define arm_v7m_scb_enable_fault_irq  arm_v7m_enable_fault
+#define arm_v7m_scb_disable_fault_irq arm_v7m_disable_fault
 
 /*============================================================================*
  * Non-Inline Functions - Complex SCB Operations

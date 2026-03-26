@@ -5,7 +5,7 @@
  *            Cortex-M7 Technical Reference Manual, Chapter 2.6
  *
  * @note Cortex-M7 extends standard Armv7-M with Cache and TCM.
- *       Basic core registers reuse generic Armv7-M definitions.
+ *       Basic core registers reuse generic Armv7-M definitions from arm_v7m_core.h
  */
 
 #ifndef ARM_V7M_CM7_CORE_H
@@ -19,6 +19,16 @@ extern "C" {
 #endif
 
 /*============================================================================*
+ * Compiler Abstraction - Inline Definition
+ *============================================================================*/
+
+#if defined(__clang__)
+    #define ARM_V7M_CM7_CORE_INLINE static inline __attribute__((always_inline))
+#else
+    #error "This library requires Clang/LLVM compiler."
+#endif
+
+/*============================================================================*
  * Type Aliases - Basic Core Registers (same as generic Armv7-M)
  *============================================================================*/
 
@@ -28,51 +38,111 @@ typedef arm_v7m_core_regs_t     arm_v7m_cm7_core_regs_t;
  * Inline Function Wrappers - Core Register Access (reuse generic)
  *============================================================================*/
 
-static inline uint32_t arm_v7m_cm7_get_msp(void) {
+/**
+ * @brief Get Main Stack Pointer (MSP)
+ * @return Current MSP value
+ */
+ARM_V7M_CM7_CORE_INLINE uint32_t arm_v7m_cm7_get_msp(void) {
     return arm_v7m_get_msp();
 }
 
-static inline void arm_v7m_cm7_set_msp(uint32_t value) {
+/**
+ * @brief Set Main Stack Pointer (MSP)
+ * @param value New MSP value
+ */
+ARM_V7M_CM7_CORE_INLINE void arm_v7m_cm7_set_msp(uint32_t value) {
     arm_v7m_set_msp(value);
 }
 
-static inline uint32_t arm_v7m_cm7_get_psp(void) {
+/**
+ * @brief Get Process Stack Pointer (PSP)
+ * @return Current PSP value
+ */
+ARM_V7M_CM7_CORE_INLINE uint32_t arm_v7m_cm7_get_psp(void) {
     return arm_v7m_get_psp();
 }
 
-static inline void arm_v7m_cm7_set_psp(uint32_t value) {
+/**
+ * @brief Set Process Stack Pointer (PSP)
+ * @param value New PSP value
+ */
+ARM_V7M_CM7_CORE_INLINE void arm_v7m_cm7_set_psp(uint32_t value) {
     arm_v7m_set_psp(value);
 }
 
-static inline uint32_t arm_v7m_cm7_get_primask(void) {
+/**
+ * @brief Get PRIMASK register
+ * @return Current PRIMASK value
+ */
+ARM_V7M_CM7_CORE_INLINE uint32_t arm_v7m_cm7_get_primask(void) {
     return arm_v7m_get_primask();
 }
 
-static inline void arm_v7m_cm7_set_primask(uint32_t value) {
+/**
+ * @brief Set PRIMASK register
+ * @param value New PRIMASK value
+ */
+ARM_V7M_CM7_CORE_INLINE void arm_v7m_cm7_set_primask(uint32_t value) {
     arm_v7m_set_primask(value);
 }
 
-static inline uint32_t arm_v7m_cm7_get_faultmask(void) {
+/**
+ * @brief Get FAULTMASK register
+ * @return Current FAULTMASK value
+ */
+ARM_V7M_CM7_CORE_INLINE uint32_t arm_v7m_cm7_get_faultmask(void) {
     return arm_v7m_get_faultmask();
 }
 
-static inline void arm_v7m_cm7_set_faultmask(uint32_t value) {
+/**
+ * @brief Set FAULTMASK register
+ * @param value New FAULTMASK value
+ */
+ARM_V7M_CM7_CORE_INLINE void arm_v7m_cm7_set_faultmask(uint32_t value) {
     arm_v7m_set_faultmask(value);
 }
 
-static inline uint32_t arm_v7m_cm7_get_basepri(void) {
+/**
+ * @brief Get BASEPRI register
+ * @return Current BASEPRI value
+ */
+ARM_V7M_CM7_CORE_INLINE uint32_t arm_v7m_cm7_get_basepri(void) {
     return arm_v7m_get_basepri();
 }
 
-static inline void arm_v7m_cm7_set_basepri(uint32_t value) {
+/**
+ * @brief Set BASEPRI register
+ * @param value New BASEPRI value
+ */
+ARM_V7M_CM7_CORE_INLINE void arm_v7m_cm7_set_basepri(uint32_t value) {
     arm_v7m_set_basepri(value);
 }
 
-static inline uint32_t arm_v7m_cm7_get_control(void) {
+/**
+ * @brief Set BASEPRI_MAX register (conditional write)
+ * @param value New BASEPRI value (only written if value is higher priority)
+ * @note Only updates BASEPRI if the new value is non-zero and has higher priority
+ *       (lower numeric value) than the current BASEPRI.
+ */
+ARM_V7M_CM7_CORE_INLINE void arm_v7m_cm7_set_basepri_max(uint32_t value) {
+    arm_v7m_set_basepri_max(value);
+}
+
+/**
+ * @brief Get CONTROL register
+ * @return Current CONTROL register value
+ */
+ARM_V7M_CM7_CORE_INLINE uint32_t arm_v7m_cm7_get_control(void) {
     return arm_v7m_get_control();
 }
 
-static inline void arm_v7m_cm7_set_control(uint32_t value) {
+/**
+ * @brief Set CONTROL register
+ * @param value New CONTROL register value
+ * @note After writing to CONTROL, an ISB instruction is required to ensure
+ *       subsequent instructions use the new configuration.
+ */
+ARM_V7M_CM7_CORE_INLINE void arm_v7m_cm7_set_control(uint32_t value) {
     arm_v7m_set_control(value);
 }
 
@@ -80,20 +150,287 @@ static inline void arm_v7m_cm7_set_control(uint32_t value) {
  * APSR/IPSR/EPSR Register Access - Reuse generic implementations
  *============================================================================*/
 
-static inline uint32_t arm_v7m_cm7_get_apsr(void) {
+/**
+ * @brief Get APSR (Application Program Status Register)
+ * @return Current APSR value
+ */
+ARM_V7M_CM7_CORE_INLINE uint32_t arm_v7m_cm7_get_apsr(void) {
     return arm_v7m_get_apsr();
 }
 
-static inline void arm_v7m_cm7_set_apsr(uint32_t value) {
+/**
+ * @brief Set APSR (N, Z, C, V, Q bits)
+ * @param value New APSR value
+ */
+ARM_V7M_CM7_CORE_INLINE void arm_v7m_cm7_set_apsr(uint32_t value) {
     arm_v7m_set_apsr(value);
 }
 
-static inline uint32_t arm_v7m_cm7_get_ipsr(void) {
+/**
+ * @brief Set APSR with nzcvq qualifier (N, Z, C, V, Q bits)
+ * @param value New APSR value
+ */
+ARM_V7M_CM7_CORE_INLINE void arm_v7m_cm7_set_apsr_nzcvq(uint32_t value) {
+    arm_v7m_set_apsr_nzcvq(value);
+}
+
+/**
+ * @brief Set APSR with g qualifier (GE[3:0] bits, DSP Extension)
+ * @param value New APSR GE bits value
+ */
+ARM_V7M_CM7_CORE_INLINE void arm_v7m_cm7_set_apsr_g(uint32_t value) {
+    arm_v7m_set_apsr_g(value);
+}
+
+/**
+ * @brief Set APSR with nzcvqg qualifier (N, Z, C, V, Q, GE bits)
+ * @param value New APSR value
+ */
+ARM_V7M_CM7_CORE_INLINE void arm_v7m_cm7_set_apsr_nzcvqg(uint32_t value) {
+    arm_v7m_set_apsr_nzcvqg(value);
+}
+
+/**
+ * @brief Get IPSR (Interrupt Program Status Register)
+ * @return Current IPSR value (exception number)
+ */
+ARM_V7M_CM7_CORE_INLINE uint32_t arm_v7m_cm7_get_ipsr(void) {
     return arm_v7m_get_ipsr();
 }
 
-static inline uint32_t arm_v7m_cm7_get_epsr(void) {
+/**
+ * @brief Get EPSR (Execution Program Status Register)
+ * @return Current EPSR value
+ * @note EPSR reads as zero when using MRS instruction.
+ */
+ARM_V7M_CM7_CORE_INLINE uint32_t arm_v7m_cm7_get_epsr(void) {
     return arm_v7m_get_epsr();
+}
+
+/**
+ * @brief Get XPSR (combined APSR + IPSR + EPSR)
+ * @return Current XPSR value
+ */
+ARM_V7M_CM7_CORE_INLINE uint32_t arm_v7m_cm7_get_xpsr(void) {
+    return arm_v7m_get_xpsr();
+}
+
+/**
+ * @brief Set XPSR
+ * @param value New XPSR value
+ */
+ARM_V7M_CM7_CORE_INLINE void arm_v7m_cm7_set_xpsr(uint32_t value) {
+    arm_v7m_set_xpsr(value);
+}
+
+/*============================================================================*
+ * Composite PSR Register Access
+ *============================================================================*/
+
+/**
+ * @brief Get IAPSR (Interrupt + Application PSR)
+ * @return Current IAPSR value
+ */
+ARM_V7M_CM7_CORE_INLINE uint32_t arm_v7m_cm7_get_iapsr(void) {
+    return arm_v7m_get_iapsr();
+}
+
+/**
+ * @brief Get EAPSR (Execution + Application PSR)
+ * @return Current EAPSR value
+ */
+ARM_V7M_CM7_CORE_INLINE uint32_t arm_v7m_cm7_get_eapsr(void) {
+    return arm_v7m_get_eapsr();
+}
+
+/**
+ * @brief Get IEPSR (Interrupt + Execution PSR)
+ * @return Current IEPSR value
+ */
+ARM_V7M_CM7_CORE_INLINE uint32_t arm_v7m_cm7_get_iepsr(void) {
+    return arm_v7m_get_iepsr();
+}
+
+/*============================================================================*
+ * Interrupt and Fault Control
+ *============================================================================*/
+
+/**
+ * @brief Enable interrupts (clear PRIMASK)
+ */
+ARM_V7M_CM7_CORE_INLINE void arm_v7m_cm7_enable_irq(void) {
+    arm_v7m_enable_irq();
+}
+
+/**
+ * @brief Disable interrupts (set PRIMASK)
+ */
+ARM_V7M_CM7_CORE_INLINE void arm_v7m_cm7_disable_irq(void) {
+    arm_v7m_disable_irq();
+}
+
+/**
+ * @brief Enable faults (clear FAULTMASK)
+ */
+ARM_V7M_CM7_CORE_INLINE void arm_v7m_cm7_enable_fault(void) {
+    arm_v7m_enable_fault();
+}
+
+/**
+ * @brief Disable faults (set FAULTMASK)
+ */
+ARM_V7M_CM7_CORE_INLINE void arm_v7m_cm7_disable_fault(void) {
+    arm_v7m_disable_fault();
+}
+
+/*============================================================================*
+ * Memory Barrier Instructions
+ *============================================================================*/
+
+/**
+ * @brief Instruction Synchronization Barrier
+ */
+ARM_V7M_CM7_CORE_INLINE void arm_v7m_cm7_isb(void) {
+    arm_v7m_isb();
+}
+
+/**
+ * @brief Data Synchronization Barrier
+ */
+ARM_V7M_CM7_CORE_INLINE void arm_v7m_cm7_dsb(void) {
+    arm_v7m_dsb();
+}
+
+/**
+ * @brief Data Memory Barrier
+ */
+ARM_V7M_CM7_CORE_INLINE void arm_v7m_cm7_dmb(void) {
+    arm_v7m_dmb();
+}
+
+/*============================================================================*
+ * Power Management Instructions
+ *============================================================================*/
+
+/**
+ * @brief Wait For Interrupt
+ */
+ARM_V7M_CM7_CORE_INLINE void arm_v7m_cm7_wfi(void) {
+    arm_v7m_wfi();
+}
+
+/**
+ * @brief Wait For Event
+ */
+ARM_V7M_CM7_CORE_INLINE void arm_v7m_cm7_wfe(void) {
+    arm_v7m_wfe();
+}
+
+/**
+ * @brief Send Event
+ */
+ARM_V7M_CM7_CORE_INLINE void arm_v7m_cm7_sev(void) {
+    arm_v7m_sev();
+}
+
+/*============================================================================*
+ * Helper Functions
+ *============================================================================*/
+
+/**
+ * @brief Get current exception number from IPSR
+ * @return Exception number (0 = Thread mode)
+ */
+ARM_V7M_CM7_CORE_INLINE uint32_t arm_v7m_cm7_get_exception_number(void) {
+    return arm_v7m_get_exception_number();
+}
+
+/**
+ * @brief Check if in Handler mode
+ * @return 1 if in Handler mode, 0 if in Thread mode
+ */
+ARM_V7M_CM7_CORE_INLINE int arm_v7m_cm7_is_in_handler_mode(void) {
+    return arm_v7m_is_in_handler_mode();
+}
+
+/**
+ * @brief Get current stack pointer
+ * @return Current SP value (MSP or PSP depending on mode)
+ */
+ARM_V7M_CM7_CORE_INLINE uint32_t arm_v7m_cm7_get_current_sp(void) {
+    return arm_v7m_get_current_sp();
+}
+
+/**
+ * @brief Check if current execution is privileged
+ * @return 1 if privileged, 0 if unprivileged
+ */
+ARM_V7M_CM7_CORE_INLINE int arm_v7m_cm7_is_privileged(void) {
+    return arm_v7m_is_privileged();
+}
+
+/**
+ * @brief Set Thread mode to unprivileged
+ */
+ARM_V7M_CM7_CORE_INLINE void arm_v7m_cm7_set_unprivileged(void) {
+    arm_v7m_set_unprivileged();
+}
+
+/**
+ * @brief Set Thread mode to privileged
+ */
+ARM_V7M_CM7_CORE_INLINE void arm_v7m_cm7_set_privileged(void) {
+    arm_v7m_set_privileged();
+}
+
+/**
+ * @brief Use Process Stack Pointer (PSP)
+ */
+ARM_V7M_CM7_CORE_INLINE void arm_v7m_cm7_use_psp(void) {
+    arm_v7m_use_psp();
+}
+
+/**
+ * @brief Use Main Stack Pointer (MSP)
+ */
+ARM_V7M_CM7_CORE_INLINE void arm_v7m_cm7_use_msp(void) {
+    arm_v7m_use_msp();
+}
+
+/*============================================================================*
+ * CONTROL Register Bit Access
+ *============================================================================*/
+
+/**
+ * @brief Get CONTROL.nPRIV bit
+ * @return 0 = privileged, 1 = unprivileged
+ */
+ARM_V7M_CM7_CORE_INLINE int arm_v7m_cm7_get_npriv(void) {
+    return arm_v7m_get_npriv();
+}
+
+/**
+ * @brief Get CONTROL.SPSEL bit
+ * @return 0 = MSP, 1 = PSP
+ */
+ARM_V7M_CM7_CORE_INLINE int arm_v7m_cm7_get_spsel(void) {
+    return arm_v7m_get_spsel();
+}
+
+/**
+ * @brief Get CONTROL.FPCA bit
+ * @return 0 = no FP context, 1 = FP context active
+ */
+ARM_V7M_CM7_CORE_INLINE int arm_v7m_cm7_get_fpca(void) {
+    return arm_v7m_get_fpca();
+}
+
+/**
+ * @brief Set CONTROL.FPCA bit
+ * @param value 0 = no FP context, 1 = FP context active
+ */
+ARM_V7M_CM7_CORE_INLINE void arm_v7m_cm7_set_fpca(int value) {
+    arm_v7m_set_fpca(value);
 }
 
 #ifdef __cplusplus

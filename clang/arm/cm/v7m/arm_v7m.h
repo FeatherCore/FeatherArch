@@ -9,6 +9,7 @@
 
 #include <stdint.h>
 
+#include "arm_v7m_instr.h"
 #include "arm_v7m_core.h"
 #include "arm_v7m_nvic.h"
 #include "arm_v7m_systick.h"
@@ -34,14 +35,21 @@ extern "C" {
  *============================================================================*/
 
 void arm_v7m_init(void);
-void arm_v7m_enable_irq(void);
-void arm_v7m_disable_irq(void);
-void arm_v7m_wait_for_interrupt(void);
-void arm_v7m_wait_for_event(void);
-void arm_v7m_send_event(void);
-void arm_v7m_data_memory_barrier(void);
-void arm_v7m_data_synchronization_barrier(void);
-void arm_v7m_instruction_synchronization_barrier(void);
+
+/* 
+ * The following functions are provided by arm_v7m_core.h as inline functions:
+ * - arm_v7m_enable_irq() / arm_v7m_disable_irq()
+ * - arm_v7m_wfi() / arm_v7m_wfe() / arm_v7m_sev()
+ * - arm_v7m_dmb() / arm_v7m_dsb() / arm_v7m_isb()
+ * 
+ * For compatibility, the following aliases are provided:
+ */
+#define arm_v7m_wait_for_interrupt          arm_v7m_wfi
+#define arm_v7m_wait_for_event              arm_v7m_wfe
+#define arm_v7m_send_event                   arm_v7m_sev
+#define arm_v7m_data_memory_barrier          arm_v7m_dmb
+#define arm_v7m_data_synchronization_barrier arm_v7m_dsb
+#define arm_v7m_instruction_synchronization_barrier arm_v7m_isb
 
 #ifdef __cplusplus
 }
