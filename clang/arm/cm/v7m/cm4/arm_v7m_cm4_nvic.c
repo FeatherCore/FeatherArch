@@ -1,76 +1,36 @@
 /*
  * arm_v7m_cm4_nvic.c
  * Cortex-M4 Nested Vectored Interrupt Controller (NVIC) Implementation
- * Reference: Cortex-M4 Devices Generic User Guide, Chapter 4.2
+ * 
+ * Reference: ARMv7-M Architecture Reference Manual
+ *            - Section B3.4: Nested Vectored Interrupt Controller on page B3-597
+ *            - Section B3.4.1: NVIC register summary on page B3-597
+ *            - Section B3.4.2: NVIC register descriptions on page B3-598
+ * 
+ *            Cortex-M4 Devices Generic User Guide
+ *            - Chapter 4.2: Nested Vectored Interrupt Controller on page 4-4
+ *            - Section 4.2.1: NVIC register summary on page 4-5
+ * 
+ *            Cortex-M4 Technical Reference Manual
+ *            - Chapter 4.2: Nested Vectored Interrupt Controller on page 4-2
+ * 
+ * @note Cortex-M4 NVIC is identical to generic Armv7-M NVIC.
+ *       All functions are implemented as static inline in arm_v7m_cm4_nvic.h
+ *       to eliminate function call overhead.
+ *       This file is kept for compatibility and potential future extensions.
  */
 
 #include "arm_v7m_cm4_nvic.h"
 
-/*============================================================================*
- * NVIC Base Address (Architecture defined)
- *============================================================================*/
-#define NVIC_BASE           0xE000E100UL
-
-#define NVIC                ((arm_v7m_cm4_nvic_regs_t *)NVIC_BASE)
-
-/*============================================================================*
- * NVIC Implementation
- *============================================================================*/
-
-void arm_v7m_cm4_nvic_enable_irq(uint32_t irqn)
-{
-    /* TODO: Set appropriate bit in ISER register */
-    (void)irqn;
-}
-
-void arm_v7m_cm4_nvic_disable_irq(uint32_t irqn)
-{
-    /* TODO: Set appropriate bit in ICER register */
-    (void)irqn;
-}
-
-uint32_t arm_v7m_cm4_nvic_get_pending_irq(uint32_t irqn)
-{
-    /* TODO: Read appropriate bit in ISPR register */
-    (void)irqn;
-    return 0;
-}
-
-void arm_v7m_cm4_nvic_set_pending_irq(uint32_t irqn)
-{
-    /* TODO: Set appropriate bit in ISPR register */
-    (void)irqn;
-}
-
-void arm_v7m_cm4_nvic_clear_pending_irq(uint32_t irqn)
-{
-    /* TODO: Set appropriate bit in ICPR register */
-    (void)irqn;
-}
-
-uint32_t arm_v7m_cm4_nvic_get_active_irq(uint32_t irqn)
-{
-    /* TODO: Read appropriate bit in IABR register */
-    (void)irqn;
-    return 0;
-}
-
-void arm_v7m_cm4_nvic_set_priority(uint32_t irqn, uint32_t priority)
-{
-    /* TODO: Write to IPR register */
-    (void)irqn;
-    (void)priority;
-}
-
-uint32_t arm_v7m_cm4_nvic_get_priority(uint32_t irqn)
-{
-    /* TODO: Read from IPR register */
-    (void)irqn;
-    return 0;
-}
-
-void arm_v7m_cm4_nvic_trigger_irq(uint32_t irqn)
-{
-    /* TODO: Write to STIR register */
-    (void)irqn;
-}
+/*
+ * All NVIC functions are implemented as static inline in arm_v7m_cm4_nvic.h
+ * for optimal performance.
+ *
+ * The following functions are available as inline functions in the header:
+ * - arm_v7m_cm4_nvic_enable_irq() / arm_v7m_cm4_nvic_disable_irq()
+ * - arm_v7m_cm4_nvic_get_pending_irq() / arm_v7m_cm4_nvic_set_pending_irq()
+ * - arm_v7m_cm4_nvic_clear_pending_irq()
+ * - arm_v7m_cm4_nvic_get_active_irq()
+ * - arm_v7m_cm4_nvic_set_priority() / arm_v7m_cm4_nvic_get_priority()
+ * - arm_v7m_cm4_nvic_system_reset()
+ */

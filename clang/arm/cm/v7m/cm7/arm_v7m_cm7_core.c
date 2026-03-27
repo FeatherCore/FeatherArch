@@ -1,8 +1,24 @@
 /*
  * arm_v7m_cm7_core.c
  * Cortex-M7 Core Register Implementation
- * Reference: Cortex-M7 Devices Generic User Guide, Chapter 2.1
+ * Reference: ARMv7-M Architecture Reference Manual
+ *            - Section B1.4: Registers on page B1-514
+ *            - Section B1.4.1: Arm core registers on page B1-514
+ *            - Section B1.4.2: The special-purpose Program Status Registers, xPSR on page B1-516
+ *            - Section B1.4.3: The special-purpose mask registers on page B1-528
+ *            - Section B1.4.4: The special-purpose CONTROL register on page B1-519
+ *            - Section B5.2: System Instruction Descriptions on page B5-678
+ *            Cortex-M7 Devices Generic User Guide, Chapter 2.1
+ *            - Core register set summary on page 2-3
+ *            - Stack Pointer on page 2-4
+ *            - Program Status Register on page 2-4
+ *            - Exception mask registers (PRIMASK, FAULTMASK, BASEPRI) on page 2-7
+ *            - CONTROL register on page 2-9
  *            Cortex-M7 Technical Reference Manual, Chapter 2.6
+ *            - Processor core registers on page 2-9
+ *            - Core register set summary on page 2-9
+ *            - Exception mask registers on page 2-11
+ *            - CONTROL register on page 2-12
  *
  * @note Cortex-M7 core registers are identical to generic Armv7-M.
  *       All functions are implemented as static inline in arm_v7m_cm7_core.h

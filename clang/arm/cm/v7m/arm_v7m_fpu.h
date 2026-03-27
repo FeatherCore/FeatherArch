@@ -1,7 +1,11 @@
 /*
  * arm_v7m_fpu.h
  * Floating-Point Unit (FPU) Definitions
- * Reference: ARMv7-M Architecture Reference Manual, Section A2.5, B3.2.21-B3.2.23
+ * Reference: ARMv7-M Architecture Reference Manual
+ *            - Section A2.5: The optional floating-point extension
+ *            - Section B3.2.21: Floating Point Context Control Register, FPCCR on page B3-615
+ *            - Section B3.2.22: Floating Point Context Address Register, FPCAR on page B3-617
+ *            - Section B3.2.23: Floating Point Default Status Control Register, FPDSCR on page B3-617
  */
 
 #ifndef ARM_V7M_FPU_H
@@ -87,6 +91,7 @@ typedef struct {
 /*============================================================================*
  * FPU FPDSCR Register Definitions
  * Reference: ARMv7-M Architecture Reference Manual, Section B3.2.23
+ *            - Floating Point Default Status Control Register, FPDSCR on page B3-617
  *============================================================================*/
 
 /* AHP: Alternative Half-Precision */
@@ -113,7 +118,8 @@ typedef struct {
 
 /*============================================================================*
  * FPU MVFR0 Register Definitions
- * Reference: ARMv7-M Architecture Reference Manual, Section B4.1.1
+ * Reference: ARMv7-M Architecture Reference Manual, Section B4.7.2
+ *            - Media and FP Feature Register 0, MVFR0 on page B4-662
  *============================================================================*/
 
 /* FP rounding modes */
@@ -150,7 +156,8 @@ typedef struct {
 
 /*============================================================================*
  * FPU MVFR1 Register Definitions
- * Reference: ARMv7-M Architecture Reference Manual, Section B4.1.2
+ * Reference: ARMv7-M Architecture Reference Manual, Section B4.7.3
+ *            - Media and FP Feature Register 1, MVFR1 on page B4-663
  *============================================================================*/
 
 /* FP fused MAC */
@@ -171,7 +178,8 @@ typedef struct {
 
 /*============================================================================*
  * FPU MVFR2 Register Definitions
- * Reference: ARMv7-M Architecture Reference Manual, Section B4.1.3
+ * Reference: ARMv7-M Architecture Reference Manual, Section B4.7.4
+ *            - Media and FP Feature Register 2, MVFR2 on page B4-664
  *============================================================================*/
 
 /* VFP_Misc */
@@ -397,7 +405,8 @@ static inline void arm_v7m_fpu_set_default_rounding_mode(uint32_t mode)
 
 /*============================================================================*
  * FPSCR Register Definitions
- * Reference: ARMv7-M Architecture Reference Manual, Section A2.5.3
+ * Reference: ARMv7-M Architecture Reference Manual, Section A2.5
+ *            - Floating-point Status and Control Register, FPSCR on page A2-37
  *============================================================================*/
 
 /* Condition flags */

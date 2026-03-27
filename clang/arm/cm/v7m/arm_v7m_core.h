@@ -355,7 +355,8 @@ ARM_V7M_CORE_INLINE void arm_v7m_dmb(void)
 
 /*============================================================================*
  * Memory Barrier Instructions with Domain Options (INLINE)
- * Reference: Section A3.8 - Memory barriers
+ * Reference: ARMv7-M Architecture Reference Manual, Section A3.7.3
+ *            - Memory barriers on page A3-92
  *============================================================================*/
 
 ARM_V7M_CORE_INLINE void arm_v7m_dmb_sy(void)
@@ -460,6 +461,137 @@ ARM_V7M_CORE_INLINE uint32_t arm_v7m_get_current_sp(void)
     uint32_t sp;
     __asm volatile ("MOV %0, sp" : "=r" (sp));
     return sp;
+}
+
+/*============================================================================*
+ * Bit-Band Operations
+ * Reference: ARMv7-M Architecture Reference Manual, Section A3.4
+ *            - Bit-band operations on page A3-71
+ *            - Bit-band alias regions for SRAM and Peripheral memory
+ *============================================================================*/
+
+/* Bit-band alias region base addresses */
+#define ARM_V7M_BITBAND_SRAM_BASE       0x20000000UL
+#define ARM_V7M_BITBAND_SRAM_ALIAS      0x22000000UL
+#define ARM_V7M_BITBAND_PERIPH_BASE     0x40000000UL
+#define ARM_V7M_BITBAND_PERIPH_ALIAS    0x42000000UL
+
+/**
+ * @brief Calculate bit-band alias address
+ * 
+ * According to ARMv7-M Architecture Reference Manual, Section A3.4:
+ * - Bit-band alias address = alias_base + ((byte_offset * 32) + (bit_number * 4))
+ * - byte_offset: offset from the bit-band base (0-0xFFFFF for SRAM, 0-0x1FFFFF for Peripheral)
+ * - bit_number: bit position (0-31)
+ * 
+ * @param base Bit-band base address (0x20000000 for SRAM, 0x40000000 for Peripheral)
+ * @param addr Target address within bit-band region
+ * @param bit Bit number (0-31)
+ * @return Bit-band alias address
+ */
+#define ARM_V7M_BITBAND_ADDR(base, addr, bit) \
+    (((uint32_t)(base) & 0xF0000000UL) + 0x02000000UL + \
+     ((((uint32_t)(addr) - (uint32_t)(base)) << 5) + ((bit) << 2)))
+
+/**
+ * @brief Set a bit using bit-band alias
+ * 
+ * @param addr Address of the word containing the bit
+ * @param bit Bit number (0-31)
+ */
+ARM_V7M_CORE_INLINE void arm_v7m_bitband_set(volatile uint32_t *addr, uint32_t bit)
+{
+    uint32_t alias_addr;
+    
+    if (bit < 32U) {
+        if (((uint32_t)addr >= ARM_V7M_BITBAND_SRAM_BASE) && 
+            ((uint32_t)addr < (ARM_V7M_BITBAND_SRAM_BASE + 0x00100000UL))) {
+            /* SRAM bit-band region */
+            alias_addr = ARM_V7M_BITBAND_ADDR(ARM_V7M_BITBAND_SRAM_BASE, addr, bit);
+        } else if (((uint32_t)addr >= ARM_V7M_BITBAND_PERIPH_BASE) && 
+                   ((uint32_t)addr < (ARM_V7M_BITBAND_PERIPH_BASE + 0x00100000UL))) {
+            /* Peripheral bit-band region */
+            alias_addr = ARM_V7M_BITBAND_ADDR(ARM_V7M_BITBAND_PERIPH_BASE, addr, bit);
+        } else {
+            /* Address not in bit-band region, use normal read-modify-write */
+            *addr |= (1UL << bit);
+            return;
+        }
+        *(volatile uint32_t *)alias_addr = 1U;
+    }
+}
+
+/**
+ * @brief Clear a bit using bit-band alias
+ * 
+ * @param addr Address of the word containing the bit
+ * @param bit Bit number (0-31)
+ */
+ARM_V7M_CORE_INLINE void arm_v7m_bitband_clear(volatile uint32_t *addr, uint32_t bit)
+{
+    uint32_t alias_addr;
+    
+    if (bit < 32U) {
+        if (((uint32_t)addr >= ARM_V7M_BITBAND_SRAM_BASE) && 
+            ((uint32_t)addr < (ARM_V7M_BITBAND_SRAM_BASE + 0x00100000UL))) {
+            /* SRAM bit-band region */
+            alias_addr = ARM_V7M_BITBAND_ADDR(ARM_V7M_BITBAND_SRAM_BASE, addr, bit);
+        } else if (((uint32_t)addr >= ARM_V7M_BITBAND_PERIPH_BASE) && 
+                   ((uint32_t)addr < (ARM_V7M_BITBAND_PERIPH_BASE + 0x00100000UL))) {
+            /* Peripheral bit-band region */
+            alias_addr = ARM_V7M_BITBAND_ADDR(ARM_V7M_BITBAND_PERIPH_BASE, addr, bit);
+        } else {
+            /* Address not in bit-band region, use normal read-modify-write */
+            *addr &= ~(1UL << bit);
+            return;
+        }
+        *(volatile uint32_t *)alias_addr = 0U;
+    }
+}
+
+/**
+ * @brief Read a bit using bit-band alias
+ * 
+ * @param addr Address of the word containing the bit
+ * @param bit Bit number (0-31)
+ * @return Bit value (0 or 1)
+ */
+ARM_V7M_CORE_INLINE uint32_t arm_v7m_bitband_read(volatile uint32_t *addr, uint32_t bit)
+{
+    uint32_t alias_addr;
+    
+    if (bit < 32U) {
+        if (((uint32_t)addr >= ARM_V7M_BITBAND_SRAM_BASE) && 
+            ((uint32_t)addr < (ARM_V7M_BITBAND_SRAM_BASE + 0x00100000UL))) {
+            /* SRAM bit-band region */
+            alias_addr = ARM_V7M_BITBAND_ADDR(ARM_V7M_BITBAND_SRAM_BASE, addr, bit);
+        } else if (((uint32_t)addr >= ARM_V7M_BITBAND_PERIPH_BASE) && 
+                   ((uint32_t)addr < (ARM_V7M_BITBAND_PERIPH_BASE + 0x00100000UL))) {
+            /* Peripheral bit-band region */
+            alias_addr = ARM_V7M_BITBAND_ADDR(ARM_V7M_BITBAND_PERIPH_BASE, addr, bit);
+        } else {
+            /* Address not in bit-band region, use normal read */
+            return (*addr >> bit) & 1U;
+        }
+        return *(volatile uint32_t *)alias_addr;
+    }
+    return 0U;
+}
+
+/**
+ * @brief Toggle a bit using bit-band alias
+ * 
+ * @param addr Address of the word containing the bit
+ * @param bit Bit number (0-31)
+ */
+ARM_V7M_CORE_INLINE void arm_v7m_bitband_toggle(volatile uint32_t *addr, uint32_t bit)
+{
+    uint32_t current = arm_v7m_bitband_read(addr, bit);
+    if (current) {
+        arm_v7m_bitband_clear(addr, bit);
+    } else {
+        arm_v7m_bitband_set(addr, bit);
+    }
 }
 
 /*============================================================================*

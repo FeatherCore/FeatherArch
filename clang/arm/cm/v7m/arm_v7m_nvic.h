@@ -83,6 +83,7 @@ typedef enum {
 /*============================================================================*
  * ICTR (Interrupt Controller Type Register) Definitions
  * Reference: ARMv7-M Architecture Reference Manual, Section B3.2.24
+ *            - Interrupt Controller Type Register, ICTR on page B3-618
  * Address: 0xE000E004
  *============================================================================*/
 #define ICTR                ((volatile uint32_t *)ICTR_BASE)
@@ -94,6 +95,7 @@ typedef enum {
 /*============================================================================*
  * STIR (Software Triggered Interrupt Register) Definitions
  * Reference: ARMv7-M Architecture Reference Manual, Section B3.2.26
+ *            - Software Triggered Interrupt Register, STIR on page B3-619
  * Address: 0xE000EF00
  *============================================================================*/
 #define STIR                ((volatile uint32_t *)STIR_BASE)
@@ -307,6 +309,191 @@ static inline uint32_t arm_v7m_nvic_get_all_irqs_enabled(void)
 }
 
 /*============================================================================*
+ * Inline Functions - BASEPRI Control (Priority Masking)
+ * Reference: ARMv7-M Architecture Reference Manual, Section B1.4.3
+ *            - The special-purpose mask registers, BASEPRI on page B1-528
+ *============================================================================*/
+
+/**
+ * @brief Set BASEPRI register value
+ * @param basepri Priority value (0-255), only upper bits effective based on implementation
+ * @note When BASEPRI is non-zero, it masks all interrupts with priority >= basepri
+ *       Lower priority value = higher urgency
+ */
+static inline void arm_v7m_nvic_set_basepri(uint32_t basepri)
+{
+    __asm__ volatile ("msr basepri, %0" :: "r" (basepri) : "memory");
+}
+
+/**
+ * @brief Get BASEPRI register value
+ * @return Current BASEPRI value
+ */
+static inline uint32_t arm_v7m_nvic_get_basepri(void)
+{
+    uint32_t basepri;
+    __asm__ volatile ("mrs %0, basepri" : "=r" (basepri));
+    return basepri;
+}
+
+/**
+ * @brief Clear BASEPRI (enable all priority levels)
+ * @note Same as setting BASEPRI to 0
+ */
+static inline void arm_v7m_nvic_clear_basepri(void)
+{
+    __asm__ volatile ("msr basepri, %0" :: "r" (0U) : "memory");
+}
+
+/**
+ * @brief Raise BASEPRI to mask interrupts up to specified priority
+ * @param priority Priority threshold (lower value = higher priority)
+ * @note Only raises if new priority is higher (lower value) than current
+ */
+static inline void arm_v7m_nvic_raise_basepri(uint32_t priority)
+{
+    uint32_t current = arm_v7m_nvic_get_basepri();
+    if (current == 0U || priority < current) {
+        arm_v7m_nvic_set_basepri(priority);
+    }
+}
+
+/**
+ * @brief Check if BASEPRI is active (non-zero)
+ * @return 1 if BASEPRI is non-zero, 0 if zero
+ */
+static inline uint32_t arm_v7m_nvic_is_basepri_active(void)
+{
+    return (arm_v7m_nvic_get_basepri() != 0U) ? 1U : 0U;
+}
+
+/*============================================================================*
+ * Inline Functions - FAULTMASK Control
+ * Reference: ARMv7-M Architecture Reference Manual, Section B1.4.3
+ *============================================================================*/
+
+/**
+ * @brief Disable all fault exceptions (set FAULTMASK)
+ * @note When FAULTMASK is set, all faults (HardFault, MemManage, BusFault, UsageFault)
+ *       are escalated to HardFault. NMI is not affected.
+ */
+static inline void arm_v7m_nvic_disable_faults(void)
+{
+    __asm__ volatile ("cpsid f" ::: "memory");
+}
+
+/**
+ * @brief Enable fault exceptions (clear FAULTMASK)
+ */
+static inline void arm_v7m_nvic_enable_faults(void)
+{
+    __asm__ volatile ("cpsie f" ::: "memory");
+}
+
+/**
+ * @brief Get FAULTMASK value
+ * @return 1 if FAULTMASK is set (faults disabled), 0 if cleared
+ */
+static inline uint32_t arm_v7m_nvic_get_fault_mask(void)
+{
+    uint32_t faultmask;
+    __asm__ volatile ("mrs %0, faultmask" : "=r" (faultmask));
+    return faultmask;
+}
+
+/**
+ * @brief Check if faults are disabled (FAULTMASK is set)
+ * @return 1 if faults are disabled, 0 if enabled
+ */
+static inline uint32_t arm_v7m_nvic_are_faults_disabled(void)
+{
+    return (arm_v7m_nvic_get_fault_mask() != 0U) ? 1U : 0U;
+}
+
+/*============================================================================*
+ * Inline Functions - System Exception Priority Management
+ * Reference: ARMv7-M Architecture Reference Manual, Section B3.2
+ *            - System Handler Priority Register 1, SHPR1 on page B3-606
+ *            - System Handler Priority Register 2, SHPR2 on page B3-606
+ *            - System Handler Priority Register 3, SHPR3 on page B3-607
+ *============================================================================*/
+
+/**
+ * @brief Set priority of a system exception
+ * @param excn System exception number (from arm_v7m_exception_t enum)
+ * @param priority Priority value (0-255)
+ * @note Valid exceptions: MemoryManagement(-12), BusFault(-11), UsageFault(-10),
+ *       SVCall(-5), DebugMonitor(-4), PendSV(-2), SysTick(-1)
+ */
+static inline void arm_v7m_nvic_set_system_exception_priority(int32_t excn, uint32_t priority)
+{
+    /* System exceptions use SHPR1, SHPR2, SHPR3 in SCB */
+    /* Exception number to SHP array index mapping:
+     * MemManage(-12)  -> SHP[0] (byte 0)
+     * BusFault(-11)   -> SHP[1] (byte 1)
+     * UsageFault(-10) -> SHP[2] (byte 2)
+     * Reserved(-9,-8,-7,-6) -> SHP[3] (byte 3)
+     * SVCall(-5)      -> SHP[4] (byte 0 of SHPR2)
+     * DebugMonitor(-4)-> SHP[5] (byte 1)
+     * Reserved(-3)    -> SHP[6] (byte 2)
+     * PendSV(-2)      -> SHP[7] (byte 3)
+     * SysTick(-1)     -> SHP[8] (byte 0 of SHPR3, but SHP[8] is offset 8)
+     * 
+     * Actually, SHP[0-11] maps to 0xE000ED18-0xE000ED23:
+     * SHP[0-3]  = SHPR1 (MemManage, BusFault, UsageFault, Reserved)
+     * SHP[4-7]  = SHPR2 (SVCall, DebugMonitor, Reserved, PendSV)
+     * SHP[8-11] = SHPR3 (SysTick, Reserved, Reserved, Reserved)
+     * 
+     * For negative exception numbers, we need to map:
+     * excn = -12 -> index 0
+     * excn = -11 -> index 1
+     * excn = -10 -> index 2
+     * excn = -5  -> index 4
+     * excn = -4  -> index 5
+     * excn = -2  -> index 7
+     * excn = -1  -> index 8
+     */
+    if (excn < 0 && excn >= -14) {
+        uint32_t idx;
+        switch (excn) {
+            case -12: idx = 0U; break;  /* MemManage */
+            case -11: idx = 1U; break;  /* BusFault */
+            case -10: idx = 2U; break;  /* UsageFault */
+            case -5:  idx = 4U; break;  /* SVCall */
+            case -4:  idx = 5U; break;  /* DebugMonitor */
+            case -2:  idx = 7U; break;  /* PendSV */
+            case -1:  idx = 8U; break;  /* SysTick */
+            default: return;            /* Reserved or invalid */
+        }
+        SCB->SHP[idx] = (uint8_t)(priority & 0xFFU);
+    }
+}
+
+/**
+ * @brief Get priority of a system exception
+ * @param excn System exception number (from arm_v7m_exception_t enum)
+ * @return Priority value (0-255), 0 if invalid exception
+ */
+static inline uint32_t arm_v7m_nvic_get_system_exception_priority(int32_t excn)
+{
+    if (excn < 0 && excn >= -14) {
+        uint32_t idx;
+        switch (excn) {
+            case -12: idx = 0U; break;  /* MemManage */
+            case -11: idx = 1U; break;  /* BusFault */
+            case -10: idx = 2U; break;  /* UsageFault */
+            case -5:  idx = 4U; break;  /* SVCall */
+            case -4:  idx = 5U; break;  /* DebugMonitor */
+            case -2:  idx = 7U; break;  /* PendSV */
+            case -1:  idx = 8U; break;  /* SysTick */
+            default: return 0U;         /* Reserved or invalid */
+        }
+        return (uint32_t)SCB->SHP[idx];
+    }
+    return 0U;
+}
+
+/*============================================================================*
  * Non-Inline Functions - Complex Operations
  * These functions are implemented in the source file
  *============================================================================*/
@@ -324,6 +511,13 @@ void arm_v7m_nvic_enable_irq_batch(const uint32_t *irqn_array, uint32_t count);
  * @param count Number of interrupts in the array
  */
 void arm_v7m_nvic_disable_irq_batch(const uint32_t *irqn_array, uint32_t count);
+
+/**
+ * @brief Get the highest priority pending interrupt
+ * @return Highest priority pending interrupt number, or NVIC_NUM_IRQN if none
+ * @note This function traverses ISPR and IPR to find the highest priority pending interrupt
+ */
+uint32_t arm_v7m_nvic_get_highest_pending_irq(void);
 
 #ifdef __cplusplus
 }

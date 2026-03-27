@@ -43,7 +43,8 @@ extern "C" {
 
 /*============================================================================*
  * MPU Alias Register Offsets (for efficient multi-region configuration)
- * Reference: B3.5.10 MPU alias register support
+ * Reference: ARMv7-M Architecture Reference Manual, Section B3.5.4
+ *            - MPU alias register support on page B3-642
  *============================================================================*/
 
 #define ARM_V7M_MPU_RBAR_A1_OFFSET  0x14
@@ -152,6 +153,7 @@ extern "C" {
  * MemManage Fault Status Register (MMFSR) Definitions
  * Part of CFSR register at 0xE000ED28
  * Reference: ARMv7-M Architecture Reference Manual, Section B3.2.14
+ *            - Configurable Fault Status Register, CFSR on page B3-609
  *============================================================================*/
 
 #define ARM_V7M_MMFSR_MMARVALID_Pos     7U
@@ -174,7 +176,8 @@ extern "C" {
 
 /*============================================================================*
  * Access Permission (AP) Encoding
- * Reference: ARMv7-M Architecture Reference Manual, Table B3-15
+ * Reference: ARMv7-M Architecture Reference Manual, Table B3-14
+ *            - Access permission encoding on page B3-641
  *============================================================================*/
 
 #define ARM_V7M_MPU_AP_NONE             0x00U  /* No access */
@@ -186,7 +189,8 @@ extern "C" {
 
 /*============================================================================*
  * Memory Attribute Encodings (TEX, C, B, S)
- * Reference: ARMv7-M Architecture Reference Manual, Table B3-13
+ * Reference: ARMv7-M Architecture Reference Manual, Table B3-12
+ *            - Memory attribute encoding on page B3-638
  *============================================================================*/
 
 /* Strongly-ordered memory: TEX=000, C=0, B=0 */
@@ -440,6 +444,246 @@ ARM_V7M_MPU_INLINE uint32_t arm_v7m_mpu_validate_region_cfg(uint32_t base_addr, 
 
     region_size = arm_v7m_mpu_calc_region_size(size_code);
     return arm_v7m_mpu_is_aligned(base_addr, region_size);
+}
+
+/**
+ * @brief Get MPU Type Register
+ * @return MPU_TYPE value
+ */
+ARM_V7M_MPU_INLINE uint32_t arm_v7m_mpu_get_type(void)
+{
+    return MPU->TYPE;
+}
+
+/**
+ * @brief Get MPU Control Register
+ * @return MPU_CTRL value
+ */
+ARM_V7M_MPU_INLINE uint32_t arm_v7m_mpu_get_ctrl(void)
+{
+    return MPU->CTRL;
+}
+
+/**
+ * @brief Set MPU Control Register
+ * @param value Value to write
+ */
+ARM_V7M_MPU_INLINE void arm_v7m_mpu_set_ctrl(uint32_t value)
+{
+    MPU->CTRL = value;
+}
+
+/**
+ * @brief Get MPU Region Number Register
+ * @return MPU_RNR value
+ */
+ARM_V7M_MPU_INLINE uint32_t arm_v7m_mpu_get_rnr(void)
+{
+    return MPU->RNR;
+}
+
+/**
+ * @brief Set MPU Region Number Register
+ * @param value Value to write
+ */
+ARM_V7M_MPU_INLINE void arm_v7m_mpu_set_rnr(uint32_t value)
+{
+    MPU->RNR = value;
+}
+
+/**
+ * @brief Get MPU Region Base Address Register
+ * @return MPU_RBAR value
+ */
+ARM_V7M_MPU_INLINE uint32_t arm_v7m_mpu_get_rbar(void)
+{
+    return MPU->RBAR;
+}
+
+/**
+ * @brief Set MPU Region Base Address Register
+ * @param value Value to write
+ */
+ARM_V7M_MPU_INLINE void arm_v7m_mpu_set_rbar(uint32_t value)
+{
+    MPU->RBAR = value;
+}
+
+/**
+ * @brief Get MPU Region Attribute and Size Register
+ * @return MPU_RASR value
+ */
+ARM_V7M_MPU_INLINE uint32_t arm_v7m_mpu_get_rasr(void)
+{
+    return MPU->RASR;
+}
+
+/**
+ * @brief Set MPU Region Attribute and Size Register
+ * @param value Value to write
+ */
+ARM_V7M_MPU_INLINE void arm_v7m_mpu_set_rasr(uint32_t value)
+{
+    MPU->RASR = value;
+}
+
+/*============================================================================*
+ * Inline Functions - MPU Alias Register Operations
+ * Reference: ARMv7-M Architecture Reference Manual, Section B3.5.4
+ *            - MPU alias register support on page B3-642
+ *            - Enables efficient multi-region programming
+ *============================================================================*/
+
+/**
+ * @brief Get MPU Region Base Address Register Alias 1
+ * @return MPU_RBAR_A1 value
+ */
+ARM_V7M_MPU_INLINE uint32_t arm_v7m_mpu_get_rbar_a1(void)
+{
+    return *(volatile uint32_t *)(ARM_V7M_MPU_BASE + ARM_V7M_MPU_RBAR_A1_OFFSET);
+}
+
+/**
+ * @brief Set MPU Region Base Address Register Alias 1
+ * @param value Value to write
+ */
+ARM_V7M_MPU_INLINE void arm_v7m_mpu_set_rbar_a1(uint32_t value)
+{
+    *(volatile uint32_t *)(ARM_V7M_MPU_BASE + ARM_V7M_MPU_RBAR_A1_OFFSET) = value;
+}
+
+/**
+ * @brief Get MPU Region Attribute and Size Register Alias 1
+ * @return MPU_RASR_A1 value
+ */
+ARM_V7M_MPU_INLINE uint32_t arm_v7m_mpu_get_rasr_a1(void)
+{
+    return *(volatile uint32_t *)(ARM_V7M_MPU_BASE + ARM_V7M_MPU_RASR_A1_OFFSET);
+}
+
+/**
+ * @brief Set MPU Region Attribute and Size Register Alias 1
+ * @param value Value to write
+ */
+ARM_V7M_MPU_INLINE void arm_v7m_mpu_set_rasr_a1(uint32_t value)
+{
+    *(volatile uint32_t *)(ARM_V7M_MPU_BASE + ARM_V7M_MPU_RASR_A1_OFFSET) = value;
+}
+
+/**
+ * @brief Get MPU Region Base Address Register Alias 2
+ * @return MPU_RBAR_A2 value
+ */
+ARM_V7M_MPU_INLINE uint32_t arm_v7m_mpu_get_rbar_a2(void)
+{
+    return *(volatile uint32_t *)(ARM_V7M_MPU_BASE + ARM_V7M_MPU_RBAR_A2_OFFSET);
+}
+
+/**
+ * @brief Set MPU Region Base Address Register Alias 2
+ * @param value Value to write
+ */
+ARM_V7M_MPU_INLINE void arm_v7m_mpu_set_rbar_a2(uint32_t value)
+{
+    *(volatile uint32_t *)(ARM_V7M_MPU_BASE + ARM_V7M_MPU_RBAR_A2_OFFSET) = value;
+}
+
+/**
+ * @brief Get MPU Region Attribute and Size Register Alias 2
+ * @return MPU_RASR_A2 value
+ */
+ARM_V7M_MPU_INLINE uint32_t arm_v7m_mpu_get_rasr_a2(void)
+{
+    return *(volatile uint32_t *)(ARM_V7M_MPU_BASE + ARM_V7M_MPU_RASR_A2_OFFSET);
+}
+
+/**
+ * @brief Set MPU Region Attribute and Size Register Alias 2
+ * @param value Value to write
+ */
+ARM_V7M_MPU_INLINE void arm_v7m_mpu_set_rasr_a2(uint32_t value)
+{
+    *(volatile uint32_t *)(ARM_V7M_MPU_BASE + ARM_V7M_MPU_RASR_A2_OFFSET) = value;
+}
+
+/**
+ * @brief Get MPU Region Base Address Register Alias 3
+ * @return MPU_RBAR_A3 value
+ */
+ARM_V7M_MPU_INLINE uint32_t arm_v7m_mpu_get_rbar_a3(void)
+{
+    return *(volatile uint32_t *)(ARM_V7M_MPU_BASE + ARM_V7M_MPU_RBAR_A3_OFFSET);
+}
+
+/**
+ * @brief Set MPU Region Base Address Register Alias 3
+ * @param value Value to write
+ */
+ARM_V7M_MPU_INLINE void arm_v7m_mpu_set_rbar_a3(uint32_t value)
+{
+    *(volatile uint32_t *)(ARM_V7M_MPU_BASE + ARM_V7M_MPU_RBAR_A3_OFFSET) = value;
+}
+
+/**
+ * @brief Get MPU Region Attribute and Size Register Alias 3
+ * @return MPU_RASR_A3 value
+ */
+ARM_V7M_MPU_INLINE uint32_t arm_v7m_mpu_get_rasr_a3(void)
+{
+    return *(volatile uint32_t *)(ARM_V7M_MPU_BASE + ARM_V7M_MPU_RASR_A3_OFFSET);
+}
+
+/**
+ * @brief Set MPU Region Attribute and Size Register Alias 3
+ * @param value Value to write
+ */
+ARM_V7M_MPU_INLINE void arm_v7m_mpu_set_rasr_a3(uint32_t value)
+{
+    *(volatile uint32_t *)(ARM_V7M_MPU_BASE + ARM_V7M_MPU_RASR_A3_OFFSET) = value;
+}
+
+/**
+ * @brief Configure multiple MPU regions using alias registers (up to 4 regions)
+ * 
+ * According to ARMv7-M Architecture Reference Manual, Section B3.5.4:
+ * - Alias registers allow efficient programming of up to 4 regions
+ * - Write RBAR, then RASR, RBAR_A1, RASR_A1, RBAR_A2, RASR_A2, RBAR_A3, RASR_A3
+ * - The region number in RBAR.REGION is incremented automatically after each write
+ * 
+ * @param region_num Starting region number (0-15)
+ * @param rbar_values Array of 1-4 RBAR values (base addresses with VALID and REGION bits)
+ * @param rasr_values Array of 1-4 RASR values (attributes and size)
+ * @param count Number of regions to configure (1-4)
+ */
+ARM_V7M_MPU_INLINE void arm_v7m_mpu_set_regions_alias(uint32_t region_num,
+                                                       const uint32_t *rbar_values,
+                                                       const uint32_t *rasr_values,
+                                                       uint32_t count)
+{
+    if (count == 0U || count > 4U || rbar_values == (void *)0 || rasr_values == (void *)0) {
+        return;
+    }
+    
+    /* Set starting region number in RNR */
+    arm_v7m_mpu_set_rnr(region_num);
+    
+    /* Write first region (RBAR, RASR) */
+    arm_v7m_mpu_set_rbar(rbar_values[0]);
+    arm_v7m_mpu_set_rasr(rasr_values[0]);
+    
+    /* Write additional regions using alias registers if count > 1 */
+    if (count > 1U) {
+        arm_v7m_mpu_set_rbar_a1(rbar_values[1]);
+        arm_v7m_mpu_set_rasr_a1(rasr_values[1]);
+    }
+    if (count > 2U) {
+        arm_v7m_mpu_set_rbar_a2(rbar_values[2]);
+        arm_v7m_mpu_set_rasr_a2(rasr_values[2]);
+    }
+    if (count > 3U) {
+        arm_v7m_mpu_set_rbar_a3(rbar_values[3]);
+        arm_v7m_mpu_set_rasr_a3(rasr_values[3]);
+    }
 }
 
 /*============================================================================*

@@ -1,70 +1,86 @@
 /*
  * arm_v7m_cm7_scb.c
  * Cortex-M7 System Control Block (SCB) Implementation
- * Reference: Cortex-M7 Devices Generic User Guide, Chapter 4.3
+ * Reference: ARMv7-M Architecture Reference Manual, Section B3.2
+ *            - Section B3.2.5: Application Interrupt and Reset Control Register, AIRCR on page B3-601
+ *            - Section B3.2.6: System Control Register, SCR on page B3-603
+ *            - Section B3.2.10: Configurable Fault Status Register, CFSR on page B3-609
+ *            - Section B3.2.11: HardFault Status Register, HFSR on page B3-612
+ *            - Section B3.2.12: MemManage Fault Address Register, MMFAR on page B3-613
+ *            - Section B3.2.13: BusFault Address Register, BFAR on page B3-614
+ *            - Section B3.2.14: Auxiliary Fault Status Register, AFSR on page B3-614
+ *            - Section B3.2.15: Coprocessor Access Control Register, CPACR on page B3-614
+ *            Cortex-M7 Devices Generic User Guide, Chapter 4.3
+ *            - Section 4.3.5: Application Interrupt and Reset Control Register on page 4-17
+ *            - Section 4.3.8: System Handler Priority Registers on page 4-23
+ *            - Section 4.3.9: System Handler Control and State Register on page 4-24
+ *            - Section 4.3.10: Configurable Fault Status Register on page 4-25
+ *            - Section 4.3.11: HardFault Status Register on page 4-31
+ *            Cortex-M7 Technical Reference Manual, Chapter 3
+ *            - Section 3.3: Register descriptions on page 3-6
+ *
+ * This file wraps the generic Armv7-M SCB implementation for Cortex-M7.
+ * All functions delegate to the generic v7m implementation.
+ *
+ * @note This file wraps the generic Armv7-M SCB implementation.
  */
 
 #include "arm_v7m_cm7_scb.h"
 
 /*============================================================================*
- * SCB Base Address (Architecture defined)
- *============================================================================*/
-#define SCB_BASE            0xE000ED00UL
-
-#define SCB                 ((arm_v7m_cm7_scb_regs_t *)SCB_BASE)
-
-/*============================================================================*
- * SCB Implementation
+ * SCB System Control Operations
  *============================================================================*/
 
-void arm_v7m_cm7_scb_set_vector_table(uint32_t offset)
-{
-    /* TODO: Write to VTOR register */
-    (void)offset;
-}
-
-uint32_t arm_v7m_cm7_scb_get_vector_table(void)
-{
-    /* TODO: Read VTOR register */
-    return 0;
-}
-
+/**
+ * @brief Trigger a system reset
+ * @note This function does not return if the reset is successful
+ */
 void arm_v7m_cm7_scb_system_reset(void)
 {
-    /* TODO: Write to AIRCR with SYSRESETREQ and VECTKEY */
+    arm_v7m_scb_system_reset();
 }
 
+/**
+ * @brief Set the priority grouping field
+ * @param priority_group Priority grouping field (ARM_V7M_CM7_SCB_PRIORITYGROUP_0 to ARM_V7M_CM7_SCB_PRIORITYGROUP_7)
+ */
 void arm_v7m_cm7_scb_set_priority_grouping(uint32_t priority_group)
 {
-    /* TODO: Write PRIGROUP field in AIRCR */
-    (void)priority_group;
+    arm_v7m_scb_set_priority_grouping(priority_group);
 }
 
-uint32_t arm_v7m_cm7_scb_get_priority_grouping(void)
-{
-    /* TODO: Read PRIGROUP field from AIRCR */
-    return 0;
-}
+/*============================================================================*
+ * SCB Fault Status Operations
+ *============================================================================*/
 
-void arm_v7m_cm7_scb_enable_fault(uint32_t fault)
-{
-    /* TODO: Set fault enable bits in SHCSR */
-    (void)fault;
-}
-
-void arm_v7m_cm7_scb_disable_fault(uint32_t fault)
-{
-    /* TODO: Clear fault enable bits in SHCSR */
-    (void)fault;
-}
-
-uint32_t arm_v7m_cm7_scb_get_fault_status(void)
-{
-    /* TODO: Read CFSR and HFSR */
-    return 0;
-}
-
+/**
+ * @brief Clear all fault status registers
+ */
 void arm_v7m_cm7_scb_clear_fault_status(void)
 {
-    /* TODO: Clear CFSR, HFSR, DFSR registers */
+    arm_v7m_scb_clear_fault_status();
+}
+
+/*============================================================================*
+ * SCB System Handler Priority Operations
+ *============================================================================*/
+
+/**
+ * @brief Get system handler priority
+ * @param handler System handler number (0-11 corresponding to SHP array index)
+ * @return Priority value (0-255), or 0 if handler is invalid
+ */
+uint32_t arm_v7m_cm7_scb_get_system_handler_priority(uint32_t handler)
+{
+    return arm_v7m_scb_get_system_handler_priority(handler);
+}
+
+/**
+ * @brief Set system handler priority
+ * @param handler System handler number (0-11 corresponding to SHP array index)
+ * @param priority Priority value (0-255)
+ */
+void arm_v7m_cm7_scb_set_system_handler_priority(uint32_t handler, uint32_t priority)
+{
+    arm_v7m_scb_set_system_handler_priority(handler, priority);
 }

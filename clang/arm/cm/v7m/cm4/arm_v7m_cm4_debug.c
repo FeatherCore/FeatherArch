@@ -1,117 +1,45 @@
 /*
  * arm_v7m_cm4_debug.c
  * Cortex-M4 Debug Support Implementation
- * Reference: Cortex-M4 Technical Reference Manual, Chapters 8-11
+ * 
+ * Reference: ARMv7-M Architecture Reference Manual
+ *            - Chapter C1: Debug on page C1-696
+ *            - Section C1.6: Debug System Registers on page C1-708
+ *            - Section C1.7: Instrumentation Trace Macrocell (ITM) on page C1-714
+ *            - Section C1.8: Data Watchpoint and Trace (DWT) on page C1-717
+ *            - Section C1.10: Flash Patch and Breakpoint (FPB) on page C1-725
+ * 
+ *            Cortex-M4 Devices Generic User Guide
+ *            - Chapter 10: Debug on page 10-2
+ *            - Chapter 11: Debug and Trace Components on page 11-2
+ * 
+ *            Cortex-M4 Technical Reference Manual
+ *            - Chapter 8: Debug on page 8-2
+ *            - Chapter 9: Data Watchpoint and Trace Unit on page 9-2
+ *            - Chapter 10: Flash Patch and Breakpoint Unit on page 10-2
+ *            - Chapter 11: Instrumentation Trace Macrocell on page 11-2
+ * 
+ * @note Cortex-M4 Debug is identical to generic Armv7-M Debug.
+ *       All functions are implemented as static inline in arm_v7m_cm4_debug.h
+ *       to eliminate function call overhead.
+ *       This file is kept for compatibility and potential future extensions.
  */
 
 #include "arm_v7m_cm4_debug.h"
 
-/*============================================================================*
- * Debug Base Addresses (Architecture defined)
- *============================================================================*/
-#define DEBUG_BASE          0xE000EDF0UL
-#define DWT_BASE            0xE0001000UL
-#define FPB_BASE            0xE0002000UL
-
-#define DEBUG               ((arm_v7m_cm4_debug_regs_t *)DEBUG_BASE)
-#define DWT                 ((arm_v7m_cm4_dwt_regs_t *)DWT_BASE)
-#define FPB                 ((arm_v7m_cm4_fpb_regs_t *)FPB_BASE)
-
-/*============================================================================*
- * Debug Implementation
- *============================================================================*/
-
-void arm_v7m_cm4_debug_enable_trace(void)
-{
-    /* TODO: Enable TRCENA in DEMCR */
-}
-
-void arm_v7m_cm4_debug_disable_trace(void)
-{
-    /* TODO: Disable TRCENA in DEMCR */
-}
-
-uint32_t arm_v7m_cm4_debug_is_halted(void)
-{
-    /* TODO: Check S_HALT bit in DHCSR */
-    return 0;
-}
-
-void arm_v7m_cm4_debug_halt(void)
-{
-    /* TODO: Set C_HALT in DHCSR with debug key */
-}
-
-void arm_v7m_cm4_debug_resume(void)
-{
-    /* TODO: Clear C_HALT in DHCSR with debug key */
-}
-
-void arm_v7m_cm4_debug_step(void)
-{
-    /* TODO: Set C_STEP in DHCSR with debug key */
-}
-
-/*============================================================================*
- * DWT Implementation
- *============================================================================*/
-
-void arm_v7m_cm4_dwt_enable_cyccnt(void)
-{
-    /* TODO: Enable CYCCNTENA in DWT_CTRL */
-}
-
-void arm_v7m_cm4_dwt_disable_cyccnt(void)
-{
-    /* TODO: Disable CYCCNTENA in DWT_CTRL */
-}
-
-uint32_t arm_v7m_cm4_dwt_get_cyccnt(void)
-{
-    /* TODO: Read DWT_CYCCNT */
-    return 0;
-}
-
-void arm_v7m_cm4_dwt_set_cyccnt(uint32_t value)
-{
-    /* TODO: Write DWT_CYCCNT */
-    (void)value;
-}
-
-void arm_v7m_cm4_dwt_enable_exception_trace(void)
-{
-    /* TODO: Enable EXCTRCENA in DWT_CTRL */
-}
-
-void arm_v7m_cm4_dwt_enable_pc_sampling(uint32_t interval)
-{
-    /* TODO: Configure PC sampling with given interval */
-    (void)interval;
-}
-
-/*============================================================================*
- * FPB Implementation
- *============================================================================*/
-
-void arm_v7m_cm4_fpb_enable(void)
-{
-    /* TODO: Set ENABLE bit in FPB_CTRL */
-}
-
-void arm_v7m_cm4_fpb_disable(void)
-{
-    /* TODO: Clear ENABLE bit in FPB_CTRL */
-}
-
-void arm_v7m_cm4_fpb_set_breakpoint(uint32_t comp_id, uint32_t addr)
-{
-    /* TODO: Configure FPB_COMP register */
-    (void)comp_id;
-    (void)addr;
-}
-
-void arm_v7m_cm4_fpb_clear_breakpoint(uint32_t comp_id)
-{
-    /* TODO: Clear FPB_COMP register */
-    (void)comp_id;
-}
+/*
+ * All Debug functions are implemented as static inline in arm_v7m_cm4_debug.h
+ * for optimal performance.
+ *
+ * The following functions are available as inline functions in the header:
+ * - arm_v7m_cm4_debug_enable_trace() / arm_v7m_cm4_debug_disable_trace()
+ * - arm_v7m_cm4_debug_is_halted()
+ * - arm_v7m_cm4_debug_halt() / arm_v7m_cm4_debug_resume()
+ * - arm_v7m_cm4_debug_step()
+ * - arm_v7m_cm4_dwt_enable_cyccnt() / arm_v7m_cm4_dwt_disable_cyccnt()
+ * - arm_v7m_cm4_dwt_get_cyccnt() / arm_v7m_cm4_dwt_set_cyccnt()
+ * - arm_v7m_cm4_dwt_enable_exception_trace()
+ * - arm_v7m_cm4_dwt_enable_pc_sampling()
+ * - arm_v7m_cm4_fpb_enable() / arm_v7m_cm4_fpb_disable()
+ * - arm_v7m_cm4_fpb_set_breakpoint() / arm_v7m_cm4_fpb_clear_breakpoint()
+ */

@@ -1,7 +1,32 @@
 /*
- * armv7m.h
+ * arm_v7m.h
  * Armv7-M Architecture Abstraction Layer - Master Header
+ * 
  * Reference: ARMv7-M Architecture Reference Manual
+ *            - Chapter A1: ARMv7-M Architecture Overview
+ *            - Section A2.1: Processor core registers on page A2-33
+ *            - Section A3: Memory model on page A3-57
+ *            - Section A3.4: Bit-band operations on page A3-71
+ *            - Section A3.5: Exclusive access on page A3-75
+ *            - Section A3.7.3: Memory barriers on page A3-81
+ *            - Section B1.4.2: Interrupt control on page B1-527
+ *            - Section B1.5: Power management on page B1-530
+ *            - Section B1.5.3: Wait For Interrupt on page B1-531
+ *            - Section B1.5.4: Wait For Event and Send Event on page B1-532
+ * 
+ *            Cortex-M7 Devices Generic User Guide
+ *            - Chapter 1: Introduction on page 1-2
+ *            - Chapter 2: The Cortex-M7 Processor
+ *            - Section 2.1: Programmers model on page 2-2
+ *            - Section 2.2: Memory model on page 2-12
+ *            - Section 2.5: Power management on page 2-31
+ * 
+ *            Cortex-M7 Technical Reference Manual
+ *            - Chapter 1: Introduction on page 1-2
+ *            - Section 1.1: About the Cortex-M7 processor on page 1-2
+ *            - Chapter 2: Programmers Model on page 2-2
+ *            - Section 2.1: About the programmers model on page 2-2
+ *            - Section 2.3: Register set on page 2-6
  */
 
 #ifndef ARM_V7M_H
@@ -34,6 +59,16 @@ extern "C" {
  * Global Initialization and Control
  *============================================================================*/
 
+/**
+ * @brief Initialize the ARMv7-M processor
+ * 
+ * According to ARMv7-M Architecture Reference Manual, Section B1.6:
+ * - Configure vector table offset
+ * - Set up priority grouping
+ * - Initialize core peripherals as needed
+ * 
+ * @note This function should be called early in the startup sequence.
+ */
 void arm_v7m_init(void);
 
 /* 

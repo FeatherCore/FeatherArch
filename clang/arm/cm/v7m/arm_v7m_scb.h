@@ -161,6 +161,7 @@ typedef struct {
 /*============================================================================*
  * SCB SHCSR Register Definitions
  * Reference: ARMv7-M Architecture Reference Manual, Section B3.2.13
+ *            - System Handler Control and State Register, SHCSR on page B3-607
  *============================================================================*/
 #define SCB_SHCSR_USGFAULTENA_Pos     18U
 #define SCB_SHCSR_USGFAULTENA_Msk     (1UL << SCB_SHCSR_USGFAULTENA_Pos)
@@ -193,7 +194,8 @@ typedef struct {
 
 /*============================================================================*
  * SCB CFSR Register Definitions
- * Reference: ARMv7-M Architecture Reference Manual, Section B3.2.15
+ * Reference: ARMv7-M Architecture Reference Manual, Section B3.2.14
+ *            - Configurable Fault Status Register, CFSR on page B3-609
  *============================================================================*/
 /* MemManage Fault Status Register (MMFSR) - Lower 8 bits of CFSR */
 #define SCB_CFSR_MMARVALID_Pos        (7U + 0U)
@@ -241,7 +243,8 @@ typedef struct {
 
 /*============================================================================*
  * SCB HFSR Register Definitions
- * Reference: ARMv7-M Architecture Reference Manual, Section B3.2.16
+ * Reference: ARMv7-M Architecture Reference Manual, Section B3.2.15
+ *            - HardFault Status Register, HFSR on page B3-612
  *============================================================================*/
 #define SCB_HFSR_DEBUGEVT_Pos         31U
 #define SCB_HFSR_DEBUGEVT_Msk         (1UL << SCB_HFSR_DEBUGEVT_Pos)
@@ -267,7 +270,8 @@ typedef struct {
 
 /*============================================================================*
  * SCB CPACR Register Definitions
- * Reference: ARMv7-M Architecture Reference Manual, Section B3.2.20
+ * Reference: ARMv7-M Architecture Reference Manual, Section B3.2.19
+ *            - Coprocessor Access Control Register, CPACR on page B3-614
  *============================================================================*/
 #define SCB_CPACR_CP10_Pos            20U
 #define SCB_CPACR_CP10_Msk          (3UL << SCB_CPACR_CP10_Pos)

@@ -282,8 +282,9 @@ void arm_v7m_mpu_set_regions(const arm_v7m_mpu_region_cfg_t *regions, uint32_t c
 /**
  * @brief Disable a specific MPU region
  * @param region_num Region number to disable
- * @note Per the architecture manual, all MPU_RASR registers must be
- *       programmed as either enabled or disabled before enabling the MPU.
+ * @note Per ARMv7-M Architecture Reference Manual, Section B3.5.4:
+ *       "All MPU_RASR registers must be programmed as either enabled or
+ *       disabled before enabling the MPU using the MPU_CTRL register."
  */
 void arm_v7m_mpu_disable_region(uint32_t region_num)
 {

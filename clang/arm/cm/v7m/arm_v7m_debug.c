@@ -3,6 +3,9 @@
  * Debug Support Implementation
  * Reference: ARMv7-M Architecture Reference Manual, Part C
  *   - Section C1.6: Debug system registers
+ *   - Section C1.6.2: Debug Halting Control and Status Register, DHCSR
+ *   - Section C1.6.3: Debug Core Register Selector Register, DCRSR
+ *   - Section C1.6.5: Debug Exception and Monitor Control Register, DEMCR
  *   - Section C1.7: The Instrumentation Trace Macrocell
  *   - Section C1.8: The Data Watchpoint and Trace unit
  *   - Section C1.10: Trace Port Interface Unit

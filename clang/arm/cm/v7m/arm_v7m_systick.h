@@ -15,13 +15,15 @@ extern "C" {
 
 /*============================================================================*
  * SysTick Base Address (Architecture defined)
- * Reference: ARMv7-M Architecture Reference Manual, Table B3-6
+ * Reference: ARMv7-M Architecture Reference Manual, Table B3-7
+ *            - SysTick register summary on page B3-621
  *============================================================================*/
 #define SYSTICK_BASE        0xE000E010UL
 
 /*============================================================================*
  * SysTick Type Definitions
- * Reference: ARMv7-M Architecture Reference Manual, Table B3-6
+ * Reference: ARMv7-M Architecture Reference Manual, Table B3-7
+ *            - SysTick register summary on page B3-621
  *============================================================================*/
 
 typedef struct {

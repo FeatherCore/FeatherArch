@@ -31,7 +31,8 @@ extern "C" {
 
 /*============================================================================*
  * Debug Base Addresses (Architecture defined)
- * Reference: ARMv7-M Architecture Reference Manual, Table C1-10, C1-719
+ * Reference: ARMv7-M Architecture Reference Manual, Table C1-10 on page C1-699
+ *            - Summary of debug system registers
  *============================================================================*/
 
 #define ARM_V7M_DEBUG_BASE          0xE000EDF0UL
@@ -134,6 +135,7 @@ extern "C" {
 /*============================================================================*
  * DEMCR (Debug Exception and Monitor Control Register) Bit Definitions
  * Reference: ARMv7-M Architecture Reference Manual, Section C1.6.5
+ *            - Debug Exception and Monitor Control Register, DEMCR on page C1-706
  * Address: 0xE000EDFC
  *============================================================================*/
 
@@ -179,7 +181,8 @@ extern "C" {
 
 /*============================================================================*
  * DWT_CTRL (DWT Control Register) Bit Definitions
- * Reference: ARMv7-M Architecture Reference Manual, Section C1.8.4
+ * Reference: ARMv7-M Architecture Reference Manual, Section C1.8.2
+ *            - DWT Control Register, DWT_CTRL on page C1-721
  * Address: 0xE0001000
  *============================================================================*/
 

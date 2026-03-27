@@ -1,8 +1,41 @@
 /*
  * arm_v7m_cm7_core.h
  * Cortex-M7 Core Register Definitions
- * Reference: Cortex-M7 Devices Generic User Guide, Chapter 2.1
+ * Reference: ARMv7-M Architecture Reference Manual
+ *            - Section B1.4: Registers on page B1-514
+ *            - Section B1.4.1: Arm core registers on page B1-514
+ *            - Section B1.4.2: The special-purpose Program Status Registers, xPSR on page B1-516
+ *            - Section B1.4.3: The special-purpose mask registers on page B1-528
+ *            - Section B1.4.4: The special-purpose CONTROL register on page B1-519
+ *            - Section A2.3: Arm core registers on page A2-33
+ *            - Section A2.3.1: Arm core registers on page A2-33
+ *            - Section A2.3.2: The Application Program Status Register (APSR) on page A2-35
+ *            - Section A2.3.3: The special-purpose Program Status Registers, xPSR on page A2-37
+ *            - Section A2.3.4: The special-purpose mask registers on page A2-38
+ *            - Section A2.3.5: The special-purpose CONTROL register on page A2-39
+ *            - Section B5.2: System Instruction Descriptions on page B5-678
+ *            Cortex-M7 Devices Generic User Guide, Chapter 2.1
+ *            - Core register set summary on page 2-3
+ *            - Stack Pointer on page 2-4
+ *            - Program Status Register on page 2-4
+ *            - Application Program Status Register on page 2-5
+ *            - Interrupt Program Status Register on page 2-6
+ *            - Execution Program Status Register on page 2-6
+ *            - Exception mask registers (PRIMASK, FAULTMASK, BASEPRI) on page 2-7
+ *            - Priority Mask Register on page 2-8
+ *            - Fault Mask Register on page 2-8
+ *            - Base Priority Mask Register on page 2-8
+ *            - CONTROL register on page 2-9
  *            Cortex-M7 Technical Reference Manual, Chapter 2.6
+ *            - Processor core registers on page 2-9
+ *            - Core register set summary on page 2-9
+ *            - Stack Pointer on page 2-10
+ *            - Program Status Register on page 2-10
+ *            - Application Program Status Register on page 2-11
+ *            - Interrupt Program Status Register on page 2-11
+ *            - Execution Program Status Register on page 2-11
+ *            - Exception mask registers on page 2-11
+ *            - CONTROL register on page 2-12
  *
  * @note Cortex-M7 extends standard Armv7-M with Cache and TCM.
  *       Basic core registers reuse generic Armv7-M definitions from arm_v7m_core.h
@@ -431,6 +464,48 @@ ARM_V7M_CM7_CORE_INLINE int arm_v7m_cm7_get_fpca(void) {
  */
 ARM_V7M_CM7_CORE_INLINE void arm_v7m_cm7_set_fpca(int value) {
     arm_v7m_set_fpca(value);
+}
+
+/*============================================================================*
+ * Bit-Band Operations (reuse generic implementation)
+ * Reference: ARMv7-M Architecture Reference Manual, Section A3.4
+ *============================================================================*/
+
+/**
+ * @brief Set a bit using bit-band alias
+ * @param addr Address of the word containing the bit
+ * @param bit Bit number (0-31)
+ */
+ARM_V7M_CM7_CORE_INLINE void arm_v7m_cm7_bitband_set(volatile uint32_t *addr, uint32_t bit) {
+    arm_v7m_bitband_set(addr, bit);
+}
+
+/**
+ * @brief Clear a bit using bit-band alias
+ * @param addr Address of the word containing the bit
+ * @param bit Bit number (0-31)
+ */
+ARM_V7M_CM7_CORE_INLINE void arm_v7m_cm7_bitband_clear(volatile uint32_t *addr, uint32_t bit) {
+    arm_v7m_bitband_clear(addr, bit);
+}
+
+/**
+ * @brief Read a bit using bit-band alias
+ * @param addr Address of the word containing the bit
+ * @param bit Bit number (0-31)
+ * @return Bit value (0 or 1)
+ */
+ARM_V7M_CM7_CORE_INLINE uint32_t arm_v7m_cm7_bitband_read(volatile uint32_t *addr, uint32_t bit) {
+    return arm_v7m_bitband_read(addr, bit);
+}
+
+/**
+ * @brief Toggle a bit using bit-band alias
+ * @param addr Address of the word containing the bit
+ * @param bit Bit number (0-31)
+ */
+ARM_V7M_CM7_CORE_INLINE void arm_v7m_cm7_bitband_toggle(volatile uint32_t *addr, uint32_t bit) {
+    arm_v7m_bitband_toggle(addr, bit);
 }
 
 #ifdef __cplusplus

@@ -18,7 +18,7 @@
  * @param enable_interrupt 1 to enable SysTick interrupt, 0 to disable
  * @note This function disables SysTick first, configures it, then enables
  *
- * Initialization sequence (per ARMv7-M Architecture Reference Manual B3.3.1):
+ * Initialization sequence (per ARMv7-M Architecture Reference Manual Section B3.3):
  * 1. Disable SysTick by clearing ENABLE bit
  * 2. Set reload value in LOAD register
  * 3. Clear current value by writing to VAL register (clears to 0)
@@ -127,7 +127,7 @@ void arm_v7m_systick_delay_ticks(uint32_t ticks)
  * @return 0 on success, 1 if calibration value is not available
  * @note Uses the TENMS calibration value from SYST_CALIB register
  *
- * Reference: ARMv7-M Architecture Reference Manual B3.3.6
+ * Reference: ARMv7-M Architecture Reference Manual, Section B3.3.6
  * The TENMS field optionally holds a reload value for 10ms (100Hz) timing.
  * If this field is zero, the calibration value is not known.
  */

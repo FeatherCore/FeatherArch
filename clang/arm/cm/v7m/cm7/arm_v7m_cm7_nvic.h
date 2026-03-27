@@ -72,6 +72,7 @@ ARM_V7M_CM7_NVIC_INLINE void arm_v7m_cm7_nvic_disable_irq(uint32_t irqn) {
  * @param irqn External interrupt number (0-495)
  * @return 1 if enabled, 0 if disabled
  * @note Reads the appropriate bit from NVIC_ISER register
+ *       Reference: Cortex-M7 Devices Generic User Guide, Section 4.2.2
  */
 ARM_V7M_CM7_NVIC_INLINE uint32_t arm_v7m_cm7_nvic_get_enable_irq(uint32_t irqn) {
     return arm_v7m_nvic_get_enable_irq(irqn);
@@ -180,6 +181,8 @@ void arm_v7m_cm7_nvic_disable_irq_batch(const uint32_t *irqn_array, uint32_t cou
 /**
  * @brief Disable all interrupts globally
  * @note Sets PRIMASK. This is a CPSID i instruction.
+ * @reference Cortex-M7 Devices Generic User Guide, Section 2.1.4
+ *            - Priority Mask Register on page 2-8
  */
 ARM_V7M_CM7_NVIC_INLINE void arm_v7m_cm7_nvic_disable_all_irqs(void) {
     arm_v7m_nvic_disable_all_irqs();
@@ -188,6 +191,8 @@ ARM_V7M_CM7_NVIC_INLINE void arm_v7m_cm7_nvic_disable_all_irqs(void) {
 /**
  * @brief Enable all interrupts globally
  * @note Clears PRIMASK. This is a CPSIE i instruction.
+ * @reference Cortex-M7 Devices Generic User Guide, Section 2.1.4
+ *            - Priority Mask Register on page 2-8
  */
 ARM_V7M_CM7_NVIC_INLINE void arm_v7m_cm7_nvic_enable_all_irqs(void) {
     arm_v7m_nvic_enable_all_irqs();
@@ -196,10 +201,143 @@ ARM_V7M_CM7_NVIC_INLINE void arm_v7m_cm7_nvic_enable_all_irqs(void) {
 /**
  * @brief Get global interrupt enable state
  * @return 1 if interrupts are enabled, 0 if disabled
+ * @note Reads PRIMASK register
+ * @reference Cortex-M7 Devices Generic User Guide, Section 2.1.4
+ *            - Priority Mask Register on page 2-8
  */
 ARM_V7M_CM7_NVIC_INLINE uint32_t arm_v7m_cm7_nvic_get_all_irqs_enabled(void) {
     return arm_v7m_nvic_get_all_irqs_enabled();
 }
+
+/*============================================================================*
+ * Inline Function Wrappers - BASEPRI Control
+ * Reference: ARMv7-M Architecture Reference Manual, Section B1.4.3
+ *            - The special-purpose mask registers, BASEPRI on page B1-528
+ *            Cortex-M7 Devices Generic User Guide, Section 2.1.4
+ *            - Base Priority Mask Register on page 2-8
+ *============================================================================*/
+
+/**
+ * @brief Set BASEPRI register value
+ * @param basepri Priority value (0-255)
+ * @note Masks all interrupts with priority >= basepri
+ */
+ARM_V7M_CM7_NVIC_INLINE void arm_v7m_cm7_nvic_set_basepri(uint32_t basepri) {
+    arm_v7m_nvic_set_basepri(basepri);
+}
+
+/**
+ * @brief Get BASEPRI register value
+ * @return Current BASEPRI value
+ */
+ARM_V7M_CM7_NVIC_INLINE uint32_t arm_v7m_cm7_nvic_get_basepri(void) {
+    return arm_v7m_nvic_get_basepri();
+}
+
+/**
+ * @brief Clear BASEPRI (enable all priority levels)
+ */
+ARM_V7M_CM7_NVIC_INLINE void arm_v7m_cm7_nvic_clear_basepri(void) {
+    arm_v7m_nvic_clear_basepri();
+}
+
+/**
+ * @brief Raise BASEPRI to mask interrupts up to specified priority
+ * @param priority Priority threshold (lower value = higher priority)
+ */
+ARM_V7M_CM7_NVIC_INLINE void arm_v7m_cm7_nvic_raise_basepri(uint32_t priority) {
+    arm_v7m_nvic_raise_basepri(priority);
+}
+
+/**
+ * @brief Check if BASEPRI is active
+ * @return 1 if BASEPRI is non-zero, 0 otherwise
+ */
+ARM_V7M_CM7_NVIC_INLINE uint32_t arm_v7m_cm7_nvic_is_basepri_active(void) {
+    return arm_v7m_nvic_is_basepri_active();
+}
+
+/*============================================================================*
+ * Inline Function Wrappers - FAULTMASK Control
+ * Reference: ARMv7-M Architecture Reference Manual, Section B1.4.3
+ *            - The special-purpose mask registers, FAULTMASK on page B1-529
+ *            Cortex-M7 Devices Generic User Guide, Section 2.1.4
+ *            - Fault Mask Register on page 2-8
+ *============================================================================*/
+
+/**
+ * @brief Disable all fault exceptions
+ * @note Sets FAULTMASK. All faults escalate to HardFault.
+ */
+ARM_V7M_CM7_NVIC_INLINE void arm_v7m_cm7_nvic_disable_faults(void) {
+    arm_v7m_nvic_disable_faults();
+}
+
+/**
+ * @brief Enable fault exceptions
+ * @note Clears FAULTMASK
+ */
+ARM_V7M_CM7_NVIC_INLINE void arm_v7m_cm7_nvic_enable_faults(void) {
+    arm_v7m_nvic_enable_faults();
+}
+
+/**
+ * @brief Get FAULTMASK value
+ * @return 1 if faults are disabled, 0 if enabled
+ * @reference Cortex-M7 Devices Generic User Guide, Section 2.1.4
+ *            - Fault Mask Register on page 2-8
+ */
+ARM_V7M_CM7_NVIC_INLINE uint32_t arm_v7m_cm7_nvic_get_fault_mask(void) {
+    return arm_v7m_nvic_get_fault_mask();
+}
+
+/**
+ * @brief Check if faults are disabled
+ * @return 1 if faults are disabled, 0 if enabled
+ * @reference Cortex-M7 Devices Generic User Guide, Section 2.1.4
+ *            - Fault Mask Register on page 2-8
+ */
+ARM_V7M_CM7_NVIC_INLINE uint32_t arm_v7m_cm7_nvic_are_faults_disabled(void) {
+    return arm_v7m_nvic_are_faults_disabled();
+}
+
+/*============================================================================*
+ * Inline Function Wrappers - System Exception Priority
+ * Reference: Cortex-M7 Devices Generic User Guide, Section 4.3.8
+ *            - System Handler Priority Registers on page 4-22
+ *            - System Handler Priority Register 1 on page 4-23
+ *            - System Handler Priority Register 2 on page 4-23
+ *            - System Handler Priority Register 3 on page 4-23
+ *============================================================================*/
+
+/**
+ * @brief Set priority of a system exception
+ * @param excn System exception number (e.g., MemoryManagement_IRQn)
+ * @param priority Priority value (0-255)
+ */
+ARM_V7M_CM7_NVIC_INLINE void arm_v7m_cm7_nvic_set_system_exception_priority(int32_t excn, uint32_t priority) {
+    arm_v7m_nvic_set_system_exception_priority(excn, priority);
+}
+
+/**
+ * @brief Get priority of a system exception
+ * @param excn System exception number
+ * @return Priority value (0-255)
+ */
+ARM_V7M_CM7_NVIC_INLINE uint32_t arm_v7m_cm7_nvic_get_system_exception_priority(int32_t excn) {
+    return arm_v7m_nvic_get_system_exception_priority(excn);
+}
+
+/*============================================================================*
+ * Non-Inline Function Declarations
+ *============================================================================*/
+
+/**
+ * @brief Get the highest priority pending interrupt
+ * @return Highest priority pending interrupt number, or ARM_V7M_CM7_NVIC_NUM_IRQN if none
+ * @note Traverses ISPR and IPR registers to find highest priority pending interrupt
+ */
+uint32_t arm_v7m_cm7_nvic_get_highest_pending_irq(void);
 
 /*============================================================================*
  * Exception Number Aliases

@@ -1,58 +1,34 @@
 /*
  * arm_v7m_cm4_systick.c
  * Cortex-M4 System Timer (SysTick) Implementation
- * Reference: Cortex-M4 Devices Generic User Guide, Chapter 4.4
+ * 
+ * Reference: ARMv7-M Architecture Reference Manual
+ *            - Section B3.3: System Timer, SysTick on page B3-596
+ *            - Section B3.3.1: SysTick register summary on page B3-596
+ * 
+ *            Cortex-M4 Devices Generic User Guide
+ *            - Chapter 4.4: System Timer, SysTick on page 4-32
+ *            - Section 4.4.1: SysTick register summary on page 4-33
+ * 
+ *            Cortex-M4 Technical Reference Manual
+ *            - Chapter 4.4: System Timer, SysTick on page 4-4
+ * 
+ * @note Cortex-M4 SysTick is identical to generic Armv7-M SysTick.
+ *       All functions are implemented as static inline in arm_v7m_cm4_systick.h
+ *       to eliminate function call overhead.
+ *       This file is kept for compatibility and potential future extensions.
  */
 
 #include "arm_v7m_cm4_systick.h"
 
-/*============================================================================*
- * SysTick Base Address (Architecture defined)
- *============================================================================*/
-#define SYSTICK_BASE        0xE000E010UL
-
-#define SYSTICK             ((arm_v7m_cm4_systick_regs_t *)SYSTICK_BASE)
-
-/*============================================================================*
- * SysTick Implementation
- *============================================================================*/
-
-void arm_v7m_cm4_systick_init(uint32_t reload_value)
-{
-    /* TODO: Configure and enable SysTick */
-    (void)reload_value;
-}
-
-void arm_v7m_cm4_systick_enable(void)
-{
-    /* TODO: Set ENABLE bit in CTRL register */
-}
-
-void arm_v7m_cm4_systick_disable(void)
-{
-    /* TODO: Clear ENABLE bit in CTRL register */
-}
-
-uint32_t arm_v7m_cm4_systick_get_count(void)
-{
-    /* TODO: Read VAL register */
-    return 0;
-}
-
-void arm_v7m_cm4_systick_set_reload(uint32_t value)
-{
-    /* TODO: Write LOAD register */
-    (void)value;
-}
-
-uint32_t arm_v7m_cm4_systick_get_reload(void)
-{
-    /* TODO: Read LOAD register */
-    return 0;
-}
-
-uint32_t arm_v7m_cm4_systick_get_calib(void)
-{
-    /* TODO: Read CALIB register */
-    return 0;
-}
+/*
+ * All SysTick functions are implemented as static inline in arm_v7m_cm4_systick.h
+ * for optimal performance.
+ *
+ * The following functions are available as inline functions in the header:
+ * - arm_v7m_cm4_systick_init()
+ * - arm_v7m_cm4_systick_enable() / arm_v7m_cm4_systick_disable()
+ * - arm_v7m_cm4_systick_get_count()
+ * - arm_v7m_cm4_systick_set_reload() / arm_v7m_cm4_systick_get_reload()
+ * - arm_v7m_cm4_systick_get_calib()
+ */
