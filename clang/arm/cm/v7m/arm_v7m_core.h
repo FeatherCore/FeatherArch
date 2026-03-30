@@ -38,6 +38,27 @@
  * - ROM Table: ROM_SCS, ROM_DWT, ROM_FPB, ROM_ITM, ROM_TPIU, ROM_ETM, ROM_END,
  *             ROM_MEMTYPE, ROM_PID0-7, ROM_CID0-3 (基地址 0xE00FF000)
  *   参考: Table C1-3 Armv7-M DAP accessible ROM table on page C1-686
+ *
+ * 【v7m 独有功能说明】
+ * 以下功能仅在 ARMv7-M 中可用，在 ARMv8-M 中已被移除或替代：
+ * 1. MPU_RASR 寄存器 - v8m 中使用 MPU_RLAR 替代，并新增 MPU_MAIR0/1 寄存器
+ * 2. ROM Table 寄存器 - v8m 中移除了 ROM Table 支持
+ * 3. FPU 基地址 - v7m 为 0xE000EF30，v8m 改为 0xE000EF34
+ * 4. 组件 ID 寄存器偏移 - v7m 为 0xFD0-0xFFC，v8m 改为 0xEFB0-0xEFFC
+ *
+ * 【v8m 新增功能（v7m 不支持）】
+ * 1. Security Extension - SAU 寄存器、Secure Fault (SFSR/SFAR)、NS 别名机制
+ * 2. Stack Pointer Limit - MSPLIM/PSPLIM 寄存器
+ * 3. 协处理器电源控制 - CPPWR 寄存器
+ * 4. 版本 ID - REVIDR 寄存器
+ * 5. Non-secure 访问控制 - NSACR 寄存器
+ * 6. NVIC ITNS - 中断目标 Non-secure 寄存器
+ * 7. 调试扩展 - DSCEMCR, DAUTHCTRL, DSCSR 寄存器
+ * 8. PMU - 性能监控单元
+ * 9. RAS - 可靠性、可用性和可服务性扩展
+ * 10. MVE - M-Profile 向量扩展 (Q0-Q7, VPR)
+ * 11. PACBTI - 指针认证和分支目标识别
+ * 12. DWT/ITM/FPB/TPIU 完整的 PIDR/CIDR/DEVARCH/DEVTYPE 寄存器
  ********************************************************************************/
 
 #ifndef __ARM_V7M_CORE_H__
@@ -1026,7 +1047,8 @@ extern "C" {
                                                位[0] 是使能 (ENABLE): 1=区域启用
                                                用于配置内存保护区域的访问权限和属性
                                                参考：MPU Region Attribute and Size Register, MPU_RASR on page B3-640
-                                               备注：Table D8-2 Memory-mapped System register index on page D8-844 */
+                                               备注：Table D8-2 Memory-mapped System register index on page D8-844
+                                               【v7m 独有】v8m 中使用 MPU_RLAR 替代此寄存器 */
 
 /*
  * MPU 别名寄存器 (Alias Registers)
@@ -1044,7 +1066,8 @@ extern "C" {
                                                地址: 0xE000EDA8
                                                MPU_RASR 的别名
                                                参考：MPU alias register support on page B3-642
-                                               备注：Table B3-11 MPU register summary on page B3-635 */
+                                               备注：Table B3-11 MPU register summary on page B3-635
+                                               【v7m 独有】v8m 中使用 MPU_RLAR_A1 替代 */
 
 #define ARM_V7M_MPU_RBAR_A2         0x01C   /* MPU Region Base Address Register Alias 2 - MPU 区域基地址寄存器别名 2 [RW]
                                                地址: 0xE000EDAC
@@ -1056,7 +1079,8 @@ extern "C" {
                                                地址: 0xE000EDB0
                                                MPU_RASR 的别名
                                                参考：MPU alias register support on page B3-642
-                                               备注：Table B3-11 MPU register summary on page B3-635 */
+                                               备注：Table B3-11 MPU register summary on page B3-635
+                                               【v7m 独有】v8m 中使用 MPU_RLAR_A2 替代 */
 
 #define ARM_V7M_MPU_RBAR_A3         0x024   /* MPU Region Base Address Register Alias 3 - MPU 区域基地址寄存器别名 3 [RW]
                                                地址: 0xE000EDB4
@@ -1068,7 +1092,8 @@ extern "C" {
                                                地址: 0xE000EDB8
                                                MPU_RASR 的别名
                                                参考：MPU alias register support on page B3-642
-                                               备注：Table B3-11 MPU register summary on page B3-635 */
+                                               备注：Table B3-11 MPU register summary on page B3-635
+                                               【v7m 独有】v8m 中使用 MPU_RLAR_A3 替代 */
 
 /* -----------------------------------------------------------------------------
  * 3.6 缓存和分支预测维护操作寄存器
@@ -1844,8 +1869,8 @@ extern "C" {
  * 参考: Table C1-3 Armv7-M DAP accessible ROM table on page C1-686
  * 地址范围: 0xE00FF000 - 0xE00FFFFF
  * 说明: ROM表用于调试器发现系统中的组件，指向各个调试组件的基地址
- * -----------------------------------------------------------------------------
- */
+ * 【v7m 独有】v8m 中已移除 ROM Table 支持
+ * ----------------------------------------------------------------------------- */
 #define ARM_V7M_ROMTABLE_BASE       0xE00FF000UL
 
 #define ARM_V7M_ROM_SCS             0x000   /* ROM SCS Entry - ROM SCS 条目 [RO]
