@@ -276,6 +276,17 @@ extern "C" {
 #define ARM_V8M_CPUID_IMPLEMENTER_Msk   (0xFFUL << ARM_V8M_CPUID_IMPLEMENTER_Pos)
 
 /* -----------------------------------------------------------------------------
+ * 2.1.1 REVIDR 寄存器位域 (ARM_V8M_SCB_REVIDR)
+ * 参考：D1.2.222 REVIDR, Revision ID Register
+ * 【v8m 独有】仅当实现 Armv8.1-M 时存在
+ * -----------------------------------------------------------------------------
+ */
+/* IMPLEMENTATION DEFINED, bits[31:0]
+   实现特定的次要版本信息，具体定义由实现决定 */
+#define ARM_V8M_REVIDR_IMPDEF_Pos       0U
+#define ARM_V8M_REVIDR_IMPDEF_Msk       (0xFFFFFFFFUL << ARM_V8M_REVIDR_IMPDEF_Pos)
+
+/* -----------------------------------------------------------------------------
  * 2.2 ICSR 寄存器位域 (ARM_V8M_SCB_ICSR)
  * 参考: D1.2.112 ICSR, Interrupt Control and State Register
  * -----------------------------------------------------------------------------
@@ -692,7 +703,17 @@ extern "C" {
 #define ARM_V8M_DFSR_EXTERNAL_Msk       (1UL << ARM_V8M_DFSR_EXTERNAL_Pos)
 
 /* -----------------------------------------------------------------------------
- * 2.14 CPACR 寄存器位域 (ARM_V8M_SCB_CPACR)
+ * 2.14 AFSR 寄存器位域 (ARM_V8M_SCB_AFSR)
+ * 参考：D1.2.2 AFSR, Auxiliary Fault Status Register
+ * -----------------------------------------------------------------------------
+ */
+/* IMPLEMENTATION DEFINED, bits[31:0]
+   辅助故障状态信息，具体定义由实现决定 */
+#define ARM_V8M_AFSR_AUXFAULT_Pos       0U
+#define ARM_V8M_AFSR_AUXFAULT_Msk       (0xFFFFFFFFUL << ARM_V8M_AFSR_AUXFAULT_Pos)
+
+/* -----------------------------------------------------------------------------
+ * 2.15 CPACR 寄存器位域 (ARM_V8M_SCB_CPACR)
  * 参考: D1.2.26 CPACR, Coprocessor Access Control Register
  * -----------------------------------------------------------------------------
  */
@@ -1638,6 +1659,66 @@ extern "C" {
    1=格式化器非停止模式 */
 #define ARM_V8M_TPIU_FFSR_FTNONSTOP_Pos 3U
 #define ARM_V8M_TPIU_FFSR_FTNONSTOP_Msk (1UL << ARM_V8M_TPIU_FFSR_FTNONSTOP_Pos)
+
+/* -----------------------------------------------------------------------------
+ * 10.8 TPIU_PSCR 寄存器位域 (ARM_V8M_TPIU_PSCR)
+ * 参考：D1.2.266 TPIU_PSCR, TPIU Periodic Synchronization Control Register
+ * -----------------------------------------------------------------------------
+ */
+/* PSCount - Periodic Synchronization Count, bits[4:0]
+   周期同步计数重载值：0=禁用, 7=128 字节, 8=256 字节, ... */
+#define ARM_V8M_TPIU_PSCR_PSCOUNT_Pos   0U
+#define ARM_V8M_TPIU_PSCR_PSCOUNT_Msk   (0x1FUL << ARM_V8M_TPIU_PSCR_PSCOUNT_Pos)
+
+/* -----------------------------------------------------------------------------
+ * 10.9 TPIU_CLAIMSET 寄存器位域 (ARM_V8M_TPIU_CLAIMSET)
+ * 参考：D1.2.225 TPIU_CLAIMSET, TPIU Claim Tag Set Register
+ * -----------------------------------------------------------------------------
+ */
+/* CLAIMSET - Claim set, bits[3:0]
+   置位声明标签位 */
+#define ARM_V8M_TPIU_CLAIMSET_CLAIMSET_Pos 0U
+#define ARM_V8M_TPIU_CLAIMSET_CLAIMSET_Msk (0xFUL << ARM_V8M_TPIU_CLAIMSET_CLAIMSET_Pos)
+
+/* -----------------------------------------------------------------------------
+ * 10.10 TPIU_CLAIMCLR 寄存器位域 (ARM_V8M_TPIU_CLAIMCLR)
+ * 参考：D1.2.226 TPIU_CLAIMCLR, TPIU Claim Tag Clear Register
+ * -----------------------------------------------------------------------------
+ */
+/* CLAIMCLR - Claim clear, bits[3:0]
+   清除声明标签位 */
+#define ARM_V8M_TPIU_CLAIMCLR_CLAIMCLR_Pos 0U
+#define ARM_V8M_TPIU_CLAIMCLR_CLAIMCLR_Msk (0xFUL << ARM_V8M_TPIU_CLAIMCLR_CLAIMCLR_Pos)
+
+/* -----------------------------------------------------------------------------
+ * 10.11 TPIU_DEVID 寄存器位域 (ARM_V8M_TPIU_DEVID)
+ * 参考：D1.2.228 TPIU_DEVID, TPIU Device Identifier Register
+ * -----------------------------------------------------------------------------
+ */
+/* VALID - Valid bit, bit[0]
+   1=DEVID 寄存器有效 */
+#define ARM_V8M_TPIU_DEVID_VALID_Pos    0U
+#define ARM_V8M_TPIU_DEVID_VALID_Msk    (1UL << ARM_V8M_TPIU_DEVID_VALID_Pos)
+/* TPIUMODE - TPIU mode, bits[2:1]
+   TPIU 模式: 0=同步, 1=异步, 2=保留, 3=保留 */
+#define ARM_V8M_TPIU_DEVID_TPIUMODE_Pos 1U
+#define ARM_V8M_TPIU_DEVID_TPIUMODE_Msk (0x3UL << ARM_V8M_TPIU_DEVID_TPIUMODE_Pos)
+/* TRIGNUM - Trigger number, bits[7:4]
+   触发器数量 */
+#define ARM_V8M_TPIU_DEVID_TRIGNUM_Pos  4U
+#define ARM_V8M_TPIU_DEVID_TRIGNUM_Msk  (0xFUL << ARM_V8M_TPIU_DEVID_TRIGNUM_Pos)
+/* TPIUPROD - TPIU product, bits[15:8]
+   TPIU 产品 ID */
+#define ARM_V8M_TPIU_DEVID_TPIUPROD_Pos 8U
+#define ARM_V8M_TPIU_DEVID_TPIUPROD_Msk (0xFFUL << ARM_V8M_TPIU_DEVID_TPIUPROD_Pos)
+/* C1P - Single-port trace, bit[16]
+   1=单端口跟踪 */
+#define ARM_V8M_TPIU_DEVID_C1P_Pos      16U
+#define ARM_V8M_TPIU_DEVID_C1P_Msk      (1UL << ARM_V8M_TPIU_DEVID_C1P_Pos)
+/* C2P - Double-port trace, bit[17]
+   1=双端口跟踪 */
+#define ARM_V8M_TPIU_DEVID_C2P_Pos      17U
+#define ARM_V8M_TPIU_DEVID_C2P_Msk      (1UL << ARM_V8M_TPIU_DEVID_C2P_Pos)
 
 /* ==============================================================================
  * 十一、PMU 寄存器位域
