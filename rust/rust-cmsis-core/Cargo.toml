@@ -1,0 +1,90 @@
+[package]
+name = "rust-cmsis-core"
+version = "0.1.0"
+edition = "2021"
+description = "Rust implementation of CMSIS-Core (Cortex Microcontroller Software Interface Standard)"
+license = "Apache-2.0"
+repository = "https://github.com/your-org/rust-cmsis-core"
+keywords = ["arm", "cortex-m", "cortex-a", "cortex-r", "cmsis", "embedded"]
+categories = ["embedded", "no-std", "hardware-support"]
+
+[package.metadata.docs.rs]
+features = ["m-profile"]
+
+[features]
+default = ["m-profile"]
+nightly = []
+
+# Profile selection (mutually exclusive)
+m-profile = []
+a-profile = []
+r-profile = []
+
+# M-profile processors
+cm0 = ["m-profile"]
+cm0plus = ["m-profile"]
+cm1 = ["m-profile"]
+cm3 = ["m-profile"]
+cm4 = ["m-profile"]
+cm7 = ["m-profile"]
+cm23 = ["m-profile"]
+cm33 = ["m-profile"]
+cm35p = ["m-profile"]
+cm52 = ["m-profile"]
+cm55 = ["m-profile"]
+cm85 = ["m-profile"]
+sc000 = ["m-profile"]
+sc300 = ["m-profile"]
+starmc1 = ["m-profile"]
+starmc3 = ["m-profile"]
+
+# A-profile processors
+ca = ["a-profile"]
+ca5 = ["a-profile", "ca"]
+ca7 = ["a-profile", "ca"]
+ca9 = ["a-profile", "ca"]
+ca35 = ["a-profile", "ca"]
+ca53 = ["a-profile", "ca"]
+ca55 = ["a-profile", "ca"]
+ca57 = ["a-profile", "ca"]
+
+# R-profile processors
+cr4 = ["r-profile"]
+cr5 = ["r-profile"]
+cr7 = ["r-profile"]
+cr8 = ["r-profile"]
+cr52 = ["r-profile"]
+
+# Feature flags
+armv7m-mpu = ["m-profile"]
+armv8m-mpu = ["m-profile"]
+armv7m-cache-l1 = ["m-profile"]
+armv8m-pmu = ["m-profile"]
+armv81m-pac = ["m-profile"]
+gicv2 = ["a-profile", "r-profile"]
+irq-ctrl = ["a-profile"]
+armv7a-cp15 = ["a-profile"]
+armv8a-cp15 = ["a-profile"]
+armv7r-cp15 = ["r-profile"]
+armv8r-cp15 = ["r-profile"]
+trustzone = ["m-profile"]
+
+[dependencies]
+# No-std support
+bare-metal = "1.0"
+vcell = "0.1"
+
+[dev-dependencies]
+
+[profile.dev]
+opt-level = "z"
+lto = true
+codegen-units = 1
+incremental = false
+
+[profile.release]
+opt-level = "z"
+lto = true
+codegen-units = 1
+strip = true
+panic = "abort"
